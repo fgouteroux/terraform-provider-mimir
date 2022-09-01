@@ -50,6 +50,20 @@ resource "mimir_rule_group_recording" "record" {
 
 ## Resource `mimir_alertmanager_config`
 
+Notification integrations:
+
+  - email
+  - pagerduty
+  - opsgenie (not yet supported)
+  - slack (not yet supported)
+  - webhook (not yet supported)
+  - wechat (not yet supported)
+  - email (not yet supported)
+  - pushover (not yet supported)
+  - victorops (not yet supported)
+  - sns (not yet supported)
+  - telegram (not yet supported)
+
 Example:
 
 ```

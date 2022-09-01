@@ -22,9 +22,9 @@ func TestAPIClient(t *testing.T) {
 
 	/* Notice the intentional trailing / */
 	opt := &apiClientOpt{
-		uri:              "http://127.0.0.1:8080/",
-		ruler_uri:        "http://127.0.0.1:8080/",
-		alertmanager_uri: "http://127.0.0.1:8080/",
+		uri:              "http://127.0.0.1:8082/",
+		ruler_uri:        "http://127.0.0.1:8082/",
+		alertmanager_uri: "http://127.0.0.1:8082/",
 		insecure:         false,
 		username:         "",
 		password:         "",
@@ -92,7 +92,7 @@ func setup_api_client_server() {
 	})
 
 	api_client_server = &http.Server{
-		Addr:    "127.0.0.1:8080",
+		Addr:    "127.0.0.1:8082",
 		Handler: serverMux,
 	}
 	go api_client_server.ListenAndServe()
