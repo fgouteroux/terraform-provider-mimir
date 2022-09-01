@@ -1,6 +1,6 @@
 package mimir
 
-// Largely copied from https://github.com/Mastercard/terraform-provider-restapi/blob/master/restapi/api_client.go
+// Largely copied from https://github.com/Mastercard/terraform-provider-restapi/blob/master/restapi/api_client_test.go
 
 import (
 	"log"

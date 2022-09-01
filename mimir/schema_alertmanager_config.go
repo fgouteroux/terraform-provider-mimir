@@ -121,6 +121,222 @@ func httpConfigFields() map[string]*schema.Schema {
 	}
 }
 
+func emailConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"to": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"from": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"hello": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"smarthost": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"auth_username": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"auth_password": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"auth_secret": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"auth_identity": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"headers": {
+			Type:     schema.TypeMap,
+			Optional: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"html": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"text": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"require_tls": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"tls_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: tlsConfigFields(),
+			},
+		},
+	}
+}
+
+func pagerdutyConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"service_key": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"routing_key": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"client": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"client_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"description": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"details": {
+			Type:     schema.TypeMap,
+			Optional: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"severity": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"class": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"component": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"group": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+	}
+}
+
+func weChatConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"api_secret": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Sensitive: true,
+		},
+		"api_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"corp_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"agent_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"to_user": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"to_party": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"to_tag": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"message": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"message_type": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+	}
+}
+
+func webhookConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"max_alerts": {
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+	}
+}
+
 func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"global": {
@@ -329,68 +545,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Optional: true,
 						MaxItems: 1,
 						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"send_resolved": {
-									Type:     schema.TypeBool,
-									Optional: true,
-									Default:  true,
-								},
-								"service_key": {
-									Type:      schema.TypeString,
-									Optional:  true,
-									Sensitive: true,
-								},
-								"routing_key": {
-									Type:      schema.TypeString,
-									Optional:  true,
-									Sensitive: true,
-								},
-								"url": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"client": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"client_url": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"description": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"details": {
-									Type:     schema.TypeMap,
-									Optional: true,
-									Elem:     &schema.Schema{Type: schema.TypeString},
-								},
-								"severity": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"class": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"component": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"group": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"http_config": {
-									Type:     schema.TypeList,
-									Optional: true,
-									MaxItems: 1,
-									Elem: &schema.Resource{
-										Schema: httpConfigFields(),
-									},
-								},
-							},
+							Schema: pagerdutyConfigFields(),
 						},
 					},
 					"email_configs": {
@@ -398,73 +553,23 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Optional: true,
 						MaxItems: 1,
 						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"send_resolved": {
-									Type:     schema.TypeBool,
-									Optional: true,
-									Default:  true,
-								},
-								"to": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"from": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"hello": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"smarthost": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"auth_username": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"auth_password": {
-									Type:      schema.TypeString,
-									Optional:  true,
-									Sensitive: true,
-								},
-								"auth_secret": {
-									Type:      schema.TypeString,
-									Optional:  true,
-									Sensitive: true,
-								},
-								"auth_identity": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"headers": {
-									Type:     schema.TypeMap,
-									Optional: true,
-									Elem:     &schema.Schema{Type: schema.TypeString},
-								},
-								"html": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"text": {
-									Type:     schema.TypeString,
-									Optional: true,
-								},
-								"require_tls": {
-									Type:     schema.TypeBool,
-									Optional: true,
-									Default:  false,
-								},
-								"tls_config": {
-									Type:     schema.TypeList,
-									Optional: true,
-									MaxItems: 1,
-									Elem: &schema.Resource{
-										Schema: tlsConfigFields(),
-									},
-								},
-							},
+							Schema: emailConfigFields(),
+						},
+					},
+					"wechat_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: weChatConfigFields(),
+						},
+					},
+					"webhook_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: webhookConfigFields(),
 						},
 					},
 				},

@@ -4,7 +4,6 @@ import (
 	"github.com/prometheus/alertmanager/config"
 	"github.com/prometheus/alertmanager/timeinterval"
 	"github.com/prometheus/common/model"
-	"log"
 	"net"
 	"net/url"
 )
@@ -245,6 +244,12 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		if raw, ok := data["email_configs"]; ok {
 			cfg.EmailConfigs = expandEmailConfig(raw.([]interface{}))
 		}
+		if raw, ok := data["wechat_configs"]; ok {
+			cfg.WeChatConfigs = expandWeChatConfig(raw.([]interface{}))
+		}
+		if raw, ok := data["webhook_configs"]; ok {
+			cfg.WebhookConfigs = expandWebhookConfig(raw.([]interface{}))
+		}
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -262,9 +267,127 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 		cfg["name"] = v.Name
 		cfg["pagerduty_configs"] = flattenPagerdutyConfig(v.PagerdutyConfigs)
 		cfg["email_configs"] = flattenEmailConfig(v.EmailConfigs)
+		cfg["wechat_configs"] = flattenWeChatConfig(v.WeChatConfigs)
+		cfg["webhook_configs"] = flattenWebhookConfig(v.WebhookConfigs)
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
+}
+
+func expandWebhookConfig(v []interface{}) []*webhookConfig {
+	var webhookConf []*webhookConfig
+
+	for _, v := range v {
+		cfg := &webhookConfig{}
+		data := v.(map[string]interface{})
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["url"]; ok {
+			cfg.URL = raw.(string)
+		}
+		if raw, ok := data["max_alerts"]; ok {
+			cfg.MaxAlerts = int32(raw.(int))
+		}
+		webhookConf = append(webhookConf, cfg)
+	}
+	return webhookConf
+}
+
+func flattenWebhookConfig(v []*webhookConfig) []interface{} {
+	var webhookConf []interface{}
+
+	if v == nil {
+		return webhookConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["url"] = v.URL
+		cfg["max_alerts"] = v.MaxAlerts
+		webhookConf = append(webhookConf, cfg)
+	}
+	return webhookConf
+}
+
+func expandWeChatConfig(v []interface{}) []*weChatConfig {
+	var weChatConf []*weChatConfig
+
+	for _, v := range v {
+		cfg := &weChatConfig{}
+		data := v.(map[string]interface{})
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["api_secret"]; ok {
+			cfg.APISecret = raw.(string)
+		}
+		if raw, ok := data["api_url_url"]; ok {
+			cfg.APIURL = raw.(string)
+		}
+		if raw, ok := data["corp_id"]; ok {
+			cfg.CorpID = raw.(string)
+		}
+		if raw, ok := data["agent_id"]; ok {
+			cfg.AgentID = raw.(string)
+		}
+		if raw, ok := data["to_user"]; ok {
+			cfg.ToUser = raw.(string)
+		}
+		if raw, ok := data["to_party"]; ok {
+			cfg.ToParty = raw.(string)
+		}
+		if raw, ok := data["to_tag"]; ok {
+			cfg.ToTag = raw.(string)
+		}
+		if raw, ok := data["message"]; ok {
+			cfg.Message = raw.(string)
+		}
+		if raw, ok := data["message_type"]; ok {
+			cfg.MessageType = raw.(string)
+		}
+		weChatConf = append(weChatConf, cfg)
+	}
+	return weChatConf
+}
+
+func flattenWeChatConfig(v []*weChatConfig) []interface{} {
+	var weChatConf []interface{}
+
+	if v == nil {
+		return weChatConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["api_secret"] = v.APISecret
+		cfg["api_url"] = v.APIURL
+		cfg["corp_id"] = v.CorpID
+		cfg["agent_id"] = v.AgentID
+		cfg["to_user"] = v.ToUser
+		cfg["to_party"] = v.ToParty
+		cfg["to_tag"] = v.ToTag
+		cfg["message"] = v.Message
+		cfg["message_type"] = v.MessageType
+		weChatConf = append(weChatConf, cfg)
+	}
+	return weChatConf
 }
 
 func expandEmailConfig(v []interface{}) []*emailConfig {
@@ -455,7 +578,6 @@ func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
 	}
 
 	for _, v := range v {
-		log.Println(v)
 		cfg := make(map[string]interface{})
 		cfg["send_resolved"] = v.VSendResolved
 		cfg["service_key"] = v.ServiceKey
