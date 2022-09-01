@@ -6,6 +6,7 @@ import (
 	"github.com/prometheus/common/model"
 	"net"
 	"net/url"
+	"time"
 )
 
 func expandHTTPConfigOAuth2(v interface{}) *oauth2 {
@@ -250,6 +251,9 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		if raw, ok := data["webhook_configs"]; ok {
 			cfg.WebhookConfigs = expandWebhookConfig(raw.([]interface{}))
 		}
+		if raw, ok := data["pushover_configs"]; ok {
+			cfg.PushoverConfigs = expandPushoverConfig(raw.([]interface{}))
+		}
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -269,6 +273,7 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 		cfg["email_configs"] = flattenEmailConfig(v.EmailConfigs)
 		cfg["wechat_configs"] = flattenWeChatConfig(v.WeChatConfigs)
 		cfg["webhook_configs"] = flattenWebhookConfig(v.WebhookConfigs)
+		cfg["pushover_configs"] = flattenPushoverConfig(v.PushoverConfigs)
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -597,6 +602,90 @@ func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
 		pagerdutyConf = append(pagerdutyConf, cfg)
 	}
 	return pagerdutyConf
+}
+
+func expandPushoverConfig(v []interface{}) []*pushoverConfig {
+	var pushoverConf []*pushoverConfig
+
+	for _, v := range v {
+		cfg := &pushoverConfig{}
+		data := v.(map[string]interface{})
+
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["user_key"]; ok {
+			cfg.UserKey = raw.(string)
+		}
+		if raw, ok := data["token"]; ok {
+			cfg.Token = raw.(string)
+		}
+		if raw, ok := data["title"]; ok {
+			cfg.Title = raw.(string)
+		}
+		if raw, ok := data["message"]; ok {
+			cfg.Message = raw.(string)
+		}
+		if raw, ok := data["url"]; ok {
+			cfg.URL = raw.(string)
+		}
+		if raw, ok := data["url_title"]; ok {
+			cfg.URLTitle = raw.(string)
+		}
+		if raw, ok := data["sound"]; ok {
+			cfg.Sound = raw.(string)
+		}
+		if raw, ok := data["priority"]; ok {
+			cfg.Priority = raw.(string)
+		}
+		if raw, ok := data["retry"]; ok {
+			retry, _ := time.ParseDuration(raw.(string))
+			cfg.Retry = retry
+		}
+		if raw, ok := data["expire"]; ok {
+			expire, _ := time.ParseDuration(raw.(string))
+			cfg.Expire = expire
+		}
+		if raw, ok := data["html"]; ok {
+			cfg.HTML = raw.(bool)
+		}
+		pushoverConf = append(pushoverConf, cfg)
+	}
+	return pushoverConf
+}
+
+func flattenPushoverConfig(v []*pushoverConfig) []interface{} {
+	var pushoverConf []interface{}
+
+	if v == nil {
+		return pushoverConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["user_key"] = v.UserKey
+		cfg["token"] = v.Token
+		cfg["title"] = v.Title
+		cfg["message"] = v.Message
+		cfg["url"] = v.URL
+		cfg["url_title"] = v.URLTitle
+		cfg["sound"] = v.Sound
+		cfg["priority"] = v.Priority
+		cfg["retry"] = v.Retry.String()
+		cfg["expire"] = v.Expire.String()
+		cfg["html"] = v.HTML
+
+		pushoverConf = append(pushoverConf, cfg)
+	}
+	return pushoverConf
 }
 
 func expandRouteConfig(v interface{}) *route {

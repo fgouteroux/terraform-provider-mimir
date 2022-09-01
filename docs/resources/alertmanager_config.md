@@ -43,6 +43,9 @@ Optional:
 
 - `email_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--email_configs))
 - `pagerduty_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs))
+- `pushover_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs))
+- `webhook_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs))
+- `wechat_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs))
 
 <a id="nestedblock--receiver--email_configs"></a>
 ### Nested Schema for `receiver.email_configs`
@@ -148,6 +151,244 @@ Optional:
 
 <a id="nestedblock--receiver--pagerduty_configs--http_config--tls_config"></a>
 ### Nested Schema for `receiver.pagerduty_configs.http_config.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+
+<a id="nestedblock--receiver--pushover_configs"></a>
+### Nested Schema for `receiver.pushover_configs`
+
+Optional:
+
+- `expire` (String)
+- `html` (Boolean)
+- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config))
+- `message` (String)
+- `priority` (String)
+- `retry` (String)
+- `send_resolved` (Boolean)
+- `sound` (String)
+- `title` (String)
+- `token` (String)
+- `url` (String)
+- `url_title` (String)
+- `user_key` (String)
+
+<a id="nestedblock--receiver--pushover_configs--http_config"></a>
+### Nested Schema for `receiver.pushover_configs.http_config`
+
+Optional:
+
+- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--basic_auth))
+- `bearer_token` (String, Sensitive)
+- `follow_redirects` (Boolean)
+- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--tls_config))
+
+<a id="nestedblock--receiver--pushover_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.authorization`
+
+Optional:
+
+- `credentials` (String, Sensitive)
+- `type` (String)
+
+
+<a id="nestedblock--receiver--pushover_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.basic_auth`
+
+Optional:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedblock--receiver--pushover_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.oauth2`
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `endpoint_params` (Map of String)
+- `scopes` (List of String)
+- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2--tls_config))
+- `token_url` (String)
+
+<a id="nestedblock--receiver--pushover_configs--http_config--oauth2--tls_config"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.oauth2.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+<a id="nestedblock--receiver--pushover_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+
+<a id="nestedblock--receiver--webhook_configs"></a>
+### Nested Schema for `receiver.webhook_configs`
+
+Optional:
+
+- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config))
+- `max_alerts` (Number)
+- `send_resolved` (Boolean)
+- `url` (String)
+
+<a id="nestedblock--receiver--webhook_configs--http_config"></a>
+### Nested Schema for `receiver.webhook_configs.http_config`
+
+Optional:
+
+- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--basic_auth))
+- `bearer_token` (String, Sensitive)
+- `follow_redirects` (Boolean)
+- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--tls_config))
+
+<a id="nestedblock--receiver--webhook_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.authorization`
+
+Optional:
+
+- `credentials` (String, Sensitive)
+- `type` (String)
+
+
+<a id="nestedblock--receiver--webhook_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.basic_auth`
+
+Optional:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedblock--receiver--webhook_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.oauth2`
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `endpoint_params` (Map of String)
+- `scopes` (List of String)
+- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2--tls_config))
+- `token_url` (String)
+
+<a id="nestedblock--receiver--webhook_configs--http_config--oauth2--tls_config"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.oauth2.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+<a id="nestedblock--receiver--webhook_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+
+<a id="nestedblock--receiver--wechat_configs"></a>
+### Nested Schema for `receiver.wechat_configs`
+
+Optional:
+
+- `agent_id` (String)
+- `api_secret` (String, Sensitive)
+- `api_url` (String)
+- `corp_id` (String)
+- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config))
+- `message` (String)
+- `message_type` (String)
+- `send_resolved` (Boolean)
+- `to_party` (String)
+- `to_tag` (String)
+- `to_user` (String)
+
+<a id="nestedblock--receiver--wechat_configs--http_config"></a>
+### Nested Schema for `receiver.wechat_configs.http_config`
+
+Optional:
+
+- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--basic_auth))
+- `bearer_token` (String, Sensitive)
+- `follow_redirects` (Boolean)
+- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--tls_config))
+
+<a id="nestedblock--receiver--wechat_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.authorization`
+
+Optional:
+
+- `credentials` (String, Sensitive)
+- `type` (String)
+
+
+<a id="nestedblock--receiver--wechat_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.basic_auth`
+
+Optional:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedblock--receiver--wechat_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.oauth2`
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `endpoint_params` (Map of String)
+- `scopes` (List of String)
+- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2--tls_config))
+- `token_url` (String)
+
+<a id="nestedblock--receiver--wechat_configs--http_config--oauth2--tls_config"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.oauth2.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+<a id="nestedblock--receiver--wechat_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.tls_config`
 
 Optional:
 

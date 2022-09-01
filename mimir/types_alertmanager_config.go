@@ -279,8 +279,8 @@ type pushoverConfig struct {
 	URLTitle      string            `yaml:"url_title,omitempty" json:"url_title,omitempty"`
 	Sound         string            `yaml:"sound,omitempty" json:"sound,omitempty"`
 	Priority      string            `yaml:"priority,omitempty" json:"priority,omitempty"`
-	Retry         duration          `yaml:"retry,omitempty" json:"retry,omitempty"`
-	Expire        duration          `yaml:"expire,omitempty" json:"expire,omitempty"`
+	Retry         time.Duration     `yaml:"retry,omitempty" json:"retry,omitempty"`
+	Expire        time.Duration     `yaml:"expire,omitempty" json:"expire,omitempty"`
 	HTML          bool              `yaml:"html,omitempty" json:"html,omitempty"`
 }
 
@@ -315,8 +315,6 @@ type sigV4Config struct {
 	Profile   string `yaml:"profile,omitempty" json:"profile,omitempty"`
 	RoleARN   string `yaml:"role_arn,omitempty" json:"role_arn,omitempty"`
 }
-
-type duration time.Duration
 
 type victorOpsConfig struct {
 	VSendResolved     *bool             `yaml:"send_resolved,omitempty" json:"send_resolved,omitempty"`

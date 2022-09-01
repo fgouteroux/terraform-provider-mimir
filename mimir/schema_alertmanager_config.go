@@ -264,8 +264,8 @@ func weChatConfigFields() map[string]*schema.Schema {
 			Default:  false,
 		},
 		"api_secret": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:      schema.TypeString,
+			Optional:  true,
 			Sensitive: true,
 		},
 		"api_url": {
@@ -337,6 +337,68 @@ func webhookConfigFields() map[string]*schema.Schema {
 	}
 }
 
+func pushoverConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+		"user_key": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"token": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"title": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"message": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"url_title": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"sound": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"priority": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"retry": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"expire": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"html": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+	}
+}
 func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"global": {
@@ -570,6 +632,14 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: webhookConfigFields(),
+						},
+					},
+					"pushover_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: pushoverConfigFields(),
 						},
 					},
 				},
