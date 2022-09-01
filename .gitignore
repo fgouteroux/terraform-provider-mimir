@@ -1,0 +1,25 @@
+# Binaries for programs and plugins
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# godoc files
+docs/godoc/**
+# mkdocs files
+mkdocs.yml
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+.terraform/
+
+*.tfstate
+*.tfstate.backup
+crash.log
+terraform-provider-mimir.log
+terraform-provider-mimir
