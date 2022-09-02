@@ -2,12 +2,64 @@
 
 This terraform provider allows you to interact with grafana mimir.
 
+Currently only these components could be managed with the api:
+  - [alertmanager](https://grafana.com/docs/mimir/v2.2.x/operators-guide/architecture/components/alertmanager/)
+  - [ruler](https://grafana.com/docs/mimir/v2.2.x/operators-guide/architecture/components/ruler/)
+
+
+See [Mimir API Reference](https://grafana.com/docs/mimir/v2.2.x/operators-guide/reference-http-api/)
+
+## Provider `mimir`
+
 Example:
 
 ```
 provider "mimir" {
-  uri = "http://localhost:8080"
+  ruler_uri = "http://localhost:8080/prometheus"
+  alertmanager_uri = "http://localhost:8080"
   org_id = "mytenant"
+}
+```
+
+Grafana Mimir have no authentication support, so this is delegated to a reverse proxy.
+
+See [Grafana Mimir authentication and authorization](https://grafana.com/docs/mimir/v2.2.x/operators-guide/securing/authentication-and-authorization/)
+
+The provider support basic auth, token or headers.
+
+### Basic auth
+
+```
+provider "mimir" {
+  ruler_uri = "http://localhost:8080/prometheus"
+  alertmanager_uri = "http://localhost:8080"
+  org_id = "mytenant"
+  username = "user"
+  password = "password"
+}
+```
+
+### Token
+
+```
+provider "mimir" {
+  ruler_uri = "http://localhost:8080/prometheus"
+  alertmanager_uri = "http://localhost:8080"
+  org_id = "mytenant"
+  token = "supersecrettoken"
+}
+```
+
+### Headers
+
+```
+provider "mimir" {
+  ruler_uri = "http://localhost:8080/prometheus"
+  alertmanager_uri = "http://localhost:8080"
+  org_id = "mytenant"
+  header = {
+    "Custom-Auth" = "Custom value"
+  }
 }
 ```
 
@@ -50,19 +102,21 @@ resource "mimir_rule_group_recording" "record" {
 
 ## Resource `mimir_alertmanager_config`
 
-Notification integrations:
+Notification integrations Supported:
 
   - email
   - pagerduty
-  - opsgenie (not yet supported)
-  - slack (not yet supported)
-  - webhook (not yet supported)
-  - wechat (not yet supported)
-  - email (not yet supported)
-  - pushover (not yet supported)
-  - victorops (not yet supported)
-  - sns (not yet supported)
-  - telegram (not yet supported)
+  - opsgenie
+  - slack
+  - webhook
+  - wechat
+  - email
+  - pushover
+  - victorops
+  - sns
+  - telegram
+
+See https://prometheus.io/docs/alerting/latest/configuration/#receiver
 
 Example:
 
