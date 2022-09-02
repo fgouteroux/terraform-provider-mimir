@@ -900,7 +900,42 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
+					"opsgenie_api_url": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"wechat_api_url": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"victorops_api_url": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"telegram_api_url": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
 					"slack_api_url": {
+						Type:      schema.TypeString,
+						Optional:  true,
+						Sensitive: true,
+					},
+					"opsgenie_api_key": {
+						Type:      schema.TypeString,
+						Optional:  true,
+						Sensitive: true,
+					},
+					"wechat_api_secret": {
+						Type:      schema.TypeString,
+						Optional:  true,
+						Sensitive: true,
+					},
+					"wechat_api_corp_id": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"victorops_api_key": {
 						Type:      schema.TypeString,
 						Optional:  true,
 						Sensitive: true,

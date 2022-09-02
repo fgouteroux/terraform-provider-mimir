@@ -190,6 +190,29 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		*globalConf.SMTPRequireTLS = cfg["smtp_require_tls"].(bool)
 		globalConf.HTTPConfig = expandHTTPConfig(cfg["http_config"].(interface{}))
 
+		globalConf.OpsGenieAPIKey = cfg["opsgenie_api_key"].(string)
+		opsGenieAPIURL, _ := url.Parse(cfg["opsgenie_api_url"].(string))
+		if opsGenieAPIURL.String() != "" {
+			globalConf.OpsGenieAPIURL = &config.URL{opsGenieAPIURL}
+		}
+
+		globalConf.WeChatAPISecret = cfg["wechat_api_secret"].(string)
+		globalConf.WeChatAPICorpID = cfg["wechat_api_corp_id"].(string)
+		weChatAPIURL, _ := url.Parse(cfg["wechat_api_url"].(string))
+		if weChatAPIURL.String() != "" {
+			globalConf.WeChatAPIURL = &config.URL{weChatAPIURL}
+		}
+
+		globalConf.VictorOpsAPIKey = cfg["victorops_api_key"].(string)
+		victorOpsAPIURL, _ := url.Parse(cfg["victorops_api_url"].(string))
+		if victorOpsAPIURL.String() != "" {
+			globalConf.VictorOpsAPIURL = &config.URL{victorOpsAPIURL}
+		}
+
+		telegramAPIURL, _ := url.Parse(cfg["telegram_api_url"].(string))
+		if telegramAPIURL.String() != "" {
+			globalConf.TelegramAPIURL = &config.URL{telegramAPIURL}
+		}
 	}
 	return globalConf
 }
@@ -209,6 +232,26 @@ func flattenGlobalConfig(v *globalConfig) []interface{} {
 		if v.SlackAPIURL != nil {
 			globalConf["slack_api_url"] = v.SlackAPIURL.URL.String()
 		}
+
+		if v.OpsGenieAPIURL != nil {
+			globalConf["opsgenie_api_url"] = v.OpsGenieAPIURL.URL.String()
+		}
+
+		if v.WeChatAPIURL != nil {
+			globalConf["wechat_api_url"] = v.WeChatAPIURL.URL.String()
+		}
+		if v.VictorOpsAPIURL != nil {
+			globalConf["victorops_api_url"] = v.VictorOpsAPIURL.URL.String()
+		}
+
+		if v.TelegramAPIURL != nil {
+			globalConf["telegram_api_url"] = v.TelegramAPIURL.URL.String()
+		}
+
+		globalConf["opsgenie_api_key"] = v.OpsGenieAPIKey
+		globalConf["wechat_api_secret"] = v.WeChatAPISecret
+		globalConf["wechat_api_corp_id"] = v.WeChatAPICorpID
+		globalConf["victorops_api_key"] = v.VictorOpsAPIKey
 
 		if v.HTTPConfig != nil {
 			globalConf["http_config"] = flattenHTTPConfig(v.HTTPConfig)
