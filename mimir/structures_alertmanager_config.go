@@ -254,6 +254,9 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		if raw, ok := data["pushover_configs"]; ok {
 			cfg.PushoverConfigs = expandPushoverConfig(raw.([]interface{}))
 		}
+		if raw, ok := data["opsgenie_configs"]; ok {
+			cfg.OpsgenieConfigs = expandOpsgenieConfig(raw.([]interface{}))
+		}
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -274,9 +277,141 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 		cfg["wechat_configs"] = flattenWeChatConfig(v.WeChatConfigs)
 		cfg["webhook_configs"] = flattenWebhookConfig(v.WebhookConfigs)
 		cfg["pushover_configs"] = flattenPushoverConfig(v.PushoverConfigs)
+		cfg["opsgenie_configs"] = flattenOpsgenieConfig(v.OpsgenieConfigs)
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
+}
+
+func expandOpsgenieResponder(v []interface{}) []opsgenieResponder {
+	var opsgenieResponderConf []opsgenieResponder
+
+	for _, v := range v {
+		var cfg opsgenieResponder
+		data := v.(map[string]interface{})
+
+		if raw, ok := data["username"]; ok {
+			cfg.Username = raw.(string)
+		}
+		if raw, ok := data["name"]; ok {
+			cfg.Name = raw.(string)
+		}
+		if raw, ok := data["type"]; ok {
+			cfg.Type = raw.(string)
+		}
+		if raw, ok := data["id"]; ok {
+			cfg.ID = raw.(string)
+		}
+		opsgenieResponderConf = append(opsgenieResponderConf, cfg)
+	}
+	return opsgenieResponderConf
+}
+
+func flattenOpsgenieResponder(v []opsgenieResponder) []interface{} {
+	var opsgenieResponderConf []interface{}
+
+	if v == nil {
+		return opsgenieResponderConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["username"] = v.Username
+		cfg["name"] = v.Name
+		cfg["type"] = v.Type
+		cfg["id"] = v.ID
+		opsgenieResponderConf = append(opsgenieResponderConf, cfg)
+	}
+	return opsgenieResponderConf
+}
+
+func expandOpsgenieConfig(v []interface{}) []*opsgenieConfig {
+	var opsgenieConf []*opsgenieConfig
+
+	for _, v := range v {
+		cfg := &opsgenieConfig{}
+		data := v.(map[string]interface{})
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["api_key"]; ok {
+			cfg.APIKey = raw.(string)
+		}
+		if raw, ok := data["api_url"]; ok {
+			cfg.APIURL = raw.(string)
+		}
+		if raw, ok := data["message"]; ok {
+			cfg.Message = raw.(string)
+		}
+		if raw, ok := data["description"]; ok {
+			cfg.Description = raw.(string)
+		}
+		if raw, ok := data["source"]; ok {
+			cfg.Source = raw.(string)
+		}
+		if raw, ok := data["details"]; ok {
+			cfg.Details = expandStringMap(raw.(map[string]interface{}))
+		}
+		if raw, ok := data["responders"]; ok {
+			cfg.Responders = expandOpsgenieResponder(raw.([]interface{}))
+		}
+		if raw, ok := data["tags"]; ok {
+			cfg.Tags = raw.(string)
+		}
+		if raw, ok := data["note"]; ok {
+			cfg.Note = raw.(string)
+		}
+		if raw, ok := data["priority"]; ok {
+			cfg.Priority = raw.(string)
+		}
+		if raw, ok := data["update_alerts"]; ok {
+			cfg.UpdateAlerts = new(bool)
+			*cfg.UpdateAlerts = raw.(bool)
+		}
+		if raw, ok := data["entity"]; ok {
+			cfg.Entity = raw.(string)
+		}
+		if raw, ok := data["actions"]; ok {
+			cfg.Actions = raw.(string)
+		}
+		opsgenieConf = append(opsgenieConf, cfg)
+	}
+	return opsgenieConf
+}
+
+func flattenOpsgenieConfig(v []*opsgenieConfig) []interface{} {
+	var opsgenieConf []interface{}
+
+	if v == nil {
+		return opsgenieConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["details"] = v.Details
+		cfg["api_key"] = v.APIKey
+		cfg["api_url"] = v.APIURL
+		cfg["message"] = v.Message
+		cfg["description"] = v.Description
+		cfg["source"] = v.Source
+		cfg["responders"] = flattenOpsgenieResponder(v.Responders)
+		cfg["tags"] = v.Tags
+		cfg["note"] = v.Note
+		cfg["priority"] = v.Priority
+		cfg["update_alerts"] = v.UpdateAlerts
+		cfg["entity"] = v.Entity
+		cfg["actions"] = v.Actions
+		opsgenieConf = append(opsgenieConf, cfg)
+	}
+	return opsgenieConf
 }
 
 func expandWebhookConfig(v []interface{}) []*webhookConfig {
@@ -496,6 +631,22 @@ func expandPagerdutyConfigLinks(v []interface{}) []pagerdutyLink {
 	return pagerdutyLinkConf
 }
 
+func flattenPagerdutyConfigLinks(v []pagerdutyLink) []interface{} {
+	var pagerdutyLinkConf []interface{}
+
+	if v == nil {
+		return pagerdutyLinkConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["text"] = v.Text
+		cfg["href"] = v.Href
+		pagerdutyLinkConf = append(pagerdutyLinkConf, cfg)
+	}
+	return pagerdutyLinkConf
+}
+
 func expandPagerdutyConfigImages(v []interface{}) []pagerdutyImage {
 	var pagerdutyImageConf []pagerdutyImage
 
@@ -512,6 +663,23 @@ func expandPagerdutyConfigImages(v []interface{}) []pagerdutyImage {
 		if raw, ok := data["href"]; ok {
 			cfg.Href = raw.(string)
 		}
+		pagerdutyImageConf = append(pagerdutyImageConf, cfg)
+	}
+	return pagerdutyImageConf
+}
+
+func flattenPagerdutyConfigImages(v []pagerdutyImage) []interface{} {
+	var pagerdutyImageConf []interface{}
+
+	if v == nil {
+		return pagerdutyImageConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["src"] = v.Src
+		cfg["alt"] = v.Alt
+		cfg["href"] = v.Href
 		pagerdutyImageConf = append(pagerdutyImageConf, cfg)
 	}
 	return pagerdutyImageConf
@@ -599,6 +767,8 @@ func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
 		cfg["component"] = v.Component
 		cfg["group"] = v.Group
 		cfg["details"] = v.Details
+		cfg["images"] = flattenPagerdutyConfigImages(v.Images)
+		cfg["links"] = flattenPagerdutyConfigLinks(v.Links)
 		pagerdutyConf = append(pagerdutyConf, cfg)
 	}
 	return pagerdutyConf

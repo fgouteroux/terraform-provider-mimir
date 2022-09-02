@@ -253,6 +253,42 @@ func pagerdutyConfigFields() map[string]*schema.Schema {
 				Schema: httpConfigFields(),
 			},
 		},
+		"images": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"src": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"alt": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"href": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"links": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"Text": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"Href": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -399,6 +435,100 @@ func pushoverConfigFields() map[string]*schema.Schema {
 		},
 	}
 }
+
+func opsgenieConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+		"details": {
+			Type:     schema.TypeMap,
+			Optional: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"api_key": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"api_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"message": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"description": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"source": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"responders": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"id": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"name": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"username": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"type": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"tags": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"note": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"priority": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"update_alerts": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"entity": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"actions": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+	}
+}
+
 func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"global": {
@@ -640,6 +770,14 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: pushoverConfigFields(),
+						},
+					},
+					"opsgenie_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: opsgenieConfigFields(),
 						},
 					},
 				},
