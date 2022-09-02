@@ -529,6 +529,351 @@ func opsgenieConfigFields() map[string]*schema.Schema {
 	}
 }
 
+func slackConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+		"api_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"channel": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"username": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"color": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"title": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"title_link": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"pretext": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"text": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"short_fields": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"footer": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"fallback": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"callback_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"icon_emoji": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"icon_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"image_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"thumb_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"link_names": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"mrkdwn_in": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"fields": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"title": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"value": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"short": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  false,
+					},
+				},
+			},
+		},
+		"actions": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"type": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"text": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"url": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"style": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"name": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"value": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"confirm": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"text": {
+									Type:     schema.TypeString,
+									Optional: true,
+								},
+								"title": {
+									Type:     schema.TypeString,
+									Optional: true,
+								},
+								"ok_text": {
+									Type:     schema.TypeString,
+									Optional: true,
+								},
+								"dismiss_text": {
+									Type:     schema.TypeString,
+									Optional: true,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func telegramConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"api_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"bot_token": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"chat_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"message": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"disable_notifications": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"parse_mode": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+	}
+}
+
+func victorOpsConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+		"custom_fields": {
+			Type:     schema.TypeMap,
+			Optional: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"api_key": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"api_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"routing_key": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"message_type": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"state_message": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"entity_display_name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"monitoring_tool": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+	}
+}
+
+func snsConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+		},
+		"attributes": {
+			Type:     schema.TypeMap,
+			Optional: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"api_url": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"topic_arn": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"phone_number": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"target_arn": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"subject": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"message": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"sigv4": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"region": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"access_key": {
+						Type:      schema.TypeString,
+						Optional:  true,
+						Sensitive: true,
+					},
+					"secret_key": {
+						Type:      schema.TypeString,
+						Optional:  true,
+						Sensitive: true,
+					},
+					"profile": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"role_arn": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
+		},
+	}
+}
+
 func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"global": {
@@ -778,6 +1123,38 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: opsgenieConfigFields(),
+						},
+					},
+					"slack_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: slackConfigFields(),
+						},
+					},
+					"telegram_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: telegramConfigFields(),
+						},
+					},
+					"victorops_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: victorOpsConfigFields(),
+						},
+					},
+					"sns_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: snsConfigFields(),
 						},
 					},
 				},

@@ -257,6 +257,18 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		if raw, ok := data["opsgenie_configs"]; ok {
 			cfg.OpsgenieConfigs = expandOpsgenieConfig(raw.([]interface{}))
 		}
+		if raw, ok := data["slack_configs"]; ok {
+			cfg.SlackConfigs = expandSlackConfig(raw.([]interface{}))
+		}
+		if raw, ok := data["telegram_configs"]; ok {
+			cfg.TelegramConfigs = expandTelegramConfig(raw.([]interface{}))
+		}
+		if raw, ok := data["victorops_configs"]; ok {
+			cfg.VictorOpsConfigs = expandVictorOpsConfig(raw.([]interface{}))
+		}
+		if raw, ok := data["sns_configs"]; ok {
+			cfg.SNSConfigs = expandSnsConfig(raw.([]interface{}))
+		}
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -278,9 +290,238 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 		cfg["webhook_configs"] = flattenWebhookConfig(v.WebhookConfigs)
 		cfg["pushover_configs"] = flattenPushoverConfig(v.PushoverConfigs)
 		cfg["opsgenie_configs"] = flattenOpsgenieConfig(v.OpsgenieConfigs)
+		cfg["slack_configs"] = flattenSlackConfig(v.SlackConfigs)
+		cfg["telegram_configs"] = flattenTelegramConfig(v.TelegramConfigs)
+		cfg["victorops_configs"] = flattenVictorOpsConfig(v.VictorOpsConfigs)
+		cfg["sns_configs"] = flattenSnsConfig(v.SNSConfigs)
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
+}
+
+func expandSnsSigV4Config(v interface{}) sigV4Config {
+	var sigV4ConfigConf sigV4Config
+	data := v.([]interface{})
+	if len(data) != 0 && data[0] != nil {
+		sigV4ConfigConf := &sigV4Config{}
+		cfg := data[0].(map[string]interface{})
+		sigV4ConfigConf.Region = cfg["region"].(string)
+		sigV4ConfigConf.AccessKey = cfg["access_key"].(string)
+		sigV4ConfigConf.SecretKey = cfg["secret_key"].(string)
+		sigV4ConfigConf.Profile = cfg["profile"].(string)
+		sigV4ConfigConf.RoleARN = cfg["role_arn"].(string)
+	}
+	return sigV4ConfigConf
+}
+
+func flattenSnsSigV4Config(v sigV4Config) []interface{} {
+	sigV4ConfigConf := make(map[string]interface{})
+	sigV4ConfigConf["region"] = v.Region
+	sigV4ConfigConf["access_key"] = v.AccessKey
+	sigV4ConfigConf["secret_key"] = v.SecretKey
+	sigV4ConfigConf["profile"] = v.Profile
+	sigV4ConfigConf["role_arn"] = v.RoleARN
+	return []interface{}{sigV4ConfigConf}
+}
+
+func expandSnsConfig(v []interface{}) []*snsConfig {
+	var snsConf []*snsConfig
+
+	for _, v := range v {
+		cfg := &snsConfig{}
+		data := v.(map[string]interface{})
+
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["sigv4"]; ok {
+			cfg.Sigv4 = expandSnsSigV4Config(raw.(interface{}))
+		}
+		if raw, ok := data["api_url"]; ok {
+			cfg.APIUrl = raw.(string)
+		}
+		if raw, ok := data["topic_arn"]; ok {
+			cfg.TopicARN = raw.(string)
+		}
+		if raw, ok := data["phone_number"]; ok {
+			cfg.PhoneNumber = raw.(string)
+		}
+		if raw, ok := data["target_arn"]; ok {
+			cfg.TargetARN = raw.(string)
+		}
+		if raw, ok := data["subject"]; ok {
+			cfg.Subject = raw.(string)
+		}
+		if raw, ok := data["message"]; ok {
+			cfg.Message = raw.(string)
+		}
+		if raw, ok := data["attributes"]; ok {
+			cfg.Attributes = expandStringMap(raw.(map[string]interface{}))
+		}
+		snsConf = append(snsConf, cfg)
+	}
+	return snsConf
+}
+
+func flattenSnsConfig(v []*snsConfig) []interface{} {
+	var snsConf []interface{}
+
+	if v == nil {
+		return snsConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["sigv4"] = flattenSnsSigV4Config(v.Sigv4)
+		cfg["api_url"] = v.APIUrl
+		cfg["topic_arn"] = v.TopicARN
+		cfg["phone_number"] = v.PhoneNumber
+		cfg["target_arn"] = v.TargetARN
+		cfg["subject"] = v.Subject
+		cfg["message"] = v.Message
+		cfg["attributes"] = v.Attributes
+		snsConf = append(snsConf, cfg)
+	}
+	return snsConf
+}
+
+func expandVictorOpsConfig(v []interface{}) []*victorOpsConfig {
+	var victorOpsConf []*victorOpsConfig
+
+	for _, v := range v {
+		cfg := &victorOpsConfig{}
+		data := v.(map[string]interface{})
+
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["api_key"]; ok {
+			cfg.APIKey = raw.(string)
+		}
+		if raw, ok := data["api_url"]; ok {
+			cfg.APIURL = raw.(string)
+		}
+		if raw, ok := data["routing_key"]; ok {
+			cfg.RoutingKey = raw.(string)
+		}
+		if raw, ok := data["message_type"]; ok {
+			cfg.MessageType = raw.(string)
+		}
+		if raw, ok := data["state_message"]; ok {
+			cfg.StateMessage = raw.(string)
+		}
+		if raw, ok := data["entity_display_name"]; ok {
+			cfg.EntityDisplayName = raw.(string)
+		}
+		if raw, ok := data["monitoring_tool"]; ok {
+			cfg.MonitoringTool = raw.(string)
+		}
+		if raw, ok := data["custom_fields"]; ok {
+			cfg.CustomFields = expandStringMap(raw.(map[string]interface{}))
+		}
+		victorOpsConf = append(victorOpsConf, cfg)
+	}
+	return victorOpsConf
+}
+
+func flattenVictorOpsConfig(v []*victorOpsConfig) []interface{} {
+	var victorOpsConf []interface{}
+
+	if v == nil {
+		return victorOpsConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["api_key"] = v.APIKey
+		cfg["api_url"] = v.APIURL
+		cfg["routing_key"] = v.RoutingKey
+		cfg["message_type"] = v.MessageType
+		cfg["state_message"] = v.StateMessage
+		cfg["entity_display_name"] = v.EntityDisplayName
+		cfg["monitoring_tool"] = v.MonitoringTool
+		cfg["custom_fields"] = v.CustomFields
+		victorOpsConf = append(victorOpsConf, cfg)
+	}
+	return victorOpsConf
+}
+
+func expandTelegramConfig(v []interface{}) []*telegramConfig {
+	var telegramConf []*telegramConfig
+
+	for _, v := range v {
+		cfg := &telegramConfig{}
+		data := v.(map[string]interface{})
+
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["api_url"]; ok {
+			cfg.APIUrl = raw.(string)
+		}
+		if raw, ok := data["bot_token"]; ok {
+			cfg.BotToken = raw.(string)
+		}
+		if raw, ok := data["chat_id"]; ok {
+			cfg.ChatID = int64(raw.(int))
+		}
+		if raw, ok := data["message"]; ok {
+			cfg.Message = raw.(string)
+		}
+		if raw, ok := data["disable_notifications"]; ok {
+			cfg.DisableNotifications = raw.(bool)
+		}
+		if raw, ok := data["parse_mode"]; ok {
+			cfg.ParseMode = raw.(string)
+		}
+
+		telegramConf = append(telegramConf, cfg)
+	}
+	return telegramConf
+}
+
+func flattenTelegramConfig(v []*telegramConfig) []interface{} {
+	var telegramConf []interface{}
+
+	if v == nil {
+		return telegramConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["api_url"] = v.APIUrl
+		cfg["bot_token"] = v.BotToken
+		cfg["chat_id"] = v.ChatID
+		cfg["message"] = v.Message
+		cfg["disable_notifications"] = v.DisableNotifications
+		cfg["parse_mode"] = v.ParseMode
+		telegramConf = append(telegramConf, cfg)
+	}
+	return telegramConf
 }
 
 func expandOpsgenieResponder(v []interface{}) []opsgenieResponder {
@@ -611,6 +852,241 @@ func flattenEmailConfig(v []*emailConfig) []interface{} {
 		emailConf = append(emailConf, cfg)
 	}
 	return emailConf
+}
+
+func expandSlackConfigConfirmationField(v interface{}) *slackConfirmationField {
+	var slackConfirmationFieldConf *slackConfirmationField
+	data := v.([]interface{})
+	if len(data) != 0 && data[0] != nil {
+		slackConfirmationFieldConf := &slackConfirmationField{}
+		cfg := data[0].(map[string]interface{})
+		slackConfirmationFieldConf.Text = cfg["text"].(string)
+		slackConfirmationFieldConf.Title = cfg["title"].(string)
+		slackConfirmationFieldConf.OkText = cfg["ok_text"].(string)
+		slackConfirmationFieldConf.DismissText = cfg["dismiss_text"].(string)
+	}
+	return slackConfirmationFieldConf
+}
+
+func flattenSlackConfigConfirmationField(v *slackConfirmationField) []interface{} {
+	slackConfirmationFieldConf := make(map[string]interface{})
+	if v != nil {
+		slackConfirmationFieldConf["text"] = v.Text
+		slackConfirmationFieldConf["title"] = v.Title
+		slackConfirmationFieldConf["ok_text"] = v.OkText
+		slackConfirmationFieldConf["dismiss_text"] = v.DismissText
+	}
+	return []interface{}{slackConfirmationFieldConf}
+}
+
+func expandSlackConfigFields(v []interface{}) []slackField {
+	var slackFieldConf []slackField
+
+	for _, v := range v {
+		var cfg slackField
+		data := v.(map[string]interface{})
+
+		if raw, ok := data["title"]; ok {
+			cfg.Title = raw.(string)
+		}
+		if raw, ok := data["value"]; ok {
+			cfg.Value = raw.(string)
+		}
+		if raw, ok := data["short"]; ok {
+			cfg.Short = raw.(bool)
+		}
+		slackFieldConf = append(slackFieldConf, cfg)
+	}
+	return slackFieldConf
+}
+
+func flattenSlackConfigFields(v []slackField) []interface{} {
+	var slackFieldConf []interface{}
+
+	if v == nil {
+		return slackFieldConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["title"] = v.Title
+		cfg["value"] = v.Value
+		cfg["short"] = v.Short
+		slackFieldConf = append(slackFieldConf, cfg)
+	}
+	return slackFieldConf
+}
+
+func expandSlackConfigActions(v []interface{}) []slackAction {
+	var slackActionConf []slackAction
+
+	for _, v := range v {
+		var cfg slackAction
+		data := v.(map[string]interface{})
+
+		if raw, ok := data["type"]; ok {
+			cfg.Type = raw.(string)
+		}
+		if raw, ok := data["text"]; ok {
+			cfg.Text = raw.(string)
+		}
+		if raw, ok := data["url"]; ok {
+			cfg.URL = raw.(string)
+		}
+		if raw, ok := data["style"]; ok {
+			cfg.Style = raw.(string)
+		}
+		if raw, ok := data["name"]; ok {
+			cfg.Name = raw.(string)
+		}
+		if raw, ok := data["value"]; ok {
+			cfg.Value = raw.(string)
+		}
+		if raw, ok := data["confirm"]; ok {
+			cfg.ConfirmField = expandSlackConfigConfirmationField(raw.([]interface{}))
+		}
+		slackActionConf = append(slackActionConf, cfg)
+	}
+	return slackActionConf
+}
+
+func flattenSlackConfigActions(v []slackAction) []interface{} {
+	var slackActionConf []interface{}
+
+	if v == nil {
+		return slackActionConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["type"] = v.Type
+		cfg["text"] = v.Text
+		cfg["url"] = v.URL
+		cfg["style"] = v.Style
+		cfg["name"] = v.Name
+		cfg["value"] = v.Value
+		cfg["confirm"] = flattenSlackConfigConfirmationField(v.ConfirmField)
+		slackActionConf = append(slackActionConf, cfg)
+	}
+	return slackActionConf
+}
+
+func expandSlackConfig(v []interface{}) []*slackConfig {
+	var slackConf []*slackConfig
+
+	for _, v := range v {
+		cfg := &slackConfig{}
+		data := v.(map[string]interface{})
+
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["actions"]; ok {
+			cfg.Actions = expandSlackConfigActions(raw.([]interface{}))
+		}
+		if raw, ok := data["fields"]; ok {
+			cfg.Fields = expandSlackConfigFields(raw.([]interface{}))
+		}
+		if raw, ok := data["api_url"]; ok {
+			cfg.APIURL = raw.(string)
+		}
+		if raw, ok := data["channel"]; ok {
+			cfg.Channel = raw.(string)
+		}
+		if raw, ok := data["username"]; ok {
+			cfg.Username = raw.(string)
+		}
+		if raw, ok := data["color"]; ok {
+			cfg.Color = raw.(string)
+		}
+		if raw, ok := data["title"]; ok {
+			cfg.Title = raw.(string)
+		}
+		if raw, ok := data["title_link"]; ok {
+			cfg.TitleLink = raw.(string)
+		}
+		if raw, ok := data["pretext"]; ok {
+			cfg.Pretext = raw.(string)
+		}
+		if raw, ok := data["text"]; ok {
+			cfg.Text = raw.(string)
+		}
+		if raw, ok := data["footer"]; ok {
+			cfg.Footer = raw.(string)
+		}
+		if raw, ok := data["fallback"]; ok {
+			cfg.Fallback = raw.(string)
+		}
+		if raw, ok := data["callback_id"]; ok {
+			cfg.CallbackID = raw.(string)
+		}
+		if raw, ok := data["icon_emoji"]; ok {
+			cfg.IconEmoji = raw.(string)
+		}
+		if raw, ok := data["icon_url"]; ok {
+			cfg.IconURL = raw.(string)
+		}
+		if raw, ok := data["image_url"]; ok {
+			cfg.ImageURL = raw.(string)
+		}
+		if raw, ok := data["thumb_url"]; ok {
+			cfg.ThumbURL = raw.(string)
+		}
+		if raw, ok := data["short_fields"]; ok {
+			cfg.ShortFields = raw.(bool)
+		}
+		if raw, ok := data["link_names"]; ok {
+			cfg.LinkNames = raw.(bool)
+		}
+		if raw, ok := data["mrkdwn_in"]; ok {
+			cfg.MrkdwnIn = expandStringArray(raw.([]interface{}))
+		}
+
+		slackConf = append(slackConf, cfg)
+	}
+	return slackConf
+}
+
+func flattenSlackConfig(v []*slackConfig) []interface{} {
+	var slackConf []interface{}
+
+	if v == nil {
+		return slackConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		cfg["fields"] = flattenSlackConfigFields(v.Fields)
+		cfg["actions"] = flattenSlackConfigActions(v.Actions)
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["api_url"] = v.APIURL
+		cfg["channel"] = v.Channel
+		cfg["username"] = v.Username
+		cfg["color"] = v.Color
+		cfg["title"] = v.Title
+		cfg["title_link"] = v.TitleLink
+		cfg["pretext"] = v.Pretext
+		cfg["text"] = v.Text
+		cfg["footer"] = v.Footer
+		cfg["fallback"] = v.Fallback
+		cfg["callback_id"] = v.CallbackID
+		cfg["icon_emoji"] = v.IconEmoji
+		cfg["icon_url"] = v.IconURL
+		cfg["image_url"] = v.ImageURL
+		cfg["thumb_url"] = v.ThumbURL
+		cfg["short_fields"] = v.ShortFields
+		cfg["link_names"] = v.LinkNames
+		cfg["mrkdwn_in"] = v.MrkdwnIn
+		slackConf = append(slackConf, cfg)
+	}
+	return slackConf
 }
 
 func expandPagerdutyConfigLinks(v []interface{}) []pagerdutyLink {
