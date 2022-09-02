@@ -278,11 +278,11 @@ func pagerdutyConfigFields() map[string]*schema.Schema {
 			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"Text": {
+					"text": {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
-					"Href": {
+					"href": {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
