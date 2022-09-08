@@ -40,16 +40,16 @@ resource "mimir_alertmanager_config" "mytenant" {
 
 ### Required
 
-- `receiver` (Block List, Min: 1) (see [below for nested schema](#nestedblock--receiver))
-- `route` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--route))
+- `receiver` (Block List, Min: 1) A list of notification receivers. (see [below for nested schema](#nestedblock--receiver))
+- `route` (Block List, Min: 1, Max: 1) The root node of the routing tree. (see [below for nested schema](#nestedblock--route))
 
 ### Optional
 
 - `global` (Block List, Max: 1) (see [below for nested schema](#nestedblock--global))
-- `inhibit_rule` (Block List) (see [below for nested schema](#nestedblock--inhibit_rule))
-- `templates` (List of String)
-- `templates_files` (Map of String)
-- `time_interval` (Block List) (see [below for nested schema](#nestedblock--time_interval))
+- `inhibit_rule` (Block List) Mutes an alert (target) matching a set of matchers when an alert (source) exists that matches another set of matchers. (see [below for nested schema](#nestedblock--inhibit_rule))
+- `templates` (List of String) A list of template names to use.
+- `templates_files` (Map of String) A map of key values string, where the key is the template name and the value the content of the template.
+- `time_interval` (Block List) A list of time intervals for muting/activating routes. (see [below for nested schema](#nestedblock--time_interval))
 
 ### Read-Only
 
@@ -80,28 +80,28 @@ Optional:
 
 Optional:
 
-- `auth_identity` (String)
-- `auth_password` (String, Sensitive)
-- `auth_secret` (String, Sensitive)
-- `auth_username` (String)
-- `from` (String)
-- `headers` (Map of String)
-- `hello` (String)
-- `html` (String)
-- `require_tls` (Boolean)
-- `send_resolved` (Boolean)
-- `smarthost` (String)
-- `text` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--email_configs--tls_config))
-- `to` (String)
+- `auth_identity` (String) SMTP authentication identity.
+- `auth_password` (String, Sensitive) SMTP authentication password.
+- `auth_secret` (String, Sensitive) SMTP authentication secret.
+- `auth_username` (String) SMTP authentication username.
+- `from` (String) The sender's address.
+- `headers` (Map of String) Further headers email header key/value pairs. Overrides any headers previously set by the notification implementation.
+- `hello` (String) The hostname to identify to the SMTP server.
+- `html` (String) The HTML body of the email notification.
+- `require_tls` (Boolean) The SMTP TLS requirement.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `smarthost` (String) The SMTP host through which emails are sent.
+- `text` (String) The text body of the email notification.
+- `tls_config` (Block List, Max: 1) The SMTP TLS configuration. (see [below for nested schema](#nestedblock--receiver--email_configs--tls_config))
+- `to` (String) The email address to send notifications to.
 
 <a id="nestedblock--receiver--email_configs--tls_config"></a>
 ### Nested Schema for `receiver.email_configs.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -110,42 +110,42 @@ Optional:
 
 Optional:
 
-- `actions` (String)
-- `api_key` (String, Sensitive)
-- `api_url` (String)
-- `description` (String)
-- `details` (Map of String)
-- `entity` (String)
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config))
-- `message` (String)
-- `note` (String)
-- `priority` (String)
-- `responders` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--responders))
-- `send_resolved` (Boolean)
-- `source` (String)
-- `tags` (String)
-- `update_alerts` (String)
+- `actions` (String) Comma separated list of actions that will be available for the alert.
+- `api_key` (String, Sensitive) The API key to use when talking to the OpsGenie API.
+- `api_url` (String) The host to send OpsGenie API requests to.
+- `description` (String) A description of the alert.
+- `details` (Map of String) A set of arbitrary key/value pairs that provide further detail about the alert. All common labels are included as details by default.
+- `entity` (String) Optional field that can be used to specify which domain alert is related to.
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config))
+- `message` (String) Alert text limited to 130 characters.
+- `note` (String) Additional alert note.
+- `priority` (String) Priority level of alert. Possible values are P1, P2, P3, P4, and P5.
+- `responders` (Block List, Max: 1) List of responders responsible for notifications. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--responders))
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `source` (String) A backlink to the sender of the notification.
+- `tags` (String) Comma separated list of tags attached to the notifications.
+- `update_alerts` (String) Whether to update message and description of the alert in OpsGenie if it already exists. By default, the alert is never updated in OpsGenie, the new message only appears in activity log.
 
 <a id="nestedblock--receiver--opsgenie_configs--http_config"></a>
 ### Nested Schema for `receiver.opsgenie_configs.http_config`
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--opsgenie_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.opsgenie_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--opsgenie_configs--http_config--basic_auth"></a>
@@ -164,18 +164,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--opsgenie_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.opsgenie_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -184,8 +184,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -209,42 +209,42 @@ Read-Only:
 
 Optional:
 
-- `class` (String)
-- `client` (String)
-- `client_url` (String)
-- `component` (String)
-- `description` (String)
-- `details` (Map of String)
-- `group` (String)
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config))
-- `images` (Block List) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--images))
-- `links` (Block List) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--links))
-- `routing_key` (String, Sensitive)
-- `send_resolved` (Boolean)
-- `service_key` (String, Sensitive)
-- `severity` (String)
-- `url` (String)
+- `class` (String) The class/type of the event.
+- `client` (String) The client identification of the Alertmanager.
+- `client_url` (String) A backlink to the sender of the notification.
+- `component` (String) The part or component of the affected system that is broken.
+- `description` (String) A description of the incident.
+- `details` (Map of String) A set of arbitrary key/value pairs that provide further detail about the incident.
+- `group` (String) A cluster or grouping of sources.
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config))
+- `images` (Block List) Images to attach to the incident. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--images))
+- `links` (Block List) Links to attach to the incident. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--links))
+- `routing_key` (String, Sensitive) The PagerDuty integration key (when using PagerDuty integration type `Events API v2`).
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `service_key` (String, Sensitive) The PagerDuty integration key (when using PagerDuty integration type `Prometheus`).
+- `severity` (String) Severity of the incident.
+- `url` (String) The URL to send API requests to
 
 <a id="nestedblock--receiver--pagerduty_configs--http_config"></a>
 ### Nested Schema for `receiver.pagerduty_configs.http_config`
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--pagerduty_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.pagerduty_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--pagerduty_configs--http_config--basic_auth"></a>
@@ -263,18 +263,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--pagerduty_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.pagerduty_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -283,8 +283,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -313,40 +313,40 @@ Optional:
 
 Optional:
 
-- `expire` (String)
+- `expire` (String) How long your notification will continue to be retried for, unless the user acknowledges the notification.
 - `html` (Boolean)
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config))
-- `message` (String)
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config))
+- `message` (String) Notification message.
 - `priority` (String)
-- `retry` (String)
-- `send_resolved` (Boolean)
+- `retry` (String) How often the Pushover servers will send the same notification to the user.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `sound` (String)
-- `title` (String)
-- `token` (String)
-- `url` (String)
+- `title` (String) Notification title.
+- `token` (String) The registered application's API token.
+- `url` (String) A supplementary URL shown alongside the message.
 - `url_title` (String)
-- `user_key` (String)
+- `user_key` (String) The recipient user's user key.
 
 <a id="nestedblock--receiver--pushover_configs--http_config"></a>
 ### Nested Schema for `receiver.pushover_configs.http_config`
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--pushover_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.pushover_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--pushover_configs--http_config--basic_auth"></a>
@@ -365,18 +365,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--pushover_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.pushover_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -385,8 +385,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -397,21 +397,21 @@ Optional:
 Optional:
 
 - `actions` (Block List) (see [below for nested schema](#nestedblock--receiver--slack_configs--actions))
-- `api_url` (String)
+- `api_url` (String) The Slack webhook URL. Defaults to global settings if none are set here.
 - `callback_id` (String)
-- `channel` (String)
+- `channel` (String) The channel or user to send notifications to.
 - `color` (String)
 - `fallback` (String)
 - `fields` (Block List) (see [below for nested schema](#nestedblock--receiver--slack_configs--fields))
 - `footer` (String)
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config))
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config))
 - `icon_emoji` (String)
 - `icon_url` (String)
 - `image_url` (String)
 - `link_names` (Boolean)
 - `mrkdwn_in` (List of String)
 - `pretext` (String)
-- `send_resolved` (Boolean)
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `short_fields` (Boolean)
 - `text` (String)
 - `thumb_url` (String)
@@ -459,21 +459,21 @@ Optional:
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--slack_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.slack_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--slack_configs--http_config--basic_auth"></a>
@@ -492,18 +492,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--slack_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.slack_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -512,8 +512,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -523,37 +523,37 @@ Optional:
 
 Optional:
 
-- `api_url` (String)
-- `attributes` (Map of String)
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config))
-- `message` (String)
-- `phone_number` (String)
-- `send_resolved` (Boolean)
-- `sigv4` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs--sigv4))
-- `subject` (String)
-- `target_arn` (String)
-- `topic_arn` (String)
+- `api_url` (String) The SNS API URL. If not specified, the SNS API URL from the SNS SDK will be used.
+- `attributes` (Map of String) SNS message attributes.
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config))
+- `message` (String) The message content of the SNS notification.
+- `phone_number` (String) Phone number if message is delivered via SMS in E.164 format.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `sigv4` (Block List, Max: 1) Configures AWS's Signature Verification 4 signing process to sign requests. (see [below for nested schema](#nestedblock--receiver--sns_configs--sigv4))
+- `subject` (String) Subject line when the message is delivered to email endpoints.
+- `target_arn` (String) The mobile platform endpoint ARN if message is delivered via mobile notifications.
+- `topic_arn` (String) SNS topic ARN. If not set, a value for the phone_number or target_arn should be set.
 
 <a id="nestedblock--receiver--sns_configs--http_config"></a>
 ### Nested Schema for `receiver.sns_configs.http_config`
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--sns_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.sns_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--sns_configs--http_config--basic_auth"></a>
@@ -572,18 +572,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--sns_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.sns_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -592,8 +592,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -603,9 +603,9 @@ Optional:
 Optional:
 
 - `access_key` (String, Sensitive)
-- `profile` (String)
-- `region` (String)
-- `role_arn` (String)
+- `profile` (String) Named AWS profile used to authenticate.
+- `region` (String) The AWS region. If blank, the region from the default credentials chain is used.
+- `role_arn` (String) AWS Role ARN, an alternative to using AWS API keys.
 - `secret_key` (String, Sensitive)
 
 
@@ -615,35 +615,35 @@ Optional:
 
 Optional:
 
-- `api_url` (String)
-- `bot_token` (String, Sensitive)
-- `chat_id` (String)
-- `disable_notifications` (Boolean)
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config))
-- `message` (String)
-- `parse_mode` (String)
-- `send_resolved` (Boolean)
+- `api_url` (String) The Telegram API URL. If not specified, default API URL will be used.
+- `bot_token` (String, Sensitive) Telegram bot token
+- `chat_id` (String) ID of the chat where to send the messages.
+- `disable_notifications` (Boolean) Disable telegram notifications
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config))
+- `message` (String) Message template
+- `parse_mode` (String) Parse mode for telegram message, supported values are MarkdownV2, Markdown, HTML and empty string for plain text.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
 
 <a id="nestedblock--receiver--telegram_configs--http_config"></a>
 ### Nested Schema for `receiver.telegram_configs.http_config`
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--telegram_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.telegram_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--telegram_configs--http_config--basic_auth"></a>
@@ -662,18 +662,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--telegram_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.telegram_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -682,8 +682,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -693,37 +693,37 @@ Optional:
 
 Optional:
 
-- `api_key` (String, Sensitive)
-- `api_url` (String)
+- `api_key` (String, Sensitive) The API key to use when talking to the VictorOps API.
+- `api_url` (String) The VictorOps API URL.
 - `custom_fields` (Map of String)
-- `entity_display_name` (String)
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config))
-- `message_type` (String)
-- `monitoring_tool` (String)
-- `routing_key` (String)
-- `send_resolved` (Boolean)
-- `state_message` (String)
+- `entity_display_name` (String) Contains summary of the alerted problem.
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config))
+- `message_type` (String) Describes the behavior of the alert (CRITICAL, WARNING, INFO).
+- `monitoring_tool` (String) The monitoring tool the state message is from.
+- `routing_key` (String) A key used to map the alert to a team.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `state_message` (String) Contains long explanation of the alerted problem.
 
 <a id="nestedblock--receiver--victorops_configs--http_config"></a>
 ### Nested Schema for `receiver.victorops_configs.http_config`
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--victorops_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.victorops_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--victorops_configs--http_config--basic_auth"></a>
@@ -742,18 +742,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--victorops_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.victorops_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -762,8 +762,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -773,31 +773,31 @@ Optional:
 
 Optional:
 
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config))
-- `max_alerts` (Number)
-- `send_resolved` (Boolean)
-- `url` (String)
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config))
+- `max_alerts` (Number) The maximum number of alerts to include in a single webhook message. Alerts above this threshold are truncated. When leaving this at its default value of 0, all alerts are included.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `url` (String) The endpoint to send HTTP POST requests to.
 
 <a id="nestedblock--receiver--webhook_configs--http_config"></a>
 ### Nested Schema for `receiver.webhook_configs.http_config`
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--webhook_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.webhook_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--webhook_configs--http_config--basic_auth"></a>
@@ -816,18 +816,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--webhook_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.webhook_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -836,8 +836,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -848,13 +848,13 @@ Optional:
 Optional:
 
 - `agent_id` (String)
-- `api_secret` (String, Sensitive)
-- `api_url` (String)
-- `corp_id` (String)
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config))
-- `message` (String)
-- `message_type` (String)
-- `send_resolved` (Boolean)
+- `api_secret` (String, Sensitive) The API key to use when talking to the WeChat API.
+- `api_url` (String) The WeChat API URL.
+- `corp_id` (String) The corp id for authentication.
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config))
+- `message` (String) API request data as defined by the WeChat API.
+- `message_type` (String) Type of the message type, supported values are `text` and `markdown`.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `to_party` (String)
 - `to_tag` (String)
 - `to_user` (String)
@@ -864,21 +864,21 @@ Optional:
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--tls_config))
 
 <a id="nestedblock--receiver--wechat_configs--http_config--authorization"></a>
 ### Nested Schema for `receiver.wechat_configs.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--receiver--wechat_configs--http_config--basic_auth"></a>
@@ -897,18 +897,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--receiver--wechat_configs--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `receiver.wechat_configs.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -917,8 +917,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -929,34 +929,34 @@ Optional:
 
 Required:
 
-- `group_interval` (String)
-- `group_wait` (String)
-- `receiver` (String)
-- `repeat_interval` (String)
+- `group_interval` (String) How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.
+- `group_wait` (String) How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.
+- `receiver` (String) Name of the receiver to send the notification.
+- `repeat_interval` (String) How long to wait before sending a notification again if it has already been sent successfully for an alert.
 
 Optional:
 
 - `child_route` (Block List) (see [below for nested schema](#nestedblock--route--child_route))
-- `continue` (Boolean)
-- `group_by` (List of String)
+- `continue` (Boolean) Whether an alert should continue matching subsequent sibling nodes.
+- `group_by` (List of String) The labels by which incoming alerts are grouped together.
 
 <a id="nestedblock--route--child_route"></a>
 ### Nested Schema for `route.child_route`
 
 Required:
 
-- `group_interval` (String)
-- `group_wait` (String)
-- `receiver` (String)
-- `repeat_interval` (String)
+- `group_interval` (String) How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.
+- `group_wait` (String) How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.
+- `receiver` (String) Name of the receiver to send the notification.
+- `repeat_interval` (String) How long to wait before sending a notification again if it has already been sent successfully for an alert.
 
 Optional:
 
-- `active_time_intervals` (List of String)
-- `continue` (Boolean)
-- `group_by` (List of String)
-- `matchers` (List of String)
-- `mute_time_intervals` (List of String)
+- `active_time_intervals` (List of String) Times when the route should be active. These must match the name of a mute time interval defined in the time_interval block.
+- `continue` (Boolean) Whether an alert should continue matching subsequent sibling nodes.
+- `group_by` (List of String) The labels by which incoming alerts are grouped together.
+- `matchers` (List of String) A list of matchers that an alert has to fulfill to match the node.
+- `mute_time_intervals` (List of String) Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.
 
 
 
@@ -965,20 +965,20 @@ Optional:
 
 Optional:
 
-- `http_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--global--http_config))
+- `http_config` (Block List, Max: 1) The default HTTP client configuration (see [below for nested schema](#nestedblock--global--http_config))
 - `opsgenie_api_key` (String, Sensitive)
 - `opsgenie_api_url` (String)
 - `pagerduty_url` (String)
 - `resolve_timeout` (String) The time after which an alert is declared resolved if it has not been updated.
 - `slack_api_url` (String, Sensitive)
-- `smtp_auth_identity` (String)
-- `smtp_auth_password` (String, Sensitive)
-- `smtp_auth_secret` (String, Sensitive)
-- `smtp_auth_username` (String)
-- `smtp_from` (String)
-- `smtp_hello` (String)
-- `smtp_require_tls` (Boolean)
-- `smtp_smarthost` (String)
+- `smtp_auth_identity` (String) SMTP Auth using PLAIN.
+- `smtp_auth_password` (String, Sensitive) SMTP Auth using LOGIN and PLAIN.
+- `smtp_auth_secret` (String, Sensitive) SMTP Auth using CRAM-MD5.
+- `smtp_auth_username` (String) SMTP Auth using CRAM-MD5, LOGIN and PLAIN. If empty, Alertmanager doesn't authenticate to the SMTP server.
+- `smtp_from` (String) The default SMTP From header field.
+- `smtp_hello` (String) The default hostname to identify to the SMTP server.
+- `smtp_require_tls` (Boolean) The default SMTP TLS requirement.
+- `smtp_smarthost` (String) The default SMTP smarthost used for sending emails, including port number.
 - `telegram_api_url` (String)
 - `victorops_api_key` (String, Sensitive)
 - `victorops_api_url` (String)
@@ -991,21 +991,21 @@ Optional:
 
 Optional:
 
-- `authorization` (Block List, Max: 1) (see [below for nested schema](#nestedblock--global--http_config--authorization))
-- `basic_auth` (Block List, Max: 1) (see [below for nested schema](#nestedblock--global--http_config--basic_auth))
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--global--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--global--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
-- `follow_redirects` (Boolean)
-- `oauth2` (Block List, Max: 1) (see [below for nested schema](#nestedblock--global--http_config--oauth2))
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--global--http_config--oauth2))
 - `proxy_url` (String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--global--http_config--tls_config))
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--global--http_config--tls_config))
 
 <a id="nestedblock--global--http_config--authorization"></a>
 ### Nested Schema for `global.http_config.authorization`
 
 Optional:
 
-- `credentials` (String, Sensitive)
-- `type` (String)
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
 
 
 <a id="nestedblock--global--http_config--basic_auth"></a>
@@ -1024,18 +1024,18 @@ Optional:
 
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
-- `endpoint_params` (Map of String)
-- `scopes` (List of String)
-- `tls_config` (Block List, Max: 1) (see [below for nested schema](#nestedblock--global--http_config--oauth2--tls_config))
-- `token_url` (String)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--global--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
 
 <a id="nestedblock--global--http_config--oauth2--tls_config"></a>
 ### Nested Schema for `global.http_config.oauth2.tls_config`
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -1044,8 +1044,8 @@ Optional:
 
 Optional:
 
-- `insecure_skip_verify` (Boolean)
-- `server_name` (String)
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
 
 
 
@@ -1055,9 +1055,9 @@ Optional:
 
 Optional:
 
-- `equal` (List of String)
-- `source_matchers` (List of String)
-- `target_matchers` (List of String)
+- `equal` (List of String) Labels that must have an equal value in the source and target alert for the inhibition to take effect.
+- `source_matchers` (List of String) A list of matchers for which one or more alerts have to exist for the inhibition to take effect.
+- `target_matchers` (List of String) A list of matchers that have to be fulfilled by the target alerts to be muted.
 
 
 <a id="nestedblock--time_interval"></a>
@@ -1065,19 +1065,19 @@ Optional:
 
 Optional:
 
-- `name` (String)
-- `time_intervals` (Block List, Max: 1) (see [below for nested schema](#nestedblock--time_interval--time_intervals))
+- `name` (String) Name interval of time that may be referenced in the routing tree to mute/activate particular routes for particular times of the day.
+- `time_intervals` (Block List, Max: 1) The actual definition for an interval of time. (see [below for nested schema](#nestedblock--time_interval--time_intervals))
 
 <a id="nestedblock--time_interval--time_intervals"></a>
 ### Nested Schema for `time_interval.time_intervals`
 
 Optional:
 
-- `days_of_month` (Block List) (see [below for nested schema](#nestedblock--time_interval--time_intervals--days_of_month))
-- `months` (Block List) (see [below for nested schema](#nestedblock--time_interval--time_intervals--months))
-- `times` (Block List) (see [below for nested schema](#nestedblock--time_interval--time_intervals--times))
-- `weekdays` (Block List) (see [below for nested schema](#nestedblock--time_interval--time_intervals--weekdays))
-- `years` (Block List) (see [below for nested schema](#nestedblock--time_interval--time_intervals--years))
+- `days_of_month` (Block List) A list of numerical days in the month. Days begin at 1. Negative values are also accepted which begin at the end of the month. (see [below for nested schema](#nestedblock--time_interval--time_intervals--days_of_month))
+- `months` (Block List) A list of calendar months identified by number, where January = 1. (see [below for nested schema](#nestedblock--time_interval--time_intervals--months))
+- `times` (Block List) Ranges inclusive of the starting time and exclusive of the end time to make it easy to represent times that start/end on hour boundaries. (see [below for nested schema](#nestedblock--time_interval--time_intervals--times))
+- `weekdays` (Block List) A list of numerical days of the week, where the week begins on Sunday (0) and ends on Saturday (6). (see [below for nested schema](#nestedblock--time_interval--time_intervals--weekdays))
+- `years` (Block List) A numerical list of years. (see [below for nested schema](#nestedblock--time_interval--time_intervals--years))
 
 <a id="nestedblock--time_interval--time_intervals--days_of_month"></a>
 ### Nested Schema for `time_interval.time_intervals.days_of_month`

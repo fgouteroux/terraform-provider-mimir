@@ -69,8 +69,8 @@ Example:
 
 ```
 resource "mimir_rule_group_alerting" "test" {
-  name = "test1"
-  name = "namespace1"
+  name      = "test1"
+  namespace = "namespace1"
   rule {
     alert       = "HighRequestLatency"
     expr        = "job:request_latency_seconds:mean5m{job="myjob"} > 0.5"
@@ -91,8 +91,8 @@ Example:
 
 ```
 resource "mimir_rule_group_recording" "record" {
-  name = "test1"
-  name = "namespace1"
+  name      = "test1"
+  namespace = "namespace1"
   rule {
     expr   = "sum by (job) (http_inprogress_requests)"
     record = "job:http_inprogress_requests:sum"

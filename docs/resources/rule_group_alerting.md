@@ -16,8 +16,8 @@ For full documention on prometheus alerting rule, see [here](https://prometheus.
 
 ```hcl
 resource "mimir_rule_group_alerting" "test" {
-  name = "test1"
-  name = "namespace1"
+  name      = "test1"
+  namespace = "namespace1"
   rule {
     alert       = "HighRequestLatency"
     expr        = "job:request_latency_seconds:mean5m{job="myjob"} > 0.5"
@@ -53,13 +53,13 @@ resource "mimir_rule_group_alerting" "test" {
 
 Required:
 
-- `alert` (String) Alerting Rule name
-- `expr` (String) Alerting Rule query
+- `alert` (String) The name of the alert.
+- `expr` (String) The PromQL expression to evaluate.
 
 Optional:
 
-- `annotations` (Map of String) Alerting Rule annotations
-- `for` (String) Alerting Rule duration
-- `labels` (Map of String) Alerting Rule labels
+- `annotations` (Map of String) Annotations to add to each alert.
+- `for` (String) The duration for which the condition must be true before an alert fires.
+- `labels` (Map of String) Labels to add or overwrite for each alert.
 
 

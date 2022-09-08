@@ -16,8 +16,8 @@ For full documention on prometheus recording rule, see [here](https://prometheus
 
 ```hcl
 resource "mimir_rule_group_recording" "record" {
-  name = "test1"
-  name = "namespace1"
+  name      = "test1"
+  namespace = "namespace1"
   rule {
     expr   = "sum by (job) (http_inprogress_requests)"
     record = "job:http_inprogress_requests:sum"
@@ -46,7 +46,7 @@ resource "mimir_rule_group_recording" "record" {
 
 Required:
 
-- `expr` (String)
-- `record` (String)
+- `expr` (String) The PromQL expression to evaluate.
+- `record` (String) The name of the time series to output to.
 
 

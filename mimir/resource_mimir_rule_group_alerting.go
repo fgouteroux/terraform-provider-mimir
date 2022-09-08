@@ -41,29 +41,29 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"alert": {
 							Type:         schema.TypeString,
-							Description:  "Alerting Rule name",
+							Description:  "The name of the alert.",
 							Required:     true,
 							ValidateFunc: validateAlertingRuleName,
 						},
 						"expr": {
 							Type:        schema.TypeString,
-							Description: "Alerting Rule query",
+							Description: "The PromQL expression to evaluate.",
 							Required:    true,
 						},
 						"for": {
 							Type:        schema.TypeString,
-							Description: "Alerting Rule duration",
+							Description: "The duration for which the condition must be true before an alert fires.",
 							Optional:    true,
 						},
 						"annotations": {
 							Type:        schema.TypeMap,
-							Description: "Alerting Rule annotations",
+							Description: "Annotations to add to each alert.",
 							Optional:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 						"labels": {
 							Type:        schema.TypeMap,
-							Description: "Alerting Rule labels",
+							Description: "Labels to add or overwrite for each alert.",
 							Optional:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
