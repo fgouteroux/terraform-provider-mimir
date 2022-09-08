@@ -51,7 +51,7 @@ func httpConfigFields() map[string]*schema.Schema {
 			Optional: true,
 			MaxItems: 1,
 			Description: "Set the `Authorization` header configuration.",
-			ConflictsWith: []string{"basic_auth"},
+			ConflictsWith: []string{"basic_auth.0.username", "basic_auth.0.password"},
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"type": {
@@ -73,7 +73,7 @@ func httpConfigFields() map[string]*schema.Schema {
 			Optional: true,
 			MaxItems: 1,
 			Description: "Sets the `Authorization` header with the configured username and password.",
-			ConflictsWith: []string{"authorization"},
+			ConflictsWith: []string{"authorization.0.type", "authorization.0.credentials"},
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"username": {
