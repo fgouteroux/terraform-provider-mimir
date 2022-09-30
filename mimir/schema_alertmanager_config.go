@@ -1454,6 +1454,11 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 
 func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"name": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Name of the alertmanager configuration. Only used for resource dependency.",
+		},
 		"global": {
 			Type:     schema.TypeList,
 			Computed: true,

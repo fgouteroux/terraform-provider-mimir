@@ -33,6 +33,6 @@ var testAccDataSourceAlertmanagerConfig_basic = fmt.Sprintf(`
 	%s
 
 	data "mimir_alertmanager_config" "mytenant" {
-		depends_on = [mimir_alertmanager_config.mytenant]
+		name = "${mimir_alertmanager_config.mytenant.id}"
 	}
 `, testAccResourceAlertmanagerConfig_basic)

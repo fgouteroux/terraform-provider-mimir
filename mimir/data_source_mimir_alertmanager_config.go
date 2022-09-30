@@ -17,6 +17,7 @@ func dataSourcemimirAlertmanagerConfig() *schema.Resource {
 
 func dataSourcemimirAlertmanagerConfigRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*api_client)
+	name := d.Get("name").(string)
 	path := "/api/v1/alerts"
 	resp, err := client.send_request("alertmanager", "GET", path, "", make(map[string]string))
 	baseMsg := "Cannot read alertmanager config"
@@ -31,6 +32,12 @@ func dataSourcemimirAlertmanagerConfigRead(d *schema.ResourceData, meta interfac
 	}
 
 	d.SetId(client.headers["X-Scope-OrgID"])
+
+	if name == "" {
+		name = client.headers["X-Scope-OrgID"]
+	}
+
+	d.Set("name", name)
 
 	var alertmanagerUserConf alertmanagerUserConfig
 	yaml.Unmarshal([]byte(resp), &alertmanagerUserConf)
