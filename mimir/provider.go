@@ -94,6 +94,7 @@ func Provider() *schema.Provider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
+			"mimir_alertmanager_config":  dataSourcemimirAlertmanagerConfig(),
 			"mimir_rule_group_alerting":  dataSourcemimirRuleGroupAlerting(),
 			"mimir_rule_group_recording": dataSourcemimirRuleGroupRecording(),
 		},
