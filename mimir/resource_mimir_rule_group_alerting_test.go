@@ -20,6 +20,26 @@ func TestAccResourceRuleGroupAlerting_expectValidationError(t *testing.T) {
 				Config:      testAccResourceRuleGroupAlerting_expectRuleNameValidationError,
 				ExpectError: regexp.MustCompile("Invalid Alerting Rule Name"),
 			},
+			{
+				Config:      testAccResourceRuleGroupAlerting_expectPromQLValidationError,
+				ExpectError: regexp.MustCompile("Invalid PromQL expression"),
+			},
+			{
+				Config:      testAccResourceRuleGroupAlerting_expectDurationValidationError,
+				ExpectError: regexp.MustCompile("not a valid duration string"),
+			},
+			{
+				Config:      testAccResourceRuleGroupAlerting_expectLabelNameValidationError,
+				ExpectError: regexp.MustCompile("Invalid Label Name"),
+			},
+			{
+				Config:      testAccResourceRuleGroupAlerting_expectLabelValueValidationError,
+				ExpectError: regexp.MustCompile("Invalid Label Value"),
+			},
+			{
+				Config:      testAccResourceRuleGroupAlerting_expectAnnotationNameValidationError,
+				ExpectError: regexp.MustCompile("Invalid Annotation Name"),
+			},
 		},
 	})
 }
@@ -42,6 +62,71 @@ const testAccResourceRuleGroupAlerting_expectRuleNameValidationError = `
 		rule {
 			alert = "test1 alert"
 			expr   = "test1_metric"
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_expectPromQLValidationError = `
+	resource "mimir_rule_group_alerting" "alert_1" {
+		name = "alert_1"
+		namespace = "namespace_1"
+		rule {
+			alert = "test1_alert"
+			expr   = "rate(hi)"
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_expectDurationValidationError = `
+	resource "mimir_rule_group_alerting" "alert_1" {
+		name = "alert_1"
+		namespace = "namespace_1"
+		rule {
+			alert = "test1_alert"
+			expr  = "test1_metric"
+			for   = "3months"
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_expectLabelNameValidationError = `
+	resource "mimir_rule_group_alerting" "alert_1" {
+		name = "alert_1"
+		namespace = "namespace_1"
+		rule {
+			alert = "test1_alert"
+			expr   = "test1_metric"
+			labels = {
+				 ins-tance = "localhost"
+			}
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_expectLabelValueValidationError = `
+	resource "mimir_rule_group_alerting" "alert_1" {
+		name = "alert_1"
+		namespace = "namespace_1"
+		rule {
+			alert = "test1_alert"
+			expr   = "test1_metric"
+			labels = {
+				 instance = "localhost{test=bad}"
+			}
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_expectAnnotationNameValidationError = `
+	resource "mimir_rule_group_alerting" "alert_1" {
+		name = "alert_1"
+		namespace = "namespace_1"
+		rule {
+			alert = "test1_alert"
+			expr   = "test1_metric"
+			annotations = {
+				 ins-tance = "localhost"
+			}
 		}
 	}
 `

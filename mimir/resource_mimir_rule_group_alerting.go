@@ -46,26 +46,30 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 							ValidateFunc: validateAlertingRuleName,
 						},
 						"expr": {
-							Type:        schema.TypeString,
-							Description: "The PromQL expression to evaluate.",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "The PromQL expression to evaluate.",
+							Required:     true,
+							ValidateFunc: validatePromQLExpr,
 						},
 						"for": {
-							Type:        schema.TypeString,
-							Description: "The duration for which the condition must be true before an alert fires.",
-							Optional:    true,
+							Type:         schema.TypeString,
+							Description:  "The duration for which the condition must be true before an alert fires.",
+							Optional:     true,
+							ValidateFunc: validateDuration,
 						},
 						"annotations": {
-							Type:        schema.TypeMap,
-							Description: "Annotations to add to each alert.",
-							Optional:    true,
-							Elem:        &schema.Schema{Type: schema.TypeString},
+							Type:         schema.TypeMap,
+							Description:  "Annotations to add to each alert.",
+							Optional:     true,
+							Elem:         &schema.Schema{Type: schema.TypeString},
+							ValidateFunc: validateAnnotations,
 						},
 						"labels": {
-							Type:        schema.TypeMap,
-							Description: "Labels to add or overwrite for each alert.",
-							Optional:    true,
-							Elem:        &schema.Schema{Type: schema.TypeString},
+							Type:         schema.TypeMap,
+							Description:  "Labels to add or overwrite for each alert.",
+							Optional:     true,
+							Elem:         &schema.Schema{Type: schema.TypeString},
+							ValidateFunc: validateLabels,
 						},
 					},
 				},
@@ -260,9 +264,9 @@ func flattenAlertingRules(v []alertingRule) []map[string]interface{} {
 func validateAlertingRuleName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
-	if !alertingRuleNameRegexp.MatchString(value) {
+	if !labelNameRegexp.MatchString(value) {
 		errors = append(errors, fmt.Errorf(
-			"\"%s\": Invalid Alerting Rule Name %q. Must match the regex %s", k, value, alertingRuleNameRegexp))
+			"\"%s\": Invalid Alerting Rule Name %q. Must match the regex %s", k, value, labelNameRegexp))
 	}
 
 	return

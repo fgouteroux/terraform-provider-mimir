@@ -46,9 +46,10 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 							ValidateFunc: validateRecordingRuleName,
 						},
 						"expr": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The PromQL expression to evaluate.",
+							Type:         schema.TypeString,
+							Required:     true,
+							Description:  "The PromQL expression to evaluate.",
+							ValidateFunc: validatePromQLExpr,
 						},
 					},
 				},
@@ -215,9 +216,9 @@ func flattenRecordingRules(v []recordingRule) []map[string]interface{} {
 func validateRecordingRuleName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
-	if !recordingRuleNameRegexp.MatchString(value) {
+	if !metricNameRegexp.MatchString(value) {
 		errors = append(errors, fmt.Errorf(
-			"\"%s\": Invalid Recording Rule Name %q. Must match the regex %s", k, value, recordingRuleNameRegexp))
+			"\"%s\": Invalid Recording Rule Name %q. Must match the regex %s", k, value, metricNameRegexp))
 	}
 
 	return

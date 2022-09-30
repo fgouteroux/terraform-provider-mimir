@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/prometheus/common/model"
+	"github.com/prometheus/prometheus/promql/parser"
 	"regexp"
 )
 
 var (
-	groupRuleNameRegexp     = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-_.]*$`)
-	alertingRuleNameRegexp  = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
-	recordingRuleNameRegexp = regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
+	groupRuleNameRegexp = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-_.]*$`)
+	labelNameRegexp     = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
+	metricNameRegexp    = regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
 )
 
 func jsonPrettyPrint(input []byte) string {
@@ -56,6 +58,60 @@ func validateGroupRuleName(v interface{}, k string) (ws []string, errors []error
 	if !groupRuleNameRegexp.MatchString(value) {
 		errors = append(errors, fmt.Errorf(
 			"\"%s\": Invalid Group Rule Name %q. Must match the regex %s", k, value, groupRuleNameRegexp))
+	}
+
+	return
+}
+
+func validatePromQLExpr(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if _, err := parser.ParseExpr(value); err != nil {
+		errors = append(errors, fmt.Errorf(
+			"\"%s\": Invalid PromQL expression %q: %v", k, value, err))
+	}
+
+	return
+}
+
+func validateLabels(v interface{}, k string) (ws []string, errors []error) {
+	m := v.(map[string]interface{})
+	for lname, lvalue := range m {
+
+		if !labelNameRegexp.MatchString(lname) {
+			errors = append(errors, fmt.Errorf(
+				"\"%s\": Invalid Label Name %q. Must match the regex %s", k, lname, labelNameRegexp))
+		}
+
+		if !metricNameRegexp.MatchString(lvalue.(string)) {
+			errors = append(errors, fmt.Errorf(
+				"\"%s\": Invalid Label Value %q. Must match the regex %s", k, lvalue, metricNameRegexp))
+		}
+	}
+	return
+}
+
+func validateAnnotations(v interface{}, k string) (ws []string, errors []error) {
+	m := v.(map[string]interface{})
+	for aname, _ := range m {
+
+		if !labelNameRegexp.MatchString(aname) {
+			errors = append(errors, fmt.Errorf(
+				"\"%s\": Invalid Annotation Name %q. Must match the regex %s", k, aname, labelNameRegexp))
+		}
+	}
+	return
+}
+
+func validateDuration(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if value == "" {
+		return
+	}
+
+	if _, err := model.ParseDuration(value); err != nil {
+		errors = append(errors, fmt.Errorf("\"%s\": %v", k, err))
 	}
 
 	return

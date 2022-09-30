@@ -19,6 +19,10 @@ func TestAccResourceRuleGroupRecording_expectValidationError(t *testing.T) {
 				Config:      testAccResourceRuleGroupRecording_expectRuleNameValidationError,
 				ExpectError: regexp.MustCompile("Invalid Recording Rule Name"),
 			},
+			{
+				Config:      testAccResourceRuleGroupRecording_expectPromQLValidationError,
+				ExpectError: regexp.MustCompile("Invalid PromQL expression"),
+			},
 		},
 	})
 }
@@ -40,6 +44,17 @@ const testAccResourceRuleGroupRecording_expectRuleNameValidationError = `
 		rule {
 			record = "test1_info;error"
 			expr   = "test1_metric"
+		}
+	}
+`
+
+const testAccResourceRuleGroupRecording_expectPromQLValidationError = `
+	resource "mimir_rule_group_recording" "record_1" {
+		name = "record_1"
+		namespace = "namespace_1"
+		rule {
+			record = "test1_info"
+			expr   = "rate(hi)"
 		}
 	}
 `
