@@ -1,6 +1,7 @@
 package mimir
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -28,27 +29,10 @@ func TestAccDataSourceAlertmanagerConfig_basic(t *testing.T) {
 	})
 }
 
-var testAccDataSourceAlertmanagerConfig_basic = `
-    resource "mimir_alertmanager_config" "mytenant" {
-      route {
-        group_by = ["..."]
-        group_wait = "30s"
-        group_interval = "5m"
-        repeat_interval = "1h"
-        receiver = "pagerduty"
-      }
-      receiver {
-        name = "pagerduty"
-        pagerduty_configs {
-          routing_key = "secret"
-          details = {
-            environment = "dev"
-          }
-        }
-      }
-    }
+var testAccDataSourceAlertmanagerConfig_basic = fmt.Sprintf(`
+	%s
 
 	data "mimir_alertmanager_config" "mytenant" {
 		depends_on = [mimir_alertmanager_config.mytenant]
 	}
-`
+`, testAccResourceAlertmanagerConfig_basic)
