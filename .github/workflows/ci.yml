@@ -60,7 +60,7 @@ jobs:
           - '0.12.*'
           - '1.2.*'
         mimir-version:
-          - "2.2.0"
+          - "2.3.0"
     steps:
 
     - name: Setup Go
