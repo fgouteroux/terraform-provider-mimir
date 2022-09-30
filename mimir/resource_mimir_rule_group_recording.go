@@ -42,12 +42,12 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 						"record": {
 							Type:         schema.TypeString,
 							Required:     true,
-							Description: "The name of the time series to output to.",
+							Description:  "The name of the time series to output to.",
 							ValidateFunc: validateRecordingRuleName,
 						},
 						"expr": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Required:    true,
 							Description: "The PromQL expression to evaluate.",
 						},
 					},
