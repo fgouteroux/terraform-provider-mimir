@@ -33,10 +33,6 @@ func TestAccResourceRuleGroupAlerting_expectValidationError(t *testing.T) {
 				ExpectError: regexp.MustCompile("Invalid Label Name"),
 			},
 			{
-				Config:      testAccResourceRuleGroupAlerting_expectLabelValueValidationError,
-				ExpectError: regexp.MustCompile("Invalid Label Value"),
-			},
-			{
 				Config:      testAccResourceRuleGroupAlerting_expectAnnotationNameValidationError,
 				ExpectError: regexp.MustCompile("Invalid Annotation Name"),
 			},
@@ -98,20 +94,6 @@ const testAccResourceRuleGroupAlerting_expectLabelNameValidationError = `
 			expr   = "test1_metric"
 			labels = {
 				 ins-tance = "localhost"
-			}
-		}
-	}
-`
-
-const testAccResourceRuleGroupAlerting_expectLabelValueValidationError = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert_1"
-		namespace = "namespace_1"
-		rule {
-			alert = "test1_alert"
-			expr   = "test1_metric"
-			labels = {
-				 instance = "localhost{test=bad}"
 			}
 		}
 	}

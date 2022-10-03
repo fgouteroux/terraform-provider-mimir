@@ -7,6 +7,7 @@ import (
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/promql/parser"
 	"regexp"
+	"unicode/utf8"
 )
 
 var (
@@ -83,9 +84,9 @@ func validateLabels(v interface{}, k string) (ws []string, errors []error) {
 				"\"%s\": Invalid Label Name %q. Must match the regex %s", k, lname, labelNameRegexp))
 		}
 
-		if !metricNameRegexp.MatchString(lvalue.(string)) {
+		if !utf8.ValidString(lvalue.(string)) {
 			errors = append(errors, fmt.Errorf(
-				"\"%s\": Invalid Label Value %q. Must match the regex %s", k, lvalue, metricNameRegexp))
+				"\"%s\": Invalid Label Value %q: not a valid UTF8 string.", k, lvalue))
 		}
 	}
 	return
