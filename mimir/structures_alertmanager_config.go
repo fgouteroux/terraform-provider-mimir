@@ -82,6 +82,7 @@ func expandTLSConfig(v interface{}) *tlsConfig {
 	var tlsConf *tlsConfig
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
+		tlsConf = &tlsConfig{}
 		cfg := data[0].(map[string]interface{})
 		tlsConf.ServerName = cfg["server_name"].(string)
 		tlsConf.InsecureSkipVerify = cfg["insecure_skip_verify"].(bool)
@@ -91,8 +92,10 @@ func expandTLSConfig(v interface{}) *tlsConfig {
 
 func flattenTLSConfig(v *tlsConfig) []interface{} {
 	tlsConf := make(map[string]interface{})
-	tlsConf["server_name"] = v.ServerName
-	tlsConf["insecure_skip_verify"] = v.InsecureSkipVerify
+	if v != nil {
+		tlsConf["server_name"] = v.ServerName
+		tlsConf["insecure_skip_verify"] = v.InsecureSkipVerify
+	}
 	return []interface{}{tlsConf}
 }
 
