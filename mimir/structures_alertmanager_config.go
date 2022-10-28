@@ -40,7 +40,7 @@ func expandHTTPConfigBasicAuth(v interface{}) *basicAuth {
 	var basicAuthConf *basicAuth
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
-		basicAuthConf := &basicAuth{}
+		basicAuthConf = &basicAuth{}
 		cfg := data[0].(map[string]interface{})
 		basicAuthConf.Username = cfg["username"].(string)
 		basicAuthConf.Password = cfg["password"].(string)
@@ -61,7 +61,7 @@ func expandHTTPConfigAuthorization(v interface{}) *authorization {
 	var authConf *authorization
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
-		authConf := &authorization{}
+		authConf = &authorization{}
 		cfg := data[0].(map[string]interface{})
 		authConf.Type = cfg["type"].(string)
 		authConf.Credentials = cfg["credentials"].(string)
@@ -904,7 +904,7 @@ func expandSlackConfigConfirmationField(v interface{}) *slackConfirmationField {
 	var slackConfirmationFieldConf *slackConfirmationField
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
-		slackConfirmationFieldConf := &slackConfirmationField{}
+		slackConfirmationFieldConf = &slackConfirmationField{}
 		cfg := data[0].(map[string]interface{})
 		slackConfirmationFieldConf.Text = cfg["text"].(string)
 		slackConfirmationFieldConf.Title = cfg["title"].(string)
