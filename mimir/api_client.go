@@ -152,7 +152,7 @@ func (client *api_client) send_request(component, method string, path, data stri
 	}
 
 	if client.token != "" {
-		client.headers["Authorization"] = "Bearer " + client.token
+		req.Header.Set("Authorization", "Bearer " + client.token)
 	}
 
 	// Set client headers from provider
