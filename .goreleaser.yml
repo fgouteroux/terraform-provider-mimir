@@ -65,9 +65,12 @@ changelog:
     - title: Features
       regexp: "^.*feat[(\\w)]*:+.*$"
       order: 0
+    - title: 'Enhancements'
+      regexp: "^.*enhancement[(\\w)]*:+.*$"
+      order: 1
     - title: 'Bug fixes'
       regexp: "^.*fix[(\\w)]*:+.*$"
-      order: 1
+      order: 2
 
   filters:
     # Commit messages matching the regexp listed here will be removed from
