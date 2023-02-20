@@ -591,8 +591,9 @@ func opsgenieConfigFields() map[string]*schema.Schema {
 			Description: "Priority level of alert. Possible values are P1, P2, P3, P4, and P5.",
 		},
 		"update_alerts": {
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     false,
 			Description: "Whether to update message and description of the alert in OpsGenie if it already exists. By default, the alert is never updated in OpsGenie, the new message only appears in activity log.",
 		},
 		"entity": {
