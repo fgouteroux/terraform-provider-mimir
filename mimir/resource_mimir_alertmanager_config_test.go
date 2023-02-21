@@ -682,3 +682,96 @@ const testAccResourceAlertmanagerConfig_EmailReceiver_update = `
       }
     }
 `
+
+func TestAccResourceAlertmanagerConfig_OpsgenieReceiver(t *testing.T) {
+    // Init client
+    client, err := NewAPIClient(setupClient())
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    resource.Test(t, resource.TestCase{
+        PreCheck:          func() { testAccPreCheck(t) },
+        ProviderFactories: testAccProviderFactories,
+        CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
+        Steps: []resource.TestStep{
+            {
+                Config: testAccResourceAlertmanagerConfig_OpsgenieReceiver,
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "opsgenie"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "opsgenie"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.api_key", "qwe456"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.name", "escalation-Y"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.type", "escalation"),
+                ),
+            },
+            {
+                Config: testAccResourceAlertmanagerConfig_OpsgenieReceiver_update,
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "opsgenie"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "opsgenie"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.api_key", "qwe456"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.update_alerts", "true"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.name", "escalation-Z"),
+                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.type", "escalation"),
+                ),
+            },
+        },
+    })
+}
+
+const testAccResourceAlertmanagerConfig_OpsgenieReceiver = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "opsgenie"
+      }
+      receiver {
+        name = "opsgenie"
+        opsgenie_configs {
+          responders {
+            name = "escalation-Y"
+            type = "escalation"
+          }
+          api_key = "qwe456"
+        }
+      }
+    }
+`
+
+const testAccResourceAlertmanagerConfig_OpsgenieReceiver_update = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "opsgenie"
+      }
+      receiver {
+        name = "opsgenie"
+        opsgenie_configs {
+          responders {
+            name = "escalation-Z"
+            type = "escalation"
+          }
+          api_key = "qwe456"
+          update_alerts = true
+        }
+      }
+    }
+`
+
