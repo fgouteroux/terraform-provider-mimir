@@ -17,7 +17,7 @@ func resourcemimirAlertmanagerConfig() *schema.Resource {
 		UpdateContext: resourcemimirAlertmanagerConfigUpdate,
 		DeleteContext: resourcemimirAlertmanagerConfigDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourceMimirAlertmanagerConfigSchemaV1(),
 	}
@@ -53,20 +53,40 @@ func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.Resource
 	}
 
 	var alertmanagerUserConf alertmanagerUserConfig
-	yaml.Unmarshal([]byte(resp), &alertmanagerUserConf)
+	err = yaml.Unmarshal([]byte(resp), &alertmanagerUserConf)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	var alertmanagerConf alertmanagerConfig
-	yaml.Unmarshal([]byte(alertmanagerUserConf.AlertmanagerConfig), &alertmanagerConf)
+	err = yaml.Unmarshal([]byte(alertmanagerUserConf.AlertmanagerConfig), &alertmanagerConf)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if alertmanagerConf.Global != nil {
-		d.Set("global", flattenGlobalConfig(alertmanagerConf.Global))
+		if err := d.Set("global", flattenGlobalConfig(alertmanagerConf.Global)); err != nil {
+			return diag.Errorf("error setting item: %v", err)
+		}
 	}
-	d.Set("time_interval", flattenMuteTimeIntervalConfig(alertmanagerConf.MuteTimeIntervals))
-	d.Set("inhibit_rule", flattenInhibitRuleConfig(alertmanagerConf.InhibitRules))
-	d.Set("receiver", flattenReceiverConfig(alertmanagerConf.Receivers))
-	d.Set("route", flattenRouteConfig(alertmanagerConf.Route))
-	d.Set("templates", alertmanagerConf.Templates)
-	d.Set("templates_files", alertmanagerUserConf.TemplateFiles)
+	if err := d.Set("time_interval", flattenMuteTimeIntervalConfig(alertmanagerConf.MuteTimeIntervals)); err != nil {
+		return diag.Errorf("error setting item: %v", err)
+	}
+	if err := d.Set("inhibit_rule", flattenInhibitRuleConfig(alertmanagerConf.InhibitRules)); err != nil {
+		return diag.Errorf("error setting item: %v", err)
+	}
+	if err := d.Set("receiver", flattenReceiverConfig(alertmanagerConf.Receivers)); err != nil {
+		return diag.Errorf("error setting item: %v", err)
+	}
+	if err := d.Set("route", flattenRouteConfig(alertmanagerConf.Route)); err != nil {
+		return diag.Errorf("error setting item: %v", err)
+	}
+	if err := d.Set("templates", alertmanagerConf.Templates); err != nil {
+		return diag.Errorf("error setting item: %v", err)
+	}
+	if err := d.Set("templates_files", alertmanagerUserConf.TemplateFiles); err != nil {
+		return diag.Errorf("error setting item: %v", err)
+	}
 
 	return diag.Diagnostics{}
 }

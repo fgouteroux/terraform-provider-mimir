@@ -1,16 +1,18 @@
 package mimir
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v3"
 )
 
 func dataSourcemimirRuleGroupAlerting() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcemimirRuleGroupAlertingRead,
+		ReadContext: dataSourcemimirRuleGroupAlertingRead,
 
 		Schema: map[string]*schema.Schema{
 			"namespace": {
@@ -67,7 +69,7 @@ func dataSourcemimirRuleGroupAlerting() *schema.Resource {
 	}
 }
 
-func dataSourcemimirRuleGroupAlertingRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*api_client)
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
@@ -84,7 +86,7 @@ func dataSourcemimirRuleGroupAlertingRead(d *schema.ResourceData, meta interface
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s", namespace, name))
@@ -92,10 +94,10 @@ func dataSourcemimirRuleGroupAlertingRead(d *schema.ResourceData, meta interface
 	var data alertingRuleGroup
 	err = yaml.Unmarshal([]byte(jobraw), &data)
 	if err != nil {
-		return fmt.Errorf("Unable to decode alerting rule group '%s' data: %v", name, err)
+		return diag.FromErr(fmt.Errorf("Unable to decode alerting rule group '%s' data: %v", name, err))
 	}
 	if err := d.Set("rule", flattenAlertingRules(data.Rules)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

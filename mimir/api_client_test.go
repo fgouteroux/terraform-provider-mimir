@@ -17,7 +17,7 @@ func TestAPIClient(t *testing.T) {
 	if debug {
 		log.Println("client_test.go: Starting HTTP server")
 	}
-	setup_api_client_server()
+	setup_api_client_server(debug)
 	defer shutdown_api_client_server()
 
 	/* Notice the intentional trailing / */
@@ -69,7 +69,11 @@ func TestAPIClient(t *testing.T) {
 		log.Printf("api_client_test.go: Testing timeout aborts requests\n")
 	}
 	_, err = client.send_request("", "GET", "/slow", "", headers)
-	if err == nil {
+	if err != nil {
+		if debug {
+			log.Println("client_test.go: slow request expected")
+		}
+	} else {
 		t.Fatalf("client_test.go: Timeout did not trigger on slow request")
 	}
 
@@ -78,14 +82,14 @@ func TestAPIClient(t *testing.T) {
 	}
 }
 
-func setup_api_client_server() {
+func setup_api_client_server(debug bool) {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/ok", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("It works!"))
+		_, _ = w.Write([]byte("It works!"))
 	})
 	serverMux.HandleFunc("/slow", func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(9999 * time.Second)
-		w.Write([]byte("This will never return!!!!!"))
+		_, _ = w.Write([]byte("This will never return!!!!!"))
 	})
 	serverMux.HandleFunc("/redirect", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/ok", http.StatusPermanentRedirect)
@@ -95,7 +99,12 @@ func setup_api_client_server() {
 		Addr:    "127.0.0.1:8082",
 		Handler: serverMux,
 	}
-	go api_client_server.ListenAndServe()
+	go func() {
+		err := api_client_server.ListenAndServe()
+		if err != nil && debug{
+			log.Println(err)
+		}
+	}()
 	/* let the server start */
 	time.Sleep(1 * time.Second)
 }

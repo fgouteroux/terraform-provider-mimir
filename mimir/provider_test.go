@@ -38,7 +38,7 @@ var testAccProviders map[string]*schema.Provider
 var testAccProviderConfigure sync.Once
 
 func init() {
-	testAccProvider = Provider()
+	testAccProvider = Provider("testacc")()
 	testAccProviders = map[string]*schema.Provider{
 		"mimir": testAccProvider,
 	}
@@ -53,7 +53,7 @@ func init() {
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().InternalValidate(); err != nil {
+	if err := Provider("dev")().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }

@@ -6,12 +6,12 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"strings"
 	"time"
 )
@@ -37,15 +37,11 @@ type api_client struct {
 	uri              string
 	ruler_uri        string
 	alertmanager_uri string
-	cert             string
-	key              string
-	ca               string
 	insecure         bool
 	token            string
 	username         string
 	password         string
 	headers          map[string]string
-	timeout          int
 	debug            bool
 }
 
@@ -53,14 +49,12 @@ type api_client struct {
 func NewAPIClient(opt *apiClientOpt) (*api_client, error) {
 
 	if opt.uri == "" && opt.ruler_uri == "" && opt.alertmanager_uri == "" {
-		return nil, errors.New("No provider URIs defined. Please set uri, or ruler_rui/alertmanager_uri.")
+		return nil, fmt.Errorf("No provider URIs defined. Please set uri, or ruler_rui/alertmanager_uri.")
 	}
 
 	/* Remove any trailing slashes since we will append
 	   to this URL with our own root-prefixed location */
-	if strings.HasSuffix(opt.uri, "/") {
-		opt.uri = opt.uri[:len(opt.uri)-1]
-	}
+	opt.uri = strings.TrimSuffix(opt.uri, "/")
 
 	// Setup HTTPS client
 	tlsConfig := &tls.Config{
@@ -79,7 +73,6 @@ func NewAPIClient(opt *apiClientOpt) (*api_client, error) {
 			return nil, err
 		}
 		tlsConfig.Certificates = []tls.Certificate{cert}
-		tlsConfig.BuildNameToCertificate()
 	}
 
 	if opt.ca != "" {
@@ -88,7 +81,7 @@ func NewAPIClient(opt *apiClientOpt) (*api_client, error) {
 		if strings.HasPrefix(opt.ca, "-----BEGIN") {
 			caCert = []byte(opt.ca)
 		} else {
-			caCert, err = ioutil.ReadFile(opt.ca)
+			caCert, err = os.ReadFile(opt.ca)
 
 			if err != nil {
 				return nil, err
@@ -97,7 +90,6 @@ func NewAPIClient(opt *apiClientOpt) (*api_client, error) {
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
 		tlsConfig.RootCAs = caCertPool
-		tlsConfig.BuildNameToCertificate()
 	}
 
 	tr := &http.Transport{
@@ -190,7 +182,9 @@ func (client *api_client) send_request(component, method string, path, data stri
 	resp, err := client.http_client.Do(req)
 
 	if err != nil {
-		log.Printf("api_client.go: Error detected: %s\n", err)
+		if client.debug {
+			log.Printf("api_client.go: Error detected: %s\n", err)
+		}
 		return "", err
 	}
 
@@ -204,7 +198,7 @@ func (client *api_client) send_request(component, method string, path, data stri
 		log.Printf("RESPONSE:\n%s", string(respDump))
 	}
 
-	bodyBytes, err2 := ioutil.ReadAll(resp.Body)
+	bodyBytes, err2 := io.ReadAll(resp.Body)
 	resp.Body.Close()
 
 	if err2 != nil {
@@ -213,7 +207,7 @@ func (client *api_client) send_request(component, method string, path, data stri
 	body := string(bodyBytes)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return body, errors.New(fmt.Sprintf("Unexpected response code '%d': %s", resp.StatusCode, body))
+		return body, fmt.Errorf("Unexpected response code '%d': %s", resp.StatusCode, body)
 	}
 
 	return body, nil

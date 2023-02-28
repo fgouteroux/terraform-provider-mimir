@@ -170,12 +170,12 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 
 		pagerdutyURL, _ := url.Parse(cfg["pagerduty_url"].(string))
 		if pagerdutyURL.String() != "" {
-			globalConf.PagerdutyURL = &config.URL{pagerdutyURL}
+			globalConf.PagerdutyURL = &config.URL{URL: pagerdutyURL}
 		}
 
 		slackAPIURL, _ := url.Parse(cfg["slack_api_url"].(string))
 		if slackAPIURL.String() != "" {
-			globalConf.SlackAPIURL = &config.URL{slackAPIURL}
+			globalConf.SlackAPIURL = &config.URL{URL: slackAPIURL}
 		}
 
 		globalConf.SMTPFrom = cfg["smtp_from"].(string)
@@ -191,35 +191,35 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		globalConf.SMTPAuthIdentity = cfg["smtp_auth_identity"].(string)
 		globalConf.SMTPRequireTLS = new(bool)
 		*globalConf.SMTPRequireTLS = cfg["smtp_require_tls"].(bool)
-		globalConf.HTTPConfig = expandHTTPConfig(cfg["http_config"].(interface{}))
+		globalConf.HTTPConfig = expandHTTPConfig(cfg["http_config"])
 
 		globalConf.OpsGenieAPIKey = cfg["opsgenie_api_key"].(string)
 		opsGenieAPIURL, _ := url.Parse(cfg["opsgenie_api_url"].(string))
 		if opsGenieAPIURL.String() != "" {
-			globalConf.OpsGenieAPIURL = &config.URL{opsGenieAPIURL}
+			globalConf.OpsGenieAPIURL = &config.URL{URL: opsGenieAPIURL}
 		}
 
 		webexAPIURL, _ := url.Parse(cfg["webex_api_url"].(string))
 		if webexAPIURL.String() != "" {
-			globalConf.WebexAPIURL = &config.URL{webexAPIURL}
+			globalConf.WebexAPIURL = &config.URL{URL: webexAPIURL}
 		}
 
 		globalConf.WeChatAPISecret = cfg["wechat_api_secret"].(string)
 		globalConf.WeChatAPICorpID = cfg["wechat_api_corp_id"].(string)
 		weChatAPIURL, _ := url.Parse(cfg["wechat_api_url"].(string))
 		if weChatAPIURL.String() != "" {
-			globalConf.WeChatAPIURL = &config.URL{weChatAPIURL}
+			globalConf.WeChatAPIURL = &config.URL{URL: weChatAPIURL}
 		}
 
 		globalConf.VictorOpsAPIKey = cfg["victorops_api_key"].(string)
 		victorOpsAPIURL, _ := url.Parse(cfg["victorops_api_url"].(string))
 		if victorOpsAPIURL.String() != "" {
-			globalConf.VictorOpsAPIURL = &config.URL{victorOpsAPIURL}
+			globalConf.VictorOpsAPIURL = &config.URL{URL: victorOpsAPIURL}
 		}
 
 		telegramAPIURL, _ := url.Parse(cfg["telegram_api_url"].(string))
 		if telegramAPIURL.String() != "" {
-			globalConf.TelegramAPIURL = &config.URL{telegramAPIURL}
+			globalConf.TelegramAPIURL = &config.URL{URL: telegramAPIURL}
 		}
 	}
 	return globalConf
@@ -399,10 +399,10 @@ func expandSnsConfig(v []interface{}) []*snsConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["sigv4"]; ok {
-			cfg.Sigv4 = expandSnsSigV4Config(raw.(interface{}))
+			cfg.Sigv4 = expandSnsSigV4Config(raw)
 		}
 		if raw, ok := data["api_url"]; ok {
 			cfg.APIUrl = raw.(string)
@@ -468,7 +468,7 @@ func expandVictorOpsConfig(v []interface{}) []*victorOpsConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["api_key"]; ok {
 			cfg.APIKey = raw.(string)
@@ -537,7 +537,7 @@ func expandTelegramConfig(v []interface{}) []*telegramConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["api_url"]; ok {
 			cfg.APIUrl = raw.(string)
@@ -640,7 +640,7 @@ func expandOpsgenieConfig(v []interface{}) []*opsgenieConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["api_key"]; ok {
 			cfg.APIKey = raw.(string)
@@ -729,7 +729,7 @@ func expandWebhookConfig(v []interface{}) []*webhookConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["url"]; ok {
 			cfg.URL = raw.(string)
@@ -773,7 +773,7 @@ func expandWebexConfig(v []interface{}) []*webexConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["api_url"]; ok {
 			cfg.APIURL = raw.(string)
@@ -821,7 +821,7 @@ func expandDiscordConfig(v []interface{}) []*discordConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["webhook_url"]; ok {
 			cfg.WebhookURL = raw.(string)
@@ -869,7 +869,7 @@ func expandWeChatConfig(v []interface{}) []*weChatConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["api_secret"]; ok {
 			cfg.APISecret = raw.(string)
@@ -1142,7 +1142,7 @@ func expandSlackConfig(v []interface{}) []*slackConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["actions"]; ok {
 			cfg.Actions = expandSlackConfigActions(raw.([]interface{}))
@@ -1341,7 +1341,7 @@ func expandPagerdutyConfig(v []interface{}) []*pagerdutyConfig {
 			cfg.URL = raw.(string)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["images"]; ok {
 			cfg.Images = expandPagerdutyConfigImages(raw.([]interface{}))
@@ -1421,7 +1421,7 @@ func expandPushoverConfig(v []interface{}) []*pushoverConfig {
 			*cfg.VSendResolved = raw.(bool)
 		}
 		if raw, ok := data["http_config"]; ok {
-			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+			cfg.HTTPConfig = expandHTTPConfig(raw)
 		}
 		if raw, ok := data["user_key"]; ok {
 			cfg.UserKey = raw.(string)

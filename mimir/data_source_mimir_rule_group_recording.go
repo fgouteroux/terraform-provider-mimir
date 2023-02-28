@@ -1,16 +1,18 @@
 package mimir
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v3"
 )
 
 func dataSourcemimirRuleGroupRecording() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcemimirRuleGroupRecordingRead,
+		ReadContext: dataSourcemimirRuleGroupRecordingRead,
 
 		Schema: map[string]*schema.Schema{
 			"namespace": {
@@ -48,7 +50,7 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 	}
 }
 
-func dataSourcemimirRuleGroupRecordingRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*api_client)
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
@@ -65,7 +67,7 @@ func dataSourcemimirRuleGroupRecordingRead(d *schema.ResourceData, meta interfac
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s", namespace, name))
@@ -73,10 +75,10 @@ func dataSourcemimirRuleGroupRecordingRead(d *schema.ResourceData, meta interfac
 	var data recordingRuleGroup
 	err = yaml.Unmarshal([]byte(jobraw), &data)
 	if err != nil {
-		return fmt.Errorf("Unable to decode recording rule group '%s' data: %v", name, err)
+		return diag.FromErr(fmt.Errorf("Unable to decode recording rule group '%s' data: %v", name, err))
 	}
 	if err := d.Set("rule", flattenRecordingRules(data.Rules)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

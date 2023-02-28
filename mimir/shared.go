@@ -1,8 +1,6 @@
 package mimir
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/promql/parser"
@@ -15,15 +13,6 @@ var (
 	labelNameRegexp     = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 	metricNameRegexp    = regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
 )
-
-func jsonPrettyPrint(input []byte) string {
-	var out bytes.Buffer
-	err := json.Indent(&out, []byte(input), "", "  ")
-	if err != nil {
-		return string(input)
-	}
-	return out.String()
-}
 
 func handleHTTPError(err error, body string, url, baseMsg string) error {
 	if err != nil {

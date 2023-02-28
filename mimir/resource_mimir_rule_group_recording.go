@@ -17,7 +17,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 		UpdateContext: resourcemimirRuleGroupRecordingUpdate,
 		DeleteContext: resourcemimirRuleGroupRecordingDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"namespace": {
@@ -83,10 +83,47 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	err := ruleRecordingRead(ctx, d, meta)
+	client := meta.(*api_client)
+
+	// use id as read is also called by import
+	id_arr := strings.Split(d.Id(), "/")
+	namespace := id_arr[0]
+	name := id_arr[1]
+
+	var headers map[string]string
+	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	jobraw, err := client.send_request("ruler", "GET", path, "", headers)
+
+	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' -", name)
+	fullurl := fmt.Sprintf("%s%s", client.uri, path)
+	err = handleHTTPError(err, jobraw, fullurl, baseMsg)
+	if err != nil {
+		if strings.Contains(err.Error(), "response code '404'") {
+			d.SetId("")
+			return diag.Diagnostics{}
+		}
+		return diag.FromErr(err)
+	}
+
+	var data recordingRuleGroup
+	err = yaml.Unmarshal([]byte(jobraw), &data)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("Unable to decode recording namespace rule group '%s' data: %v", name, err))
+	}
+
+	if err := d.Set("rule", flattenRecordingRules(data.Rules)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("namespace", namespace)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set("name", name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return diag.Diagnostics{}
 }
 
@@ -132,45 +169,6 @@ func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.Resour
 	d.SetId("")
 
 	return diag.Diagnostics{}
-}
-
-func ruleRecordingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*api_client)
-
-	// use id as read is also called by import
-	id_arr := strings.Split(d.Id(), "/")
-	namespace := id_arr[0]
-	name := id_arr[1]
-
-	var headers map[string]string
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
-	jobraw, err := client.send_request("ruler", "GET", path, "", headers)
-
-	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' -", name)
-	fullurl := fmt.Sprintf("%s%s", client.uri, path)
-	err = handleHTTPError(err, jobraw, fullurl, baseMsg)
-	if err != nil {
-		if strings.Contains(err.Error(), "response code '404'") {
-			d.SetId("")
-			return nil
-		}
-		return err
-	}
-
-	var data recordingRuleGroup
-	err = yaml.Unmarshal([]byte(jobraw), &data)
-	if err != nil {
-		return fmt.Errorf("Unable to decode recording namespace rule group '%s' data: %v", name, err)
-	}
-
-	if err := d.Set("rule", flattenRecordingRules(data.Rules)); err != nil {
-		return err
-	}
-
-	d.Set("namespace", namespace)
-	d.Set("name", name)
-
-	return nil
 }
 
 func expandRecordingRules(v []interface{}) []recordingRule {
