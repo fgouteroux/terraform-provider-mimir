@@ -51,17 +51,16 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 }
 
 func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
+	client := meta.(*apiClient)
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
 
 	var headers map[string]string
 	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
-	jobraw, err := client.send_request("ruler", "GET", path, "", headers)
+	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
 
 	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' -", name)
-	fullurl := fmt.Sprintf("%s%s", client.uri, path)
-	err = handleHTTPError(err, jobraw, fullurl, baseMsg)
+	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		if strings.Contains(err.Error(), "response code '404'") {
 			d.SetId("")
@@ -75,7 +74,7 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 	var data recordingRuleGroup
 	err = yaml.Unmarshal([]byte(jobraw), &data)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("Unable to decode recording rule group '%s' data: %v", name, err))
+		return diag.FromErr(fmt.Errorf("unable to decode recording rule group '%s' data: %v", name, err))
 	}
 	if err := d.Set("rule", flattenRecordingRules(data.Rules)); err != nil {
 		return diag.FromErr(err)

@@ -1,0 +1,42 @@
+[run]
+timeout = "10m"
+
+[linters-settings.goconst]
+min-len = 5
+min-occurrences = 5
+
+[linters]
+disable-all = true
+enable = [
+  "depguard",
+  "dogsled",
+  "exportloopref",
+  "goconst",
+  "gocritic",
+  "gocyclo",
+  "goimports",
+  "goprintffuncname",
+  "gosec",
+  "gosimple",
+  "govet",
+  "ineffassign",
+  "misspell",
+  "nakedret",
+  "rowserrcheck",
+  "staticcheck",
+  "stylecheck",
+  "typecheck",
+  "unconvert",
+  "unparam",
+  "unused",
+  "whitespace"
+]
+
+[[issues.exclude-rules]]
+linters = ["stylecheck"]
+path = "_test.go"
+text = "ST1003: should not use underscores in Go names;"
+
+[[issues.exclude-rules]]
+linters = ["gosec"]
+text = "G402: TLS MinVersion too low."

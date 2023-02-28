@@ -59,7 +59,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 }
 
 func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
+	client := meta.(*apiClient)
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
 
@@ -71,10 +71,9 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	headers := map[string]string{"Content-Type": "application/yaml"}
 
 	path := fmt.Sprintf("/config/v1/rules/%s", namespace)
-	jobraw, err := client.send_request("ruler", "POST", path, string(data), headers)
+	_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
 	baseMsg := fmt.Sprintf("Cannot create recording rule group '%s' -", name)
-	fullurl := fmt.Sprintf("%s%s", client.uri, path)
-	err = handleHTTPError(err, jobraw, fullurl, baseMsg)
+	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -83,20 +82,19 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
+	client := meta.(*apiClient)
 
 	// use id as read is also called by import
-	id_arr := strings.Split(d.Id(), "/")
-	namespace := id_arr[0]
-	name := id_arr[1]
+	idArr := strings.Split(d.Id(), "/")
+	namespace := idArr[0]
+	name := idArr[1]
 
 	var headers map[string]string
 	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
-	jobraw, err := client.send_request("ruler", "GET", path, "", headers)
+	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
 
 	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' -", name)
-	fullurl := fmt.Sprintf("%s%s", client.uri, path)
-	err = handleHTTPError(err, jobraw, fullurl, baseMsg)
+	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		if strings.Contains(err.Error(), "response code '404'") {
 			d.SetId("")
@@ -108,7 +106,7 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	var data recordingRuleGroup
 	err = yaml.Unmarshal([]byte(jobraw), &data)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("Unable to decode recording namespace rule group '%s' data: %v", name, err))
+		return diag.FromErr(fmt.Errorf("unable to decode recording namespace rule group '%s' data: %v", name, err))
 	}
 
 	if err := d.Set("rule", flattenRecordingRules(data.Rules)); err != nil {
@@ -129,7 +127,7 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	if d.HasChange("rule") {
-		client := meta.(*api_client)
+		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get("namespace").(string)
 
@@ -141,10 +139,9 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 		headers := map[string]string{"Content-Type": "application/yaml"}
 
 		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
-		jobraw, err := client.send_request("ruler", "POST", path, string(data), headers)
+		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
 		baseMsg := fmt.Sprintf("Cannot update recording rule group '%s' -", name)
-		fullurl := fmt.Sprintf("%s%s", client.uri, path)
-		err = handleHTTPError(err, jobraw, fullurl, baseMsg)
+		err = handleHTTPError(err, baseMsg)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -153,15 +150,15 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 }
 
 func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
+	client := meta.(*apiClient)
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
 	var headers map[string]string
 	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
-	_, err := client.send_request("ruler", "DELETE", path, "", headers)
+	_, err := client.sendRequest("ruler", "DELETE", path, "", headers)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf(
-			"Cannot delete recording rule group '%s' from %s: %v",
+			"cannot delete recording rule group '%s' from %s: %v",
 			name,
 			fmt.Sprintf("%s%s", client.uri, path),
 			err))
@@ -205,7 +202,6 @@ func flattenRecordingRules(v []recordingRule) []map[string]interface{} {
 		rule["expr"] = v.Expr
 
 		rules = append(rules, rule)
-
 	}
 
 	return rules

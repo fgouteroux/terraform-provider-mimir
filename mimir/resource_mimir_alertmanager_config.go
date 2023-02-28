@@ -24,12 +24,10 @@ func resourcemimirAlertmanagerConfig() *schema.Resource {
 }
 
 func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
-	path := "/api/v1/alerts"
-	resp, err := alertmanagerConfigCreateUpdate(client, d, path)
+	client := meta.(*apiClient)
+	_, err := alertmanagerConfigCreateUpdate(client, d, apiAlertsPath)
 	baseMsg := "Cannot create alertmanager config"
-	fullurl := fmt.Sprintf("%s%s", client.uri, path)
-	err = handleHTTPError(err, resp, fullurl, baseMsg)
+	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -38,12 +36,10 @@ func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
-	path := "/api/v1/alerts"
-	resp, err := client.send_request("alertmanager", "GET", path, "", make(map[string]string))
+	client := meta.(*apiClient)
+	resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
 	baseMsg := "Cannot read alertmanager config"
-	fullurl := fmt.Sprintf("%s%s", client.uri, path)
-	err = handleHTTPError(err, resp, fullurl, baseMsg)
+	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		if strings.Contains(err.Error(), "response code '404'") {
 			d.SetId("")
@@ -92,12 +88,10 @@ func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.Resource
 }
 
 func resourcemimirAlertmanagerConfigUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
-	path := "/api/v1/alerts"
-	resp, err := alertmanagerConfigCreateUpdate(client, d, path)
+	client := meta.(*apiClient)
+	_, err := alertmanagerConfigCreateUpdate(client, d, apiAlertsPath)
 	baseMsg := "Cannot update alertmanager config"
-	fullurl := fmt.Sprintf("%s%s", client.uri, path)
-	err = handleHTTPError(err, resp, fullurl, baseMsg)
+	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -105,13 +99,12 @@ func resourcemimirAlertmanagerConfigUpdate(ctx context.Context, d *schema.Resour
 }
 
 func resourcemimirAlertmanagerConfigDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
-	path := "/api/v1/alerts"
-	_, err := client.send_request("alertmanager", "DELETE", path, "", make(map[string]string))
+	client := meta.(*apiClient)
+	_, err := client.sendRequest("alertmanager", "DELETE", apiAlertsPath, "", make(map[string]string))
 	if err != nil {
 		return diag.FromErr(fmt.Errorf(
-			"Cannot delete alertmanager config from %s: %v",
-			fmt.Sprintf("%s%s", client.uri, path),
+			"cannot delete alertmanager config from %s: %v",
+			fmt.Sprintf("%s%s", client.uri, apiAlertsPath),
 			err))
 	}
 	d.SetId("")
@@ -119,7 +112,7 @@ func resourcemimirAlertmanagerConfigDelete(ctx context.Context, d *schema.Resour
 	return diag.Diagnostics{}
 }
 
-func alertmanagerConfigCreateUpdate(client *api_client, d *schema.ResourceData, path string) (string, error) {
+func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, path string) (string, error) {
 	headers := map[string]string{"Content-Type": "application/yaml"}
 
 	alertmanagerConf := &alertmanagerConfig{
@@ -139,7 +132,7 @@ func alertmanagerConfigCreateUpdate(client *api_client, d *schema.ResourceData, 
 
 	dataBytes, _ := yaml.Marshal(&alertmanagerUserConf)
 
-	resp, err := client.send_request("alertmanager", "POST", path, string(dataBytes), headers)
+	resp, err := client.sendRequest("alertmanager", "POST", path, string(dataBytes), headers)
 
 	return resp, err
 }

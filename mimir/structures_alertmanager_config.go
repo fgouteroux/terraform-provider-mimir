@@ -1,12 +1,13 @@
 package mimir
 
 import (
-	"github.com/prometheus/alertmanager/config"
-	"github.com/prometheus/alertmanager/timeinterval"
-	"github.com/prometheus/common/model"
 	"net"
 	"net/url"
 	"time"
+
+	"github.com/prometheus/alertmanager/config"
+	"github.com/prometheus/alertmanager/timeinterval"
+	"github.com/prometheus/common/model"
 )
 
 func expandHTTPConfigOAuth2(v interface{}) *oauth2 {

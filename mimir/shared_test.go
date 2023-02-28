@@ -2,10 +2,11 @@ package mimir
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func getSetEnv(key, fallback string) string {
@@ -17,7 +18,7 @@ func getSetEnv(key, fallback string) string {
 	return value
 }
 
-func testAccCheckMimirRuleGroupExists(n string, name string, client *api_client) resource.TestCheckFunc {
+func testAccCheckMimirRuleGroupExists(n string, name string, client *apiClient) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -29,13 +30,13 @@ func testAccCheckMimirRuleGroupExists(n string, name string, client *api_client)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("mimir object name not set in terraform")
+			return fmt.Errorf("mimir object name %s not set in terraform", name)
 		}
 
 		/* Make a throw-away API object to read from the API */
 		var headers map[string]string
 		path := fmt.Sprintf("/config/v1/rules/%s", rs.Primary.ID)
-		_, err := client.send_request("ruler", "GET", path, "", headers)
+		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 		if err != nil {
 			return err
 		}
@@ -46,7 +47,7 @@ func testAccCheckMimirRuleGroupExists(n string, name string, client *api_client)
 
 func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 	// retrieve the connection established in Provider configuration
-	client := testAccProvider.Meta().(*api_client)
+	client := testAccProvider.Meta().(*apiClient)
 
 	// loop through the resources in state, verifying each widget
 	// is destroyed
@@ -57,7 +58,7 @@ func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 
 		var headers map[string]string
 		path := fmt.Sprintf("/config/v1/rules/%s", rs.Primary.ID)
-		_, err := client.send_request("ruler", "GET", path, "", headers)
+		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 
 		// If the error is equivalent to 404 not found, the widget is destroyed.
 		// Otherwise return the error
@@ -71,22 +72,22 @@ func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 
 func setupClient() *apiClientOpt {
 	headers := make(map[string]string)
-	headers["X-Scope-OrgID"] = MIMIR_ORG_ID
+	headers["X-Scope-OrgID"] = mimirOrgID
 
 	opt := &apiClientOpt{
-		uri:              MIMIR_URI,
-		ruler_uri:        MIMIR_RULER_URI,
-		alertmanager_uri: MIMIR_ALERTMANAGER_URI,
-		insecure:         false,
-		username:         "",
-		password:         "",
-		token:            "",
-		cert:             "",
-		key:              "",
-		ca:               "",
-		headers:          headers,
-		timeout:          2,
-		debug:            true,
+		uri:             mimirURI,
+		rulerURI:        mimirRulerURI,
+		alertmanagerURI: mimirAlertmanagerURI,
+		insecure:        false,
+		username:        "",
+		password:        "",
+		token:           "",
+		cert:            "",
+		key:             "",
+		ca:              "",
+		headers:         headers,
+		timeout:         2,
+		debug:           true,
 	}
 	return opt
 }

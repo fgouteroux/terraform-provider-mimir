@@ -1,9 +1,10 @@
 package mimir
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccResourceRuleGroupRecording_expectValidationError(t *testing.T) {

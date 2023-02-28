@@ -153,7 +153,6 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 			},
 		},
 	})
-
 }
 
 const testAccResourceRuleGroupAlerting_basic = `

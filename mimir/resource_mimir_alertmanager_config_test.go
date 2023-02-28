@@ -2,14 +2,16 @@ package mimir
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func testAccCheckMimirAlertmanagerConfigExists(n string, client *api_client) resource.TestCheckFunc {
+func testAccCheckMimirAlertmanagerConfigExists(client *apiClient) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		n := "mimir_alertmanager_config.mytenant"
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			keys := make([]string, 0, len(s.RootModule().Resources))
@@ -24,7 +26,7 @@ func testAccCheckMimirAlertmanagerConfigExists(n string, client *api_client) res
 		}
 
 		/* Make a throw-away API object to read from the API */
-		_, err := client.send_request("alertmanager", "GET", "/api/v1/alerts", "", make(map[string]string))
+		_, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
 		if err != nil {
 			return err
 		}
@@ -35,7 +37,7 @@ func testAccCheckMimirAlertmanagerConfigExists(n string, client *api_client) res
 
 func testAccCheckMimirAlertmanagerConfigDestroy(s *terraform.State) error {
 	// retrieve the connection established in Provider configuration
-	client := testAccProvider.Meta().(*api_client)
+	client := testAccProvider.Meta().(*apiClient)
 
 	// loop through the resources in state, verifying each widget
 	// is destroyed
@@ -43,7 +45,7 @@ func testAccCheckMimirAlertmanagerConfigDestroy(s *terraform.State) error {
 		if rs.Type != "mimir_alertmanager_config" {
 			continue
 		}
-		_, err := client.send_request("alertmanager", "GET", "/api/v1/alerts", "", make(map[string]string))
+		_, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
 		// If the error is equivalent to 404 not found, the widget is destroyed.
 		// Otherwise return the error
 		if !strings.Contains(err.Error(), "not found") {
@@ -69,7 +71,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -83,7 +85,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_basic_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "1m"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -102,7 +104,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_global,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.resolve_timeout", "5m"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.follow_redirects", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
@@ -118,7 +120,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_global_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.resolve_timeout", "15m"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.follow_redirects", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
@@ -134,7 +136,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_inhibit_rule,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.source_matchers.#", "1"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.source_matchers.0", "severity=\"critical\""),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.target_matchers.#", "2"),
@@ -155,7 +157,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_inhibit_rule_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.source_matchers.#", "1"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.source_matchers.0", "severity=\"warning\""),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.target_matchers.#", "1"),
@@ -176,7 +178,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 
 				Config: testAccResourceAlertmanagerConfig_time_interval,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.name", "offhours"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.begin", "0"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.end", "6"),
@@ -193,7 +195,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_time_interval_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.name", "offhours"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.begin", "5"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.end", "6"),
@@ -211,7 +213,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 
 				Config: testAccResourceAlertmanagerConfig_templates_files,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "templates.#", "1"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "templates.0", "default_template"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "templates_files.default_template", "default template text file"),
@@ -228,7 +230,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_templates_files_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "templates.#", "1"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "templates.0", "default_template"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "templates_files.default_template", "updated template text file"),
@@ -526,7 +528,7 @@ func TestAccResourceAlertmanagerConfig_PagerdutyReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_PagerdutyReceiver,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -540,7 +542,7 @@ func TestAccResourceAlertmanagerConfig_PagerdutyReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_PagerdutyReceiver_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -612,7 +614,7 @@ func TestAccResourceAlertmanagerConfig_EmailReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_EmailReceiver,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -627,7 +629,7 @@ func TestAccResourceAlertmanagerConfig_EmailReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_EmailReceiver_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -698,7 +700,7 @@ func TestAccResourceAlertmanagerConfig_OpsgenieReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_OpsgenieReceiver,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -713,7 +715,7 @@ func TestAccResourceAlertmanagerConfig_OpsgenieReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_OpsgenieReceiver_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -790,7 +792,7 @@ func TestAccResourceAlertmanagerConfig_DiscordReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_DiscordReceiver,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -805,7 +807,7 @@ func TestAccResourceAlertmanagerConfig_DiscordReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_DiscordReceiver_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -876,7 +878,7 @@ func TestAccResourceAlertmanagerConfig_WebexReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_WebexReceiver,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -890,7 +892,7 @@ func TestAccResourceAlertmanagerConfig_WebexReceiver(t *testing.T) {
 			{
 				Config: testAccResourceAlertmanagerConfig_WebexReceiver_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),

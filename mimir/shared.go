@@ -2,10 +2,11 @@ package mimir
 
 import (
 	"fmt"
-	"github.com/prometheus/common/model"
-	"github.com/prometheus/prometheus/promql/parser"
 	"regexp"
 	"unicode/utf8"
+
+	"github.com/prometheus/common/model"
+	"github.com/prometheus/prometheus/promql/parser"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 	metricNameRegexp    = regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
 )
 
-func handleHTTPError(err error, body string, url, baseMsg string) error {
+func handleHTTPError(err error, baseMsg string) error {
 	if err != nil {
 		return fmt.Errorf("%s %v", baseMsg, err)
 	}
@@ -67,7 +68,6 @@ func validatePromQLExpr(v interface{}, k string) (ws []string, errors []error) {
 func validateLabels(v interface{}, k string) (ws []string, errors []error) {
 	m := v.(map[string]interface{})
 	for lname, lvalue := range m {
-
 		if !labelNameRegexp.MatchString(lname) {
 			errors = append(errors, fmt.Errorf(
 				"\"%s\": Invalid Label Name %q. Must match the regex %s", k, lname, labelNameRegexp))
@@ -75,7 +75,7 @@ func validateLabels(v interface{}, k string) (ws []string, errors []error) {
 
 		if !utf8.ValidString(lvalue.(string)) {
 			errors = append(errors, fmt.Errorf(
-				"\"%s\": Invalid Label Value %q: not a valid UTF8 string.", k, lvalue))
+				"\"%s\": Invalid Label Value %q: not a valid UTF8 string", k, lvalue))
 		}
 	}
 	return
@@ -84,7 +84,6 @@ func validateLabels(v interface{}, k string) (ws []string, errors []error) {
 func validateAnnotations(v interface{}, k string) (ws []string, errors []error) {
 	m := v.(map[string]interface{})
 	for aname := range m {
-
 		if !labelNameRegexp.MatchString(aname) {
 			errors = append(errors, fmt.Errorf(
 				"\"%s\": Invalid Annotation Name %q. Must match the regex %s", k, aname, labelNameRegexp))

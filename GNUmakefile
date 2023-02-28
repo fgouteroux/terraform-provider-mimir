@@ -9,7 +9,7 @@ install: build
 
 # See https://golangci-lint.run/
 lint:
-	golangci-lint run
+	golangci-lint run -c .golangci.toml ./...
 
 generate:
 	go generate ./...

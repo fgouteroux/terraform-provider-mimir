@@ -2,7 +2,6 @@ package mimir
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,13 +17,11 @@ func dataSourcemimirAlertmanagerConfig() *schema.Resource {
 }
 
 func dataSourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*api_client)
+	client := meta.(*apiClient)
 	name := d.Get("name").(string)
-	path := "/api/v1/alerts"
-	resp, err := client.send_request("alertmanager", "GET", path, "", make(map[string]string))
+	resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
 	baseMsg := "Cannot read alertmanager config"
-	fullurl := fmt.Sprintf("%s%s", client.uri, path)
-	err = handleHTTPError(err, resp, fullurl, baseMsg)
+	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		if strings.Contains(err.Error(), "response code '404'") {
 			d.SetId("")

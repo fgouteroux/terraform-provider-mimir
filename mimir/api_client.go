@@ -17,39 +17,38 @@ import (
 )
 
 type apiClientOpt struct {
-	uri              string
-	ruler_uri        string
-	alertmanager_uri string
-	cert             string
-	key              string
-	ca               string
-	token            string
-	insecure         bool
-	username         string
-	password         string
-	headers          map[string]string
-	timeout          int
-	debug            bool
+	uri             string
+	rulerURI        string
+	alertmanagerURI string
+	cert            string
+	key             string
+	ca              string
+	token           string
+	insecure        bool
+	username        string
+	password        string
+	headers         map[string]string
+	timeout         int
+	debug           bool
 }
 
-type api_client struct {
-	http_client      *http.Client
-	uri              string
-	ruler_uri        string
-	alertmanager_uri string
-	insecure         bool
-	token            string
-	username         string
-	password         string
-	headers          map[string]string
-	debug            bool
+type apiClient struct {
+	httpClient      *http.Client
+	uri             string
+	rulerURI        string
+	alertmanagerURI string
+	insecure        bool
+	token           string
+	username        string
+	password        string
+	headers         map[string]string
+	debug           bool
 }
 
 // Make a new api client for RESTful calls
-func NewAPIClient(opt *apiClientOpt) (*api_client, error) {
-
-	if opt.uri == "" && opt.ruler_uri == "" && opt.alertmanager_uri == "" {
-		return nil, fmt.Errorf("No provider URIs defined. Please set uri, or ruler_rui/alertmanager_uri.")
+func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
+	if opt.uri == "" && opt.rulerURI == "" && opt.alertmanagerURI == "" {
+		return nil, fmt.Errorf("no provider URIs defined. Please set uri, or ruler_uui/alertmanager_uri")
 	}
 
 	/* Remove any trailing slashes since we will append
@@ -57,8 +56,11 @@ func NewAPIClient(opt *apiClientOpt) (*api_client, error) {
 	opt.uri = strings.TrimSuffix(opt.uri, "/")
 
 	// Setup HTTPS client
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: opt.insecure,
+	tlsConfig := &tls.Config{}
+
+	// Set insecure verify
+	if opt.insecure {
+		tlsConfig.InsecureSkipVerify = true
 	}
 
 	if opt.cert != "" && opt.key != "" {
@@ -96,20 +98,20 @@ func NewAPIClient(opt *apiClientOpt) (*api_client, error) {
 		TLSClientConfig: tlsConfig,
 	}
 
-	client := api_client{
-		http_client: &http.Client{
+	client := apiClient{
+		httpClient: &http.Client{
 			Timeout:   time.Second * time.Duration(opt.timeout),
 			Transport: tr,
 		},
-		uri:              opt.uri,
-		ruler_uri:        opt.ruler_uri,
-		alertmanager_uri: opt.alertmanager_uri,
-		insecure:         opt.insecure,
-		token:            opt.token,
-		username:         opt.username,
-		password:         opt.password,
-		headers:          opt.headers,
-		debug:            opt.debug,
+		uri:             opt.uri,
+		rulerURI:        opt.rulerURI,
+		alertmanagerURI: opt.alertmanagerURI,
+		insecure:        opt.insecure,
+		token:           opt.token,
+		username:        opt.username,
+		password:        opt.password,
+		headers:         opt.headers,
+		debug:           opt.debug,
 	}
 
 	return &client, nil
@@ -120,15 +122,16 @@ Helper function that handles sending/receiving and handling
 
 	of HTTP data in and out.
 */
-func (client *api_client) send_request(component, method string, path, data string, headers map[string]string) (string, error) {
-	var full_uri string
+func (client *apiClient) sendRequest(component, method string, path, data string, headers map[string]string) (string, error) {
+	var fullURI string
 
-	if component == "ruler" && client.ruler_uri != "" {
-		full_uri = client.ruler_uri + path
-	} else if component == "alertmanager" && client.ruler_uri != "" {
-		full_uri = client.alertmanager_uri + path
-	} else {
-		full_uri = client.uri + path
+	switch {
+	case component == "ruler" && client.rulerURI != "":
+		fullURI = client.rulerURI + path
+	case component == "alertmanager" && client.rulerURI != "":
+		fullURI = client.alertmanagerURI + path
+	default:
+		fullURI = client.uri + path
 	}
 
 	var req *http.Request
@@ -137,9 +140,9 @@ func (client *api_client) send_request(component, method string, path, data stri
 	buffer := bytes.NewBuffer([]byte(data))
 
 	if data == "" {
-		req, err = http.NewRequest(method, full_uri, nil)
+		req, err = http.NewRequest(method, fullURI, nil)
 	} else {
-		req, err = http.NewRequest(method, full_uri, buffer)
+		req, err = http.NewRequest(method, fullURI, buffer)
 	}
 
 	if err != nil {
@@ -170,7 +173,6 @@ func (client *api_client) send_request(component, method string, path, data stri
 	}
 
 	if client.debug {
-
 		reqDump, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
 			log.Fatal(err)
@@ -179,7 +181,7 @@ func (client *api_client) send_request(component, method string, path, data stri
 		log.Printf("REQUEST:\n%s", string(reqDump))
 	}
 
-	resp, err := client.http_client.Do(req)
+	resp, err := client.httpClient.Do(req)
 
 	if err != nil {
 		if client.debug {
@@ -189,7 +191,6 @@ func (client *api_client) send_request(component, method string, path, data stri
 	}
 
 	if client.debug {
-
 		respDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			log.Fatal(err)
@@ -207,9 +208,8 @@ func (client *api_client) send_request(component, method string, path, data stri
 	body := string(bodyBytes)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return body, fmt.Errorf("Unexpected response code '%d': %s", resp.StatusCode, body)
+		return body, fmt.Errorf("unexpected response code '%d': %s", resp.StatusCode, body)
 	}
 
 	return body, nil
-
 }

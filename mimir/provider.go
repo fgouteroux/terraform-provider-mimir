@@ -2,13 +2,17 @@ package mimir
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func Provider(version string) func() *schema.Provider {
+var (
+	apiAlertsPath = "/api/v1/alerts"
+)
 
+func Provider(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			Schema: map[string]*schema.Schema{
@@ -108,36 +112,35 @@ func Provider(version string) func() *schema.Provider {
 		}
 		p.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			p.UserAgent("terraform-provider-mimir", version)
-			return providerConfigure(d, p.TerraformVersion)
+			return providerConfigure(d)
 		}
 		return p
 	}
 }
 
-func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
-
+func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	headers := make(map[string]string)
-	if i_headers := d.Get("headers"); i_headers != nil {
-		for k, v := range i_headers.(map[string]interface{}) {
+	if initHeaders := d.Get("headers"); initHeaders != nil {
+		for k, v := range initHeaders.(map[string]interface{}) {
 			headers[k] = v.(string)
 		}
 	}
 	headers["X-Scope-OrgID"] = d.Get("org_id").(string)
 
 	opt := &apiClientOpt{
-		token:            d.Get("token").(string),
-		username:         d.Get("username").(string),
-		password:         d.Get("password").(string),
-		cert:             d.Get("cert").(string),
-		key:              d.Get("key").(string),
-		ca:               d.Get("ca").(string),
-		insecure:         d.Get("insecure").(bool),
-		uri:              d.Get("uri").(string),
-		ruler_uri:        d.Get("ruler_uri").(string),
-		alertmanager_uri: d.Get("alertmanager_uri").(string),
-		headers:          headers,
-		timeout:          d.Get("timeout").(int),
-		debug:            d.Get("debug").(bool),
+		token:           d.Get("token").(string),
+		username:        d.Get("username").(string),
+		password:        d.Get("password").(string),
+		cert:            d.Get("cert").(string),
+		key:             d.Get("key").(string),
+		ca:              d.Get("ca").(string),
+		insecure:        d.Get("insecure").(bool),
+		uri:             d.Get("uri").(string),
+		rulerURI:        d.Get("ruler_uri").(string),
+		alertmanagerURI: d.Get("alertmanager_uri").(string),
+		headers:         headers,
+		timeout:         d.Get("timeout").(int),
+		debug:           d.Get("debug").(bool),
 	}
 
 	client, err := NewAPIClient(opt)

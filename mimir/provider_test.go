@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	MIMIR_ORG_ID           = getSetEnv("MIMIR_ORG_ID", "mytenant")
-	MIMIR_URI              = getSetEnv("MIMIR_URI", "http://localhost:8080")
-	MIMIR_RULER_URI        = getSetEnv("MIMIR_RULER_URI", "http://localhost:8080/prometheus")
-	MIMIR_ALERTMANAGER_URI = getSetEnv("MIMIR_ALERTMANAGER_URI", "http://localhost:8080")
+	mimirOrgID           = getSetEnv("MIMIR_ORG_ID", "mytenant")
+	mimirURI             = getSetEnv("MIMIR_URI", "http://localhost:8080")
+	mimirRulerURI        = getSetEnv("MIMIR_RULER_URI", "http://localhost:8080/prometheus")
+	mimirAlertmanagerURI = getSetEnv("MIMIR_ALERTMANAGER_URI", "http://localhost:8080")
 )
 
 // testAccProviderFactories is a static map containing only the main provider instance
