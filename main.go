@@ -4,8 +4,8 @@ import (
 	"context"
 	"flag"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/fgouteroux/terraform-provider-mimir/mimir"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
 func main() {

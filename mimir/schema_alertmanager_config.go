@@ -426,6 +426,76 @@ func webhookConfigFields() map[string]*schema.Schema {
 	}
 }
 
+func webexConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Whether to notify about resolved alerts.",
+		},
+		"api_url": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The Webex Teams API URL.",
+		},
+		"room_id": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "ID of the Webex Teams room where to send the messages.",
+		},
+		"message": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Message template.",
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+			Description: "The HTTP client's configuration.",
+		},
+	}
+}
+
+func discordConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Whether to notify about resolved alerts.",
+		},
+		"webhook_url": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The webhook URL.",
+		},
+		"title": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Notification title.",
+		},
+		"message": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Notification message.",
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+			Description: "The HTTP client's configuration.",
+		},
+	}
+}
+
 func pushoverConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"send_resolved": {
@@ -1020,6 +1090,10 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
+					"webex_api_url": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
 					"wechat_api_url": {
 						Type:     schema.TypeString,
 						Optional: true,
@@ -1281,6 +1355,22 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 							Schema: webhookConfigFields(),
 						},
 					},
+					"webex_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: webexConfigFields(),
+						},
+					},
+					"discord_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: discordConfigFields(),
+						},
+					},
 					"pushover_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
@@ -1484,6 +1574,10 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Computed: true,
 					},
 					"opsgenie_api_url": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"webex_api_url": {
 						Type:     schema.TypeString,
 						Computed: true,
 					},
@@ -1741,6 +1835,20 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Computed: true,
 						Elem: &schema.Resource{
 							Schema: webhookConfigFields(),
+						},
+					},
+					"webex_configs": {
+						Type:     schema.TypeList,
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: webexConfigFields(),
+						},
+					},
+					"discord_configs": {
+						Type:     schema.TypeList,
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: discordConfigFields(),
 						},
 					},
 					"pushover_configs": {

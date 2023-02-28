@@ -684,50 +684,50 @@ const testAccResourceAlertmanagerConfig_EmailReceiver_update = `
 `
 
 func TestAccResourceAlertmanagerConfig_OpsgenieReceiver(t *testing.T) {
-    // Init client
-    client, err := NewAPIClient(setupClient())
-    if err != nil {
-        t.Fatal(err)
-    }
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    resource.Test(t, resource.TestCase{
-        PreCheck:          func() { testAccPreCheck(t) },
-        ProviderFactories: testAccProviderFactories,
-        CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
-        Steps: []resource.TestStep{
-            {
-                Config: testAccResourceAlertmanagerConfig_OpsgenieReceiver,
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "opsgenie"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "opsgenie"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.api_key", "qwe456"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.name", "escalation-Y"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.type", "escalation"),
-                ),
-            },
-            {
-                Config: testAccResourceAlertmanagerConfig_OpsgenieReceiver_update,
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "opsgenie"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "opsgenie"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.api_key", "qwe456"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.update_alerts", "true"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.name", "escalation-Z"),
-                    resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.type", "escalation"),
-                ),
-            },
-        },
-    })
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAlertmanagerConfig_OpsgenieReceiver,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "opsgenie"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "opsgenie"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.api_key", "qwe456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.name", "escalation-Y"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.type", "escalation"),
+				),
+			},
+			{
+				Config: testAccResourceAlertmanagerConfig_OpsgenieReceiver_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "opsgenie"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "opsgenie"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.api_key", "qwe456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.update_alerts", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.name", "escalation-Z"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.type", "escalation"),
+				),
+			},
+		},
+	})
 }
 
 const testAccResourceAlertmanagerConfig_OpsgenieReceiver = `
@@ -775,3 +775,180 @@ const testAccResourceAlertmanagerConfig_OpsgenieReceiver_update = `
     }
 `
 
+func TestAccResourceAlertmanagerConfig_DiscordReceiver(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAlertmanagerConfig_DiscordReceiver,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "discord"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "discord"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.webhook_url", "https://discord.com/api/webhooks/123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.title", "title1"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.message", "test message"),
+				),
+			},
+			{
+				Config: testAccResourceAlertmanagerConfig_DiscordReceiver_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "discord"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "discord"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.webhook_url", "https://discord.com/api/webhooks/123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.title", "title2"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.message", "test message updated"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceAlertmanagerConfig_DiscordReceiver = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "discord"
+      }
+      receiver {
+        name = "discord"
+        discord_configs {
+          webhook_url = "https://discord.com/api/webhooks/123456"
+          title = "title1"
+          message = "test message"
+        }
+      }
+    }
+`
+
+const testAccResourceAlertmanagerConfig_DiscordReceiver_update = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "discord"
+      }
+      receiver {
+        name = "discord"
+        discord_configs {
+          webhook_url = "https://discord.com/api/webhooks/123456"
+          title = "title2"
+          message = "test message updated"
+        }
+      }
+    }
+`
+
+func TestAccResourceAlertmanagerConfig_WebexReceiver(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAlertmanagerConfig_WebexReceiver,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "webex"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "webex"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webex_configs.0.api_url", "https://webexapis.com/v1/messages"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webex_configs.0.room_id", "room-123456"),
+				),
+			},
+			{
+				Config: testAccResourceAlertmanagerConfig_WebexReceiver_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "webex"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "webex"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webex_configs.0.api_url", "https://webexapis.com/v1/messages"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webex_configs.0.room_id", "room-789"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceAlertmanagerConfig_WebexReceiver = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "webex"
+      }
+      receiver {
+        name = "webex"
+        webex_configs {
+		  http_config {
+			authorization {
+			  credentials = "xxxyyyzz"
+			}
+		  }
+          api_url = "https://webexapis.com/v1/messages"
+          room_id = "room-123456"
+        }
+      }
+    }
+`
+
+const testAccResourceAlertmanagerConfig_WebexReceiver_update = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "webex"
+      }
+      receiver {
+        name = "webex"
+        webex_configs {
+		  http_config {
+			authorization {
+			  credentials = "xxxyyyzz"
+			}
+		  }
+          api_url = "https://webexapis.com/v1/messages"
+          room_id = "room-789"
+        }
+      }
+    }
+`

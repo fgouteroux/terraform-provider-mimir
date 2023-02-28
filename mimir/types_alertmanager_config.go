@@ -46,6 +46,7 @@ type globalConfig struct {
 	PagerdutyURL     *config.URL     `yaml:"pagerduty_url,omitempty" json:"pagerduty_url,omitempty"`
 	OpsGenieAPIURL   *config.URL     `yaml:"opsgenie_api_url,omitempty" json:"opsgenie_api_url,omitempty"`
 	OpsGenieAPIKey   string          `yaml:"opsgenie_api_key,omitempty" json:"opsgenie_api_key,omitempty"`
+	WebexAPIURL      *config.URL     `yaml:"webex_api_url,omitempty" json:"webex_api_url,omitempty"`
 	WeChatAPIURL     *config.URL     `yaml:"wechat_api_url,omitempty" json:"wechat_api_url,omitempty"`
 	WeChatAPISecret  string          `yaml:"wechat_api_secret,omitempty" json:"wechat_api_secret,omitempty"`
 	WeChatAPICorpID  string          `yaml:"wechat_api_corp_id,omitempty" json:"wechat_api_corp_id,omitempty"`
@@ -79,6 +80,8 @@ type receiver struct {
 	PagerdutyConfigs []*pagerdutyConfig `yaml:"pagerduty_configs,omitempty" json:"pagerduty_configs,omitempty"`
 	SlackConfigs     []*slackConfig     `yaml:"slack_configs,omitempty" json:"slack_configs,omitempty"`
 	WebhookConfigs   []*webhookConfig   `yaml:"webhook_configs,omitempty" json:"webhook_configs,omitempty"`
+	WebexConfigs     []*webexConfig     `yaml:"webex_configs,omitempty" json:"webex_configs,omitempty"`
+	DiscordConfigs   []*discordConfig   `yaml:"discord_configs,omitempty" json:"discord_configs,omitempty"`
 	WeChatConfigs    []*weChatConfig    `yaml:"wechat_configs,omitempty" json:"wechat_config,omitempty"`
 	EmailConfigs     []*emailConfig     `yaml:"email_configs,omitempty" json:"email_configs,omitempty"`
 	PushoverConfigs  []*pushoverConfig  `yaml:"pushover_configs,omitempty" json:"pushover_configs,omitempty"`
@@ -92,6 +95,22 @@ type webhookConfig struct {
 	URL           string            `yaml:"url,omitempty" json:"url,omitempty"`
 	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 	MaxAlerts     int32             `yaml:"max_alerts,omitempty" json:"max_alerts,omitempty"`
+}
+
+type webexConfig struct {
+	VSendResolved *bool             `yaml:"send_resolved,omitempty" json:"send_resolved,omitempty"`
+	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
+	APIURL        string            `yaml:"api_url,omitempty" json:"api_url,omitempty"`
+	Message       string            `yaml:"message,omitempty" json:"message,omitempty"`
+	RoomID        string            `yaml:"room_id,omitempty" json:"room_id,omitempty"`
+}
+
+type discordConfig struct {
+	VSendResolved *bool             `yaml:"send_resolved,omitempty" json:"send_resolved,omitempty"`
+	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
+	WebhookURL    string            `yaml:"webhook_url,omitempty" json:"webhook_url,omitempty"`
+	Title         string            `yaml:"title,omitempty" json:"title,omitempty"`
+	Message       string            `yaml:"message,omitempty" json:"message,omitempty"`
 }
 
 type pagerdutyConfig struct {

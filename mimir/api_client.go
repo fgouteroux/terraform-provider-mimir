@@ -123,8 +123,11 @@ func NewAPIClient(opt *apiClientOpt) (*api_client, error) {
 	return &client, nil
 }
 
-/* Helper function that handles sending/receiving and handling
-   of HTTP data in and out. */
+/*
+Helper function that handles sending/receiving and handling
+
+	of HTTP data in and out.
+*/
 func (client *api_client) send_request(component, method string, path, data string, headers map[string]string) (string, error) {
 	var full_uri string
 
@@ -152,7 +155,7 @@ func (client *api_client) send_request(component, method string, path, data stri
 	}
 
 	if client.token != "" {
-		req.Header.Set("Authorization", "Bearer " + client.token)
+		req.Header.Set("Authorization", "Bearer "+client.token)
 	}
 
 	// Set client headers from provider

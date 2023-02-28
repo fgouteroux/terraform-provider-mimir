@@ -199,6 +199,11 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 			globalConf.OpsGenieAPIURL = &config.URL{opsGenieAPIURL}
 		}
 
+		webexAPIURL, _ := url.Parse(cfg["webex_api_url"].(string))
+		if webexAPIURL.String() != "" {
+			globalConf.WebexAPIURL = &config.URL{webexAPIURL}
+		}
+
 		globalConf.WeChatAPISecret = cfg["wechat_api_secret"].(string)
 		globalConf.WeChatAPICorpID = cfg["wechat_api_corp_id"].(string)
 		weChatAPIURL, _ := url.Parse(cfg["wechat_api_url"].(string))
@@ -238,6 +243,10 @@ func flattenGlobalConfig(v *globalConfig) []interface{} {
 
 		if v.OpsGenieAPIURL != nil {
 			globalConf["opsgenie_api_url"] = v.OpsGenieAPIURL.URL.String()
+		}
+
+		if v.WebexAPIURL != nil {
+			globalConf["webex_api_url"] = v.WebexAPIURL.URL.String()
 		}
 
 		if v.WeChatAPIURL != nil {
@@ -297,6 +306,12 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		if raw, ok := data["webhook_configs"]; ok {
 			cfg.WebhookConfigs = expandWebhookConfig(raw.([]interface{}))
 		}
+		if raw, ok := data["webex_configs"]; ok {
+			cfg.WebexConfigs = expandWebexConfig(raw.([]interface{}))
+		}
+		if raw, ok := data["discord_configs"]; ok {
+			cfg.DiscordConfigs = expandDiscordConfig(raw.([]interface{}))
+		}
 		if raw, ok := data["pushover_configs"]; ok {
 			cfg.PushoverConfigs = expandPushoverConfig(raw.([]interface{}))
 		}
@@ -334,6 +349,8 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 		cfg["email_configs"] = flattenEmailConfig(v.EmailConfigs)
 		cfg["wechat_configs"] = flattenWeChatConfig(v.WeChatConfigs)
 		cfg["webhook_configs"] = flattenWebhookConfig(v.WebhookConfigs)
+		cfg["webex_configs"] = flattenWebexConfig(v.WebexConfigs)
+		cfg["discord_configs"] = flattenDiscordConfig(v.DiscordConfigs)
 		cfg["pushover_configs"] = flattenPushoverConfig(v.PushoverConfigs)
 		cfg["opsgenie_configs"] = flattenOpsgenieConfig(v.OpsgenieConfigs)
 		cfg["slack_configs"] = flattenSlackConfig(v.SlackConfigs)
@@ -743,6 +760,102 @@ func flattenWebhookConfig(v []*webhookConfig) []interface{} {
 		webhookConf = append(webhookConf, cfg)
 	}
 	return webhookConf
+}
+
+func expandWebexConfig(v []interface{}) []*webexConfig {
+	var webexConf []*webexConfig
+
+	for _, v := range v {
+		cfg := &webexConfig{}
+		data := v.(map[string]interface{})
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["api_url"]; ok {
+			cfg.APIURL = raw.(string)
+		}
+		if raw, ok := data["room_id"]; ok {
+			cfg.RoomID = raw.(string)
+		}
+		if raw, ok := data["message"]; ok {
+			cfg.Message = raw.(string)
+		}
+		webexConf = append(webexConf, cfg)
+	}
+	return webexConf
+}
+
+func flattenWebexConfig(v []*webexConfig) []interface{} {
+	var webexConf []interface{}
+
+	if v == nil {
+		return webexConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["api_url"] = v.APIURL
+		cfg["room_id"] = v.RoomID
+		cfg["message"] = v.Message
+		webexConf = append(webexConf, cfg)
+	}
+	return webexConf
+}
+
+func expandDiscordConfig(v []interface{}) []*discordConfig {
+	var discordConf []*discordConfig
+
+	for _, v := range v {
+		cfg := &discordConfig{}
+		data := v.(map[string]interface{})
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw.(interface{}))
+		}
+		if raw, ok := data["webhook_url"]; ok {
+			cfg.WebhookURL = raw.(string)
+		}
+		if raw, ok := data["title"]; ok {
+			cfg.Title = raw.(string)
+		}
+		if raw, ok := data["message"]; ok {
+			cfg.Message = raw.(string)
+		}
+		discordConf = append(discordConf, cfg)
+	}
+	return discordConf
+}
+
+func flattenDiscordConfig(v []*discordConfig) []interface{} {
+	var discordConf []interface{}
+
+	if v == nil {
+		return discordConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["webhook_url"] = v.WebhookURL
+		cfg["title"] = v.Title
+		cfg["message"] = v.Message
+		discordConf = append(discordConf, cfg)
+	}
+	return discordConf
 }
 
 func expandWeChatConfig(v []interface{}) []*weChatConfig {

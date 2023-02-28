@@ -94,7 +94,7 @@ func validateLabels(v interface{}, k string) (ws []string, errors []error) {
 
 func validateAnnotations(v interface{}, k string) (ws []string, errors []error) {
 	m := v.(map[string]interface{})
-	for aname, _ := range m {
+	for aname := range m {
 
 		if !labelNameRegexp.MatchString(aname) {
 			errors = append(errors, fmt.Errorf(
