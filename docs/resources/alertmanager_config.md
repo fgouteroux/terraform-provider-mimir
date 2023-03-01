@@ -64,6 +64,7 @@ Required:
 
 Optional:
 
+- `discord_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--discord_configs))
 - `email_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--email_configs))
 - `opsgenie_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs))
 - `pagerduty_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs))
@@ -72,8 +73,84 @@ Optional:
 - `sns_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs))
 - `telegram_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--telegram_configs))
 - `victorops_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--victorops_configs))
+- `webex_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webex_configs))
 - `webhook_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs))
 - `wechat_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs))
+
+<a id="nestedblock--receiver--discord_configs"></a>
+### Nested Schema for `receiver.discord_configs`
+
+Optional:
+
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config))
+- `message` (String) Notification message.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `title` (String) Notification title.
+- `webhook_url` (String) The webhook URL.
+
+<a id="nestedblock--receiver--discord_configs--http_config"></a>
+### Nested Schema for `receiver.discord_configs.http_config`
+
+Optional:
+
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--basic_auth))
+- `bearer_token` (String, Sensitive)
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--tls_config))
+
+<a id="nestedblock--receiver--discord_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.discord_configs.http_config.authorization`
+
+Optional:
+
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
+
+
+<a id="nestedblock--receiver--discord_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.discord_configs.http_config.basic_auth`
+
+Optional:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedblock--receiver--discord_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.discord_configs.http_config.oauth2`
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
+
+<a id="nestedblock--receiver--discord_configs--http_config--oauth2--tls_config"></a>
+### Nested Schema for `receiver.discord_configs.http_config.oauth2.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
+
+
+<a id="nestedblock--receiver--discord_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.discord_configs.http_config.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
+
+
 
 <a id="nestedblock--receiver--email_configs"></a>
 ### Nested Schema for `receiver.email_configs`
@@ -124,7 +201,7 @@ Optional:
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `source` (String) A backlink to the sender of the notification.
 - `tags` (String) Comma separated list of tags attached to the notifications.
-- `update_alerts` (String) Whether to update message and description of the alert in OpsGenie if it already exists. By default, the alert is never updated in OpsGenie, the new message only appears in activity log.
+- `update_alerts` (Boolean) Whether to update message and description of the alert in OpsGenie if it already exists. By default, the alert is never updated in OpsGenie, the new message only appears in activity log.
 
 <a id="nestedblock--receiver--opsgenie_configs--http_config"></a>
 ### Nested Schema for `receiver.opsgenie_configs.http_config`
@@ -768,6 +845,81 @@ Optional:
 
 
 
+<a id="nestedblock--receiver--webex_configs"></a>
+### Nested Schema for `receiver.webex_configs`
+
+Optional:
+
+- `api_url` (String) The Webex Teams API URL.
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config))
+- `message` (String) Message template.
+- `room_id` (String) ID of the Webex Teams room where to send the messages.
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+
+<a id="nestedblock--receiver--webex_configs--http_config"></a>
+### Nested Schema for `receiver.webex_configs.http_config`
+
+Optional:
+
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--basic_auth))
+- `bearer_token` (String, Sensitive)
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--tls_config))
+
+<a id="nestedblock--receiver--webex_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.webex_configs.http_config.authorization`
+
+Optional:
+
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
+
+
+<a id="nestedblock--receiver--webex_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.webex_configs.http_config.basic_auth`
+
+Optional:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedblock--receiver--webex_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.webex_configs.http_config.oauth2`
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
+
+<a id="nestedblock--receiver--webex_configs--http_config--oauth2--tls_config"></a>
+### Nested Schema for `receiver.webex_configs.http_config.oauth2.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
+
+
+<a id="nestedblock--receiver--webex_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.webex_configs.http_config.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
+
+
+
 <a id="nestedblock--receiver--webhook_configs"></a>
 ### Nested Schema for `receiver.webhook_configs`
 
@@ -982,6 +1134,7 @@ Optional:
 - `telegram_api_url` (String)
 - `victorops_api_key` (String, Sensitive)
 - `victorops_api_url` (String)
+- `webex_api_url` (String)
 - `wechat_api_corp_id` (String)
 - `wechat_api_secret` (String, Sensitive)
 - `wechat_api_url` (String)

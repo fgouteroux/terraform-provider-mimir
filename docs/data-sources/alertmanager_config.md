@@ -54,6 +54,7 @@ Read-Only:
 - `telegram_api_url` (String)
 - `victorops_api_key` (String)
 - `victorops_api_url` (String)
+- `webex_api_url` (String)
 - `wechat_api_corp_id` (String)
 - `wechat_api_secret` (String)
 - `wechat_api_url` (String)
@@ -137,6 +138,7 @@ Read-Only:
 
 Read-Only:
 
+- `discord_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs))
 - `email_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--email_configs))
 - `name` (String)
 - `opsgenie_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs))
@@ -146,8 +148,84 @@ Read-Only:
 - `sns_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs))
 - `telegram_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs))
 - `victorops_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs))
+- `webex_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs))
 - `webhook_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs))
 - `wechat_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs))
+
+<a id="nestedobjatt--receiver--discord_configs"></a>
+### Nested Schema for `receiver.discord_configs`
+
+Read-Only:
+
+- `http_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config))
+- `message` (String)
+- `send_resolved` (Boolean)
+- `title` (String)
+- `webhook_url` (String)
+
+<a id="nestedobjatt--receiver--discord_configs--http_config"></a>
+### Nested Schema for `receiver.discord_configs.http_config`
+
+Read-Only:
+
+- `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--authorization))
+- `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--basic_auth))
+- `bearer_token` (String)
+- `follow_redirects` (Boolean)
+- `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--tls_config))
+
+<a id="nestedobjatt--receiver--discord_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.discord_configs.http_config.tls_config`
+
+Read-Only:
+
+- `credentials` (String)
+- `type` (String)
+
+
+<a id="nestedobjatt--receiver--discord_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.discord_configs.http_config.tls_config`
+
+Read-Only:
+
+- `password` (String)
+- `username` (String)
+
+
+<a id="nestedobjatt--receiver--discord_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.discord_configs.http_config.tls_config`
+
+Read-Only:
+
+- `client_id` (String)
+- `client_secret` (String)
+- `endpoint_params` (Map of String)
+- `scopes` (List of String)
+- `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--tls_config--tls_config))
+- `token_url` (String)
+
+<a id="nestedobjatt--receiver--discord_configs--http_config--tls_config--tls_config"></a>
+### Nested Schema for `receiver.discord_configs.http_config.tls_config.tls_config`
+
+Read-Only:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+<a id="nestedobjatt--receiver--discord_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.discord_configs.http_config.tls_config`
+
+Read-Only:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
 
 <a id="nestedobjatt--receiver--email_configs"></a>
 ### Nested Schema for `receiver.email_configs`
@@ -198,7 +276,7 @@ Read-Only:
 - `send_resolved` (Boolean)
 - `source` (String)
 - `tags` (String)
-- `update_alerts` (String)
+- `update_alerts` (Boolean)
 
 <a id="nestedobjatt--receiver--opsgenie_configs--http_config"></a>
 ### Nested Schema for `receiver.opsgenie_configs.http_config`
@@ -830,6 +908,81 @@ Read-Only:
 
 <a id="nestedobjatt--receiver--victorops_configs--http_config--tls_config"></a>
 ### Nested Schema for `receiver.victorops_configs.http_config.tls_config`
+
+Read-Only:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+
+<a id="nestedobjatt--receiver--webex_configs"></a>
+### Nested Schema for `receiver.webex_configs`
+
+Read-Only:
+
+- `api_url` (String)
+- `http_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config))
+- `message` (String)
+- `room_id` (String)
+- `send_resolved` (Boolean)
+
+<a id="nestedobjatt--receiver--webex_configs--http_config"></a>
+### Nested Schema for `receiver.webex_configs.http_config`
+
+Read-Only:
+
+- `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--authorization))
+- `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--basic_auth))
+- `bearer_token` (String)
+- `follow_redirects` (Boolean)
+- `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--tls_config))
+
+<a id="nestedobjatt--receiver--webex_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.webex_configs.http_config.tls_config`
+
+Read-Only:
+
+- `credentials` (String)
+- `type` (String)
+
+
+<a id="nestedobjatt--receiver--webex_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.webex_configs.http_config.tls_config`
+
+Read-Only:
+
+- `password` (String)
+- `username` (String)
+
+
+<a id="nestedobjatt--receiver--webex_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.webex_configs.http_config.tls_config`
+
+Read-Only:
+
+- `client_id` (String)
+- `client_secret` (String)
+- `endpoint_params` (Map of String)
+- `scopes` (List of String)
+- `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--tls_config--tls_config))
+- `token_url` (String)
+
+<a id="nestedobjatt--receiver--webex_configs--http_config--tls_config--tls_config"></a>
+### Nested Schema for `receiver.webex_configs.http_config.tls_config.tls_config`
+
+Read-Only:
+
+- `insecure_skip_verify` (Boolean)
+- `server_name` (String)
+
+
+
+<a id="nestedobjatt--receiver--webex_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.webex_configs.http_config.tls_config`
 
 Read-Only:
 
