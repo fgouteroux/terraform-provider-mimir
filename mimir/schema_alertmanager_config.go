@@ -1458,12 +1458,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Required:    true,
 						Description: "Name of the receiver to send the notification.",
 					},
-					"continue": {
-						Type:        schema.TypeBool,
-						Optional:    true,
-						Default:     false,
-						Description: "Whether an alert should continue matching subsequent sibling nodes.",
-					},
 					"child_route": {
 						Type:     schema.TypeList,
 						Optional: true,
@@ -1927,12 +1921,6 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Type:        schema.TypeString,
 						Computed:    true,
 						Description: "Name of the receiver to send the notification.",
-					},
-					"continue": {
-						Type:        schema.TypeBool,
-						Computed:    true,
-						Default:     nil,
-						Description: "Whether an alert should continue matching subsequent sibling nodes.",
 					},
 					"child_route": {
 						Type:     schema.TypeList,

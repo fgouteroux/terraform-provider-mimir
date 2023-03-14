@@ -1508,9 +1508,6 @@ func expandRouteConfig(v interface{}) *route {
 		if raw, ok := cfg["matchers"]; ok {
 			routeConf.Matchers = expandStringArray(raw.([]interface{}))
 		}
-		if raw, ok := cfg["continue"]; ok {
-			routeConf.Continue = raw.(bool)
-		}
 		if raw, ok := cfg["child_route"]; ok {
 			var routes []*route
 			for _, item := range raw.([]interface{}) {
@@ -1557,7 +1554,6 @@ func flattenRouteConfig(v *route) []interface{} {
 		}
 		routeConf["child_route"] = routes
 	}
-	routeConf["continue"] = v.Continue
 	routeConf["group_wait"] = v.GroupWait
 	routeConf["group_interval"] = v.GroupInterval
 	routeConf["repeat_interval"] = v.RepeatInterval

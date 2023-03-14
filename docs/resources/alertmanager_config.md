@@ -1089,7 +1089,6 @@ Required:
 Optional:
 
 - `child_route` (Block List) (see [below for nested schema](#nestedblock--route--child_route))
-- `continue` (Boolean) Whether an alert should continue matching subsequent sibling nodes.
 - `group_by` (List of String) The labels by which incoming alerts are grouped together.
 
 <a id="nestedblock--route--child_route"></a>

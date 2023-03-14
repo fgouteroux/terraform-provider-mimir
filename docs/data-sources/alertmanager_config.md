@@ -1154,7 +1154,6 @@ Read-Only:
 Read-Only:
 
 - `child_route` (List of Object) (see [below for nested schema](#nestedobjatt--route--child_route))
-- `continue` (Boolean)
 - `group_by` (List of String)
 - `group_interval` (String)
 - `group_wait` (String)
