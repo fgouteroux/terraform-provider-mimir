@@ -1672,6 +1672,11 @@ func expandTimeIntervalConfig(v []interface{}) []timeinterval.TimeInterval {
 		if raw, ok := data["years"]; ok {
 			cfg.Years = expandYearRange(raw.([]interface{}))
 		}
+		if raw, ok := data["location"]; ok {
+			loc, _ := time.LoadLocation(raw.(string))
+			cfg.Location = new(timeinterval.Location)
+			*cfg.Location = timeinterval.Location{Location: loc}
+		}
 		timeIntervalConf = append(timeIntervalConf, cfg)
 	}
 	return timeIntervalConf
@@ -1866,6 +1871,7 @@ func flattenTimeIntervalConfig(v []timeinterval.TimeInterval) []interface{} {
 		cfg["days_of_month"] = flattenDayOfMonthRange(v.DaysOfMonth)
 		cfg["months"] = flattenMonthRange(v.Months)
 		cfg["years"] = flattenYearRange(v.Years)
+		cfg["location"] = v.Location.String()
 		timeIntervalConf = append(timeIntervalConf, cfg)
 	}
 	return timeIntervalConf

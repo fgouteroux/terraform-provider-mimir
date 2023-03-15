@@ -1288,6 +1288,7 @@ Optional:
 Optional:
 
 - `days_of_month` (Block List) A list of numerical days in the month. Days begin at 1. Negative values are also accepted which begin at the end of the month. (see [below for nested schema](#nestedblock--time_interval--time_intervals--days_of_month))
+- `location` (String) A string that matches a location in the IANA time zone database.
 - `months` (Block List) A list of calendar months identified by number, where January = 1. (see [below for nested schema](#nestedblock--time_interval--time_intervals--months))
 - `times` (Block List) Ranges inclusive of the starting time and exclusive of the end time to make it easy to represent times that start/end on hour boundaries. (see [below for nested schema](#nestedblock--time_interval--time_intervals--times))
 - `weekdays` (Block List) A list of numerical days of the week, where the week begins on Sunday (0) and ends on Saturday (6). (see [below for nested schema](#nestedblock--time_interval--time_intervals--weekdays))

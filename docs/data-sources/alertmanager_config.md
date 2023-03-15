@@ -1253,6 +1253,7 @@ Read-Only:
 Read-Only:
 
 - `days_of_month` (List of Object) (see [below for nested schema](#nestedobjatt--time_interval--time_intervals--days_of_month))
+- `location` (String)
 - `months` (List of Object) (see [below for nested schema](#nestedobjatt--time_interval--time_intervals--months))
 - `times` (List of Object) (see [below for nested schema](#nestedobjatt--time_interval--time_intervals--times))
 - `weekdays` (List of Object) (see [below for nested schema](#nestedobjatt--time_interval--time_intervals--weekdays))
