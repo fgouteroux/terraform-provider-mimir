@@ -107,6 +107,10 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.resolve_timeout", "5m"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.follow_redirects", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.enable_http2", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.tls_config.0.insecure_skip_verify", "false"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.tls_config.0.min_version", "TLS12"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.tls_config.0.max_version", "TLS13"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -123,6 +127,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 					testAccCheckMimirAlertmanagerConfigExists(client),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.resolve_timeout", "15m"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.follow_redirects", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.http_config.0.enable_http2", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -303,6 +308,12 @@ const testAccResourceAlertmanagerConfig_global = `
         resolve_timeout = "5m"
         http_config {
           follow_redirects = true
+          enable_http2 = true
+          tls_config {
+            insecure_skip_verify = false
+            min_version = "TLS12"
+            max_version = "TLS13"
+          }
         }
       }
       route {

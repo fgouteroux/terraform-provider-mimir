@@ -96,6 +96,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -137,6 +138,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -147,6 +150,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -178,6 +183,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -211,6 +218,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -252,6 +260,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -262,6 +272,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -310,6 +322,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -351,6 +364,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -361,6 +376,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -412,6 +429,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -453,6 +471,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -463,6 +483,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -539,6 +561,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -580,6 +603,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -590,6 +615,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -619,6 +646,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -660,6 +688,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -670,6 +700,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -709,6 +741,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -750,6 +783,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -760,6 +795,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -789,6 +826,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -830,6 +868,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -840,6 +880,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -864,6 +906,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -905,6 +948,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -915,6 +960,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -938,6 +985,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -979,6 +1027,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -989,6 +1039,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -1019,6 +1071,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -1060,6 +1113,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -1070,6 +1125,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -1146,6 +1203,7 @@ Optional:
 - `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--global--http_config--authorization))
 - `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--global--http_config--basic_auth))
 - `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--global--http_config--oauth2))
 - `proxy_url` (String)
@@ -1187,6 +1245,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 
@@ -1197,6 +1257,8 @@ Optional:
 Optional:
 
 - `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
 

@@ -87,6 +87,8 @@ func expandTLSConfig(v interface{}) *tlsConfig {
 		cfg := data[0].(map[string]interface{})
 		tlsConf.ServerName = cfg["server_name"].(string)
 		tlsConf.InsecureSkipVerify = cfg["insecure_skip_verify"].(bool)
+		tlsConf.MinVersion = cfg["min_version"].(string)
+		tlsConf.MaxVersion = cfg["max_version"].(string)
 	}
 	return tlsConf
 }
@@ -96,6 +98,8 @@ func flattenTLSConfig(v *tlsConfig) []interface{} {
 	if v != nil {
 		tlsConf["server_name"] = v.ServerName
 		tlsConf["insecure_skip_verify"] = v.InsecureSkipVerify
+		tlsConf["min_version"] = v.MinVersion
+		tlsConf["max_version"] = v.MaxVersion
 	}
 	return []interface{}{tlsConf}
 }
@@ -109,6 +113,8 @@ func expandHTTPConfig(v interface{}) *httpClientConfig {
 		httpConf.ProxyURL = cfg["proxy_url"].(string)
 		httpConf.FollowRedirects = new(bool)
 		*httpConf.FollowRedirects = cfg["follow_redirects"].(bool)
+		httpConf.EnableHTTP2 = new(bool)
+		*httpConf.EnableHTTP2 = cfg["enable_http2"].(bool)
 		httpConf.BearerToken = cfg["bearer_token"].(string)
 
 		if len(cfg["authorization"].([]interface{})) > 0 {
@@ -140,6 +146,10 @@ func flattenHTTPConfig(v *httpClientConfig) []interface{} {
 
 		if v.FollowRedirects != nil {
 			httpConf["follow_redirects"] = v.FollowRedirects
+		}
+
+		if v.EnableHTTP2 != nil {
+			httpConf["enable_http2"] = v.EnableHTTP2
 		}
 
 		if v.BasicAuth != nil {

@@ -17,6 +17,16 @@ func tlsConfigFields() map[string]*schema.Schema {
 			Default:     false,
 			Description: "Disable validation of the server certificate",
 		},
+		"min_version": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Minimum acceptable TLS version",
+		},
+		"max_version": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Maximum acceptable TLS version.",
+		},
 	}
 }
 
@@ -36,6 +46,12 @@ func httpConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Default:     true,
 			Description: "Configure whether HTTP requests follow HTTP 3xx redirects.",
+		},
+		"enable_http2": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Whether to enable HTTP2.",
 		},
 		"tls_config": {
 			Type:        schema.TypeList,

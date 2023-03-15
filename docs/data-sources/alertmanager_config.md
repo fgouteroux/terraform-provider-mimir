@@ -67,6 +67,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--global--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--global--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--global--http_config--oauth2))
 - `proxy_url` (String)
@@ -108,6 +109,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -118,6 +121,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -171,6 +176,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -212,6 +218,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -222,6 +230,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -253,6 +263,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -286,6 +298,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -327,6 +340,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -337,6 +352,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -382,6 +399,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -423,6 +441,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -433,6 +453,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -484,6 +506,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pushover_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pushover_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pushover_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -525,6 +548,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -535,6 +560,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -611,6 +638,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--slack_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--slack_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--slack_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -652,6 +680,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -662,6 +692,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -691,6 +723,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -732,6 +765,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -742,6 +777,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -781,6 +818,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -822,6 +860,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -832,6 +872,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -861,6 +903,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -902,6 +945,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -912,6 +957,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -936,6 +983,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -977,6 +1025,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -987,6 +1037,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -1010,6 +1062,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -1051,6 +1104,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -1061,6 +1116,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -1091,6 +1148,7 @@ Read-Only:
 - `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs--http_config--authorization))
 - `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs--http_config--basic_auth))
 - `bearer_token` (String)
+- `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs--http_config--oauth2))
 - `proxy_url` (String)
@@ -1132,6 +1190,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 
@@ -1142,6 +1202,8 @@ Read-Only:
 Read-Only:
 
 - `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
 - `server_name` (String)
 
 

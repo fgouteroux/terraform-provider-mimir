@@ -196,11 +196,14 @@ type httpClientConfig struct {
 	ProxyURL        string         `yaml:"proxy_url,omitempty"`
 	TLSConfig       *tlsConfig     `yaml:"tls_config,omitempty"`
 	FollowRedirects *bool          `yaml:"follow_redirects,omitempty"`
+	EnableHTTP2     *bool          `yaml:"enable_http2,omitempty"`
 }
 
 type tlsConfig struct {
 	ServerName         string `yaml:"server_name,omitempty"`
 	InsecureSkipVerify bool   `yaml:"insecure_skip_verify,omitempty"`
+	MinVersion         string `yaml:"min_version,omitempty"`
+	MaxVersion         string `yaml:"max_version,omitempty"`
 }
 
 type authorization struct {
