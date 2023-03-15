@@ -51,6 +51,13 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 							Description:  "The PromQL expression to evaluate.",
 							ValidateFunc: validatePromQLExpr,
 						},
+						"labels": {
+							Type:         schema.TypeMap,
+							Description:  "Labels to add or overwrite before storing the result.",
+							Optional:     true,
+							Elem:         &schema.Schema{Type: schema.TypeString},
+							ValidateFunc: validateLabels,
+						},
 					},
 				},
 			},
@@ -183,6 +190,12 @@ func expandRecordingRules(v []interface{}) []recordingRule {
 			rule.Expr = raw.(string)
 		}
 
+		if raw, ok := data["labels"]; ok {
+			if len(raw.(map[string]interface{})) > 0 {
+				rule.Labels = expandStringMap(raw.(map[string]interface{}))
+			}
+		}
+
 		rules = append(rules, rule)
 	}
 
@@ -200,6 +213,10 @@ func flattenRecordingRules(v []recordingRule) []map[string]interface{} {
 		rule := make(map[string]interface{})
 		rule["record"] = v.Record
 		rule["expr"] = v.Expr
+
+		if v.Labels != nil {
+			rule["labels"] = v.Labels
+		}
 
 		rules = append(rules, rule)
 	}
@@ -219,8 +236,9 @@ func validateRecordingRuleName(v interface{}, k string) (ws []string, errors []e
 }
 
 type recordingRule struct {
-	Record string `json:"record"`
-	Expr   string `json:"expr"`
+	Record string            `json:"record"`
+	Expr   string            `json:"expr"`
+	Labels map[string]string `yaml:"labels,omitempty"`
 }
 
 type recordingRuleGroup struct {

@@ -24,6 +24,10 @@ func TestAccResourceRuleGroupRecording_expectValidationError(t *testing.T) {
 				Config:      testAccResourceRuleGroupRecording_expectPromQLValidationError,
 				ExpectError: regexp.MustCompile("Invalid PromQL expression"),
 			},
+			{
+				Config:      testAccResourceRuleGroupRecording_expectLabelNameValidationError,
+				ExpectError: regexp.MustCompile("Invalid Label Name"),
+			},
 		},
 	})
 }
@@ -56,6 +60,19 @@ const testAccResourceRuleGroupRecording_expectPromQLValidationError = `
 		rule {
 			record = "test1_info"
 			expr   = "rate(hi)"
+		}
+	}
+`
+const testAccResourceRuleGroupRecording_expectLabelNameValidationError = `
+	resource "mimir_rule_group_recording" "record_1" {
+		name = "record_1"
+		namespace = "namespace_1"
+		rule {
+			record = "test1_info"
+			expr   = "test1_metric"
+			labels = {
+				 ins-tance = "localhost"
+			}
 		}
 	}
 `
@@ -92,6 +109,7 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.0.expr", "test1_metric"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.1.record", "test2_info"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.1.expr", "test2_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.1.labels.key1", "val1"),
 				),
 			},
 		},
@@ -120,6 +138,9 @@ const testAccResourceRuleGroupRecording_basic_update = `
 		rule {
 			record = "test2_info"
 			expr   = "test2_metric"
+			labels = {
+				key1 = "val1"
+			}
 		}
 	}
 `

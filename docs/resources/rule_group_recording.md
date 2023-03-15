@@ -49,4 +49,8 @@ Required:
 - `expr` (String) The PromQL expression to evaluate.
 - `record` (String) The name of the time series to output to.
 
+Optional:
+
+- `labels` (Map of String) Labels to add or overwrite before storing the result.
+
 
