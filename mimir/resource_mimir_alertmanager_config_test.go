@@ -91,6 +91,7 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "pagerduty"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.0.continue", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.0.group_interval", "15m"),
@@ -284,6 +285,7 @@ const testAccResourceAlertmanagerConfig_basic_update = `
         repeat_interval = "1h"
         receiver = "pagerduty"
         child_route {
+          continue = true
           group_by = ["..."]
           group_wait = "30s"
           group_interval = "15m"

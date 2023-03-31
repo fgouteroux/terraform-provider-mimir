@@ -1521,9 +1521,45 @@ func expandRouteConfig(v interface{}) *route {
 		if raw, ok := cfg["child_route"]; ok {
 			var routes []*route
 			for _, item := range raw.([]interface{}) {
-				routes = append(routes, expandRouteConfig([]interface{}{item.(map[string]interface{})}))
+				routes = append(routes, expandChildRouteConfig([]interface{}{item.(map[string]interface{})}))
 			}
 			routeConf.Routes = routes
+		}
+		if raw, ok := cfg["group_wait"]; ok {
+			routeConf.GroupWait = raw.(string)
+		}
+		if raw, ok := cfg["group_interval"]; ok {
+			routeConf.GroupInterval = raw.(string)
+		}
+		if raw, ok := cfg["repeat_interval"]; ok {
+			routeConf.RepeatInterval = raw.(string)
+		}
+		if raw, ok := cfg["mute_time_intervals"]; ok {
+			routeConf.MuteTimeIntervals = expandStringArray(raw.([]interface{}))
+		}
+		if raw, ok := cfg["active_time_intervals"]; ok {
+			routeConf.ActiveTimeIntervals = expandStringArray(raw.([]interface{}))
+		}
+	}
+	return routeConf
+}
+
+func expandChildRouteConfig(v interface{}) *route {
+	routeConf := &route{}
+	data := v.([]interface{})
+	if len(data) != 0 && data[0] != nil {
+		cfg := data[0].(map[string]interface{})
+		if raw, ok := cfg["receiver"]; ok {
+			routeConf.Receiver = raw.(string)
+		}
+		if raw, ok := cfg["group_by"]; ok {
+			routeConf.GroupByStr = expandStringArray(raw.([]interface{}))
+		}
+		if raw, ok := cfg["matchers"]; ok {
+			routeConf.Matchers = expandStringArray(raw.([]interface{}))
+		}
+		if raw, ok := cfg["continue"]; ok {
+			routeConf.Continue = raw.(bool)
 		}
 		if raw, ok := cfg["group_wait"]; ok {
 			routeConf.GroupWait = raw.(string)
@@ -1560,10 +1596,38 @@ func flattenRouteConfig(v *route) []interface{} {
 	if v.Routes != nil {
 		var routes []interface{}
 		for _, route := range v.Routes {
-			routes = append(routes, flattenRouteConfig(route)[0])
+			routes = append(routes, flattenChildRouteConfig(route)[0])
 		}
 		routeConf["child_route"] = routes
 	}
+	routeConf["group_wait"] = v.GroupWait
+	routeConf["group_interval"] = v.GroupInterval
+	routeConf["repeat_interval"] = v.RepeatInterval
+
+	if len(v.MuteTimeIntervals) > 0 {
+		routeConf["mute_time_intervals"] = v.MuteTimeIntervals
+	}
+	if len(v.ActiveTimeIntervals) > 0 {
+		routeConf["active_time_intervals"] = v.ActiveTimeIntervals
+	}
+
+	return []interface{}{routeConf}
+}
+
+func flattenChildRouteConfig(v *route) []interface{} {
+	routeConf := make(map[string]interface{})
+
+	routeConf["receiver"] = v.Receiver
+
+	if len(v.GroupByStr) > 0 {
+		routeConf["group_by"] = v.GroupByStr
+	}
+
+	if len(v.Matchers) > 0 {
+		routeConf["matchers"] = v.Matchers
+	}
+
+	routeConf["continue"] = v.Continue
 	routeConf["group_wait"] = v.GroupWait
 	routeConf["group_interval"] = v.GroupInterval
 	routeConf["repeat_interval"] = v.RepeatInterval
