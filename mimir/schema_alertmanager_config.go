@@ -571,12 +571,14 @@ func pushoverConfigFields() map[string]*schema.Schema {
 			Optional:     true,
 			Description:  "How often the Pushover servers will send the same notification to the user.",
 			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
 		},
 		"expire": {
 			Type:         schema.TypeString,
 			Optional:     true,
 			Description:  "How long your notification will continue to be retried for, unless the user acknowledges the notification.",
 			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
 		},
 		"html": {
 			Type:     schema.TypeBool,
@@ -1088,6 +1090,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Optional:     true,
 						Default:      "5m",
 						ValidateFunc: validateDuration,
+						StateFunc:    formatDuration,
 					},
 					"http_config": {
 						Type:        schema.TypeList,
@@ -1462,18 +1465,21 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Required:     true,
 						Description:  "How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.",
 						ValidateFunc: validateDuration,
+						StateFunc:    formatDuration,
 					},
 					"group_interval": {
 						Type:         schema.TypeString,
 						Required:     true,
 						Description:  "How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.",
 						ValidateFunc: validateDuration,
+						StateFunc:    formatDuration,
 					},
 					"repeat_interval": {
 						Type:         schema.TypeString,
 						Required:     true,
 						Description:  "How long to wait before sending a notification again if it has already been sent successfully for an alert.",
 						ValidateFunc: validateDuration,
+						StateFunc:    formatDuration,
 					},
 					"receiver": {
 						Type:        schema.TypeString,
@@ -1502,18 +1508,21 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Required:     true,
 									Description:  "How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.",
 									ValidateFunc: validateDuration,
+									StateFunc:    formatDuration,
 								},
 								"group_interval": {
 									Type:         schema.TypeString,
 									Required:     true,
 									Description:  "How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.",
 									ValidateFunc: validateDuration,
+									StateFunc:    formatDuration,
 								},
 								"repeat_interval": {
 									Type:         schema.TypeString,
 									Required:     true,
 									Description:  "How long to wait before sending a notification again if it has already been sent successfully for an alert.",
 									ValidateFunc: validateDuration,
+									StateFunc:    formatDuration,
 								},
 								"receiver": {
 									Type:        schema.TypeString,
