@@ -3,11 +3,11 @@
 This terraform provider allows you to interact with grafana mimir.
 
 Currently only these components could be managed with the api:
-  - [alertmanager](https://grafana.com/docs/mimir/v2.2.x/operators-guide/architecture/components/alertmanager/)
-  - [ruler](https://grafana.com/docs/mimir/v2.2.x/operators-guide/architecture/components/ruler/)
+  - [alertmanager](https://grafana.com/docs/mimir/v2.7.x/operators-guide/architecture/components/alertmanager/)
+  - [ruler](https://grafana.com/docs/mimir/v2.7.x/operators-guide/architecture/components/ruler/)
 
 
-See [Mimir API Reference](https://grafana.com/docs/mimir/v2.2.x/operators-guide/reference-http-api/)
+See [Mimir API Reference](https://grafana.com/docs/mimir/v2.7.x/operators-guide/reference-http-api/)
 
 ## Provider `mimir`
 
@@ -21,13 +21,24 @@ provider "mimir" {
 }
 ```
 
+### URI path
+
+- ruler_uri (default prefix: /prometheus)
+- alertmanager_uri (default prefix: /)
+
+> **Warning**
+> You may check and adapt provider uri path: `ruler_uri` and `alertmanager_uri`.
+
+
+### Authentication
+
 Grafana Mimir have no authentication support, so this is delegated to a reverse proxy.
 
-See [Grafana Mimir authentication and authorization](https://grafana.com/docs/mimir/v2.2.x/operators-guide/securing/authentication-and-authorization/)
+See [Grafana Mimir authentication and authorization](https://grafana.com/docs/mimir/v2.7.x/operators-guide/securing/authentication-and-authorization/)
 
-The provider support basic auth, token or headers.
+The provider support basic auth, token.
 
-### Basic auth
+#### Basic auth
 
 ```
 provider "mimir" {
@@ -39,7 +50,7 @@ provider "mimir" {
 }
 ```
 
-### Token
+#### Token
 
 ```
 provider "mimir" {
@@ -102,21 +113,7 @@ resource "mimir_rule_group_recording" "record" {
 
 ## Resource `mimir_alertmanager_config`
 
-Notification integrations Supported:
-
-  - email
-  - pagerduty
-  - opsgenie
-  - slack
-  - webhook
-  - wechat
-  - email
-  - pushover
-  - victorops
-  - sns
-  - telegram
-
-See https://prometheus.io/docs/alerting/latest/configuration/#receiver
+Notification integrations Supported: https://prometheus.io/docs/alerting/latest/configuration/#receiver
 
 Example:
 
