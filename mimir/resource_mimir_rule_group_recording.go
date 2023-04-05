@@ -213,7 +213,7 @@ func flattenRecordingRules(v []recordingRule) []map[string]interface{} {
 	for _, v := range v {
 		rule := make(map[string]interface{})
 		rule["record"] = v.Record
-		rule["expr"] = v.Expr
+		rule["expr"] = formatPromQLExpr(v.Expr)
 
 		if v.Labels != nil {
 			rule["labels"] = v.Labels

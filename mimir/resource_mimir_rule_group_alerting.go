@@ -240,7 +240,7 @@ func flattenAlertingRules(v []alertingRule) []map[string]interface{} {
 	for _, v := range v {
 		rule := make(map[string]interface{})
 		rule["alert"] = v.Alert
-		rule["expr"] = v.Expr
+		rule["expr"] = formatPromQLExpr(v.Expr)
 
 		if v.For != "" {
 			rule["for"] = v.For
