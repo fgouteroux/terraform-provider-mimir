@@ -56,6 +56,7 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 							Description:  "The duration for which the condition must be true before an alert fires.",
 							Optional:     true,
 							ValidateFunc: validateDuration,
+							StateFunc:    formatDuration,
 						},
 						"annotations": {
 							Type:         schema.TypeMap,

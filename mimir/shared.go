@@ -106,6 +106,11 @@ func validateDuration(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
+func formatDuration(v interface{}) string {
+	value, _ := model.ParseDuration(v.(string))
+	return value.String()
+}
+
 // SliceFind takes a slice and looks for an element in it. If found it will
 // return true otherwise false.
 func SliceFind(slice []string, val string) bool {
