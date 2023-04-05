@@ -50,6 +50,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 							Required:     true,
 							Description:  "The PromQL expression to evaluate.",
 							ValidateFunc: validatePromQLExpr,
+							StateFunc:    formatPromQLExpr,
 						},
 						"labels": {
 							Type:         schema.TypeMap,
@@ -187,7 +188,7 @@ func expandRecordingRules(v []interface{}) []recordingRule {
 		}
 
 		if raw, ok := data["expr"]; ok {
-			rule.Expr = raw.(string)
+			rule.Expr = formatPromQLExpr(raw)
 		}
 
 		if raw, ok := data["labels"]; ok {

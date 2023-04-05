@@ -121,3 +121,8 @@ func SliceFind(slice []string, val string) bool {
 	}
 	return false
 }
+
+func formatPromQLExpr(v interface{}) string {
+	value, _ := parser.ParseExpr(v.(string))
+	return parser.Prettify(value)
+}

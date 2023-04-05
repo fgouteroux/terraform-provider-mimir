@@ -50,6 +50,7 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 							Description:  "The PromQL expression to evaluate.",
 							Required:     true,
 							ValidateFunc: validatePromQLExpr,
+							StateFunc:    formatPromQLExpr,
 						},
 						"for": {
 							Type:         schema.TypeString,
@@ -202,7 +203,7 @@ func expandAlertingRules(v []interface{}) []alertingRule {
 		}
 
 		if raw, ok := data["expr"]; ok {
-			rule.Expr = raw.(string)
+			rule.Expr = formatPromQLExpr(raw)
 		}
 
 		if raw, ok := data["for"]; ok {
