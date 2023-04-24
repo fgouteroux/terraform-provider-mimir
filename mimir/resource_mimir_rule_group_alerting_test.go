@@ -151,6 +151,16 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.1.annotations.description", "test 2 alert description"),
 				),
 			},
+			{
+				Config: testAccResourceRuleGroupAlerting_prettify_promql_expr,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_prettify", "alert_1_prettify", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "name", "alert_1_prettify"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "rule.0.alert", "checkPrettifyPromQL"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "rule.0.expr", "up == 0\nunless\n  my_very_very_long_useless_metric_that_mean_nothing_but_necessary_to_check_prettify_promql > 300"),
+				),
+			},
 		},
 	})
 }
@@ -185,6 +195,17 @@ const testAccResourceRuleGroupAlerting_basic_update = `
 				summary = "test 2 alert summary"
 				description = "test 2 alert description"
 			}
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_prettify_promql_expr = `
+	resource "mimir_rule_group_alerting" "alert_1_prettify" {
+		name = "alert_1_prettify"
+		namespace = "namespace_1"
+		rule {
+			alert = "checkPrettifyPromQL"
+			expr  = "up==0 unless my_very_very_long_useless_metric_that_mean_nothing_but_necessary_to_check_prettify_promql > 300"
 		}
 	}
 `

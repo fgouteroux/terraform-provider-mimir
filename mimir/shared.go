@@ -3,6 +3,7 @@ package mimir
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/prometheus/common/model"
@@ -124,5 +125,6 @@ func SliceFind(slice []string, val string) bool {
 
 func formatPromQLExpr(v interface{}) string {
 	value, _ := parser.ParseExpr(v.(string))
-	return parser.Prettify(value)
+	// remove spaces causing decoding issues with multiline yaml marshal/unmarshall
+	return strings.TrimLeft(parser.Prettify(value), " ")
 }
