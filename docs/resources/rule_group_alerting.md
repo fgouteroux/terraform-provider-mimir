@@ -60,6 +60,7 @@ Optional:
 
 - `annotations` (Map of String) Annotations to add to each alert.
 - `for` (String) The duration for which the condition must be true before an alert fires.
+- `keep_firing_for` (String) How long an alert will continue firing after the condition that triggered it has cleared.
 - `labels` (Map of String) Labels to add or overwrite for each alert.
 
 
