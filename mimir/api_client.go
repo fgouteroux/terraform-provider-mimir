@@ -128,7 +128,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	switch {
 	case component == "ruler" && client.rulerURI != "":
 		fullURI = client.rulerURI + path
-	case component == "alertmanager" && client.rulerURI != "":
+	case component == "alertmanager" && client.alertmanagerURI != "":
 		fullURI = client.alertmanagerURI + path
 	default:
 		fullURI = client.uri + path
