@@ -34,6 +34,12 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateGroupRuleName,
 			},
+			"source_tenants": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"rule": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -72,8 +78,9 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	namespace := d.Get("namespace").(string)
 
 	rules := &recordingRuleGroup{
-		Name:  name,
-		Rules: expandRecordingRules(d.Get("rule").([]interface{})),
+		Name:          name,
+		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
+		Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
 	}
 	data, _ := yaml.Marshal(rules)
 	headers := map[string]string{"Content-Type": "application/yaml"}
@@ -129,6 +136,10 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set("source_tenants", data.SourceTenants)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diag.Diagnostics{}
 }
@@ -140,8 +151,9 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 		namespace := d.Get("namespace").(string)
 
 		rules := &recordingRuleGroup{
-			Name:  name,
-			Rules: expandRecordingRules(d.Get("rule").([]interface{})),
+			Name:          name,
+			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
+			Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
 		}
 		data, _ := yaml.Marshal(rules)
 		headers := map[string]string{"Content-Type": "application/yaml"}
@@ -243,6 +255,7 @@ type recordingRule struct {
 }
 
 type recordingRuleGroup struct {
-	Name  string          `yaml:"name"`
-	Rules []recordingRule `yaml:"rules"`
+	Name          string          `yaml:"name"`
+	Rules         []recordingRule `yaml:"rules"`
+	SourceTenants []string        `yaml:"source_tenants,omitempty"`
 }

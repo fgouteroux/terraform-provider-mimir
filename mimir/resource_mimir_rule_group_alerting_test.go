@@ -161,6 +161,18 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "rule.0.expr", "up == 0\nunless\n  my_very_very_long_useless_metric_that_mean_nothing_but_necessary_to_check_prettify_promql > 300"),
 				),
 			},
+			{
+				Config: testAccResourceRuleGroupAlerting_federated_rule_group,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_federated_rule_group", "alert_1", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "name", "alert_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.0", "tenant-a"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.1", "tenant-b"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "rule.0.alert", "test1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "rule.0.expr", "test1_metric"),
+				),
+			},
 		},
 	})
 }
@@ -206,6 +218,18 @@ const testAccResourceRuleGroupAlerting_prettify_promql_expr = `
 		rule {
 			alert = "checkPrettifyPromQL"
 			expr  = "up==0 unless my_very_very_long_useless_metric_that_mean_nothing_but_necessary_to_check_prettify_promql > 300"
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_federated_rule_group = `
+	resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
+		name = "alert_1"
+		source_tenants = ["tenant-a", "tenant-b"]
+		namespace = "namespace_1"
+		rule {
+			alert = "test1"
+			expr  = "test1_metric"
 		}
 	}
 `

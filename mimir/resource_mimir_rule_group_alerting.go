@@ -34,6 +34,12 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateGroupRuleName,
 			},
+			"source_tenants": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"rule": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -93,8 +99,9 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 	namespace := d.Get("namespace").(string)
 
 	rules := &alertingRuleGroup{
-		Name:  name,
-		Rules: expandAlertingRules(d.Get("rule").([]interface{})),
+		Name:          name,
+		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
+		Rules:         expandAlertingRules(d.Get("rule").([]interface{})),
 	}
 	data, _ := yaml.Marshal(rules)
 	headers := map[string]string{"Content-Type": "application/yaml"}
@@ -150,6 +157,10 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set("source_tenants", data.SourceTenants)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diag.Diagnostics{}
 }
@@ -161,8 +172,9 @@ func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.Resourc
 		namespace := d.Get("namespace").(string)
 
 		rules := &alertingRuleGroup{
-			Name:  name,
-			Rules: expandAlertingRules(d.Get("rule").([]interface{})),
+			Name:          name,
+			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
+			Rules:         expandAlertingRules(d.Get("rule").([]interface{})),
 		}
 		data, _ := yaml.Marshal(rules)
 		headers := map[string]string{"Content-Type": "application/yaml"}
@@ -295,6 +307,7 @@ type alertingRule struct {
 }
 
 type alertingRuleGroup struct {
-	Name  string         `yaml:"name"`
-	Rules []alertingRule `yaml:"rules"`
+	Name          string         `yaml:"name"`
+	Rules         []alertingRule `yaml:"rules"`
+	SourceTenants []string       `yaml:"source_tenants,omitempty"`
 }

@@ -29,6 +29,12 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateGroupRuleName,
 			},
+			"source_tenants": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"rule": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -77,6 +83,9 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(fmt.Errorf("unable to decode recording rule group '%s' data: %v", name, err))
 	}
 	if err := d.Set("rule", flattenRecordingRules(data.Rules)); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("source_tenants", data.SourceTenants); err != nil {
 		return diag.FromErr(err)
 	}
 

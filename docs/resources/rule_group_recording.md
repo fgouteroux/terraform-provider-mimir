@@ -36,6 +36,7 @@ resource "mimir_rule_group_recording" "record" {
 ### Optional
 
 - `namespace` (String) Recording Rule group namespace
+- `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 
 ### Read-Only
 

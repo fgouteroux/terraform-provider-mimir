@@ -112,6 +112,18 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.1.labels.key1", "val1"),
 				),
 			},
+			{
+				Config: testAccResourceRuleGroupRecording_federated_rule_group,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_federated_rule_group", "record_1", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "name", "record_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "source_tenants.0", "tenant-a"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "source_tenants.1", "tenant-b"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "rule.0.expr", "test1_metric"),
+				),
+			},
 		},
 	})
 }
@@ -141,6 +153,18 @@ const testAccResourceRuleGroupRecording_basic_update = `
 			labels = {
 				key1 = "val1"
 			}
+		}
+	}
+`
+
+const testAccResourceRuleGroupRecording_federated_rule_group = `
+	resource "mimir_rule_group_recording" "record_1_federated_rule_group" {
+		name = "record_1"
+		namespace = "namespace_1"
+		source_tenants = ["tenant-a", "tenant-b"]
+		rule {
+			record = "test1_info"
+			expr   = "test1_metric"
 		}
 	}
 `
