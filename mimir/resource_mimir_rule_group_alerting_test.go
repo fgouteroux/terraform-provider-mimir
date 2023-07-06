@@ -27,7 +27,7 @@ func TestAccResourceRuleGroupAlerting_expectValidationError(t *testing.T) {
 			},
 			{
 				Config:      testAccResourceRuleGroupAlerting_expectDurationValidationError,
-				ExpectError: regexp.MustCompile("not a valid duration string"),
+				ExpectError: regexp.MustCompile("unknown unit"),
 			},
 			{
 				Config:      testAccResourceRuleGroupAlerting_expectLabelNameValidationError,
