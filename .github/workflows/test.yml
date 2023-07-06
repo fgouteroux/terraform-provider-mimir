@@ -84,11 +84,11 @@ jobs:
     - name: Setup Grafana Mimir from ${{ matrix.mimir-version }}
       run: |
         docker pull grafana/mimir:${{ matrix.mimir-version }}
-        docker run
-          --name mimir
-          --entrypoint="/bin/sh" grafana/mimir:${{ matrix.mimir-version }}
-          -d
-          -p 8080:8080
+        docker run \
+          -d \
+          -p 8080:8080 \
+          --name mimir \
+          --entrypoint="/bin/sh" grafana/mimir:${{ matrix.mimir-version }} \
           -c "mimir -target=alertmanager,ruler -tenant-federation.enabled=true -ruler.tenant-federation.enabled=true"
 
     - name: Run acceptance test
