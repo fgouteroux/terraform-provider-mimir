@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	apiAlertsPath = "/api/v1/alerts"
+	apiAlertsPath          = "/api/v1/alerts"
+	enablePromQLExprFormat bool
 )
 
 func Provider(version string) func() *schema.Provider {
@@ -98,6 +99,12 @@ func Provider(version string) func() *schema.Provider {
 					DefaultFunc: schema.EnvDefaultFunc("MIMIR_DEBUG", false),
 					Description: "Enable debug mode to trace requests executed.",
 				},
+				"format_promql_expr": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_FORMAT_PROMQL_EXPR", false),
+					Description: "Enable the formatting of PromQL expression.",
+				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"mimir_alertmanager_config":  dataSourcemimirAlertmanagerConfig(),
@@ -142,6 +149,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		timeout:         d.Get("timeout").(int),
 		debug:           d.Get("debug").(bool),
 	}
+
+	enablePromQLExprFormat = d.Get("format_promql_expr").(bool)
 
 	client, err := NewAPIClient(opt)
 	return client, diag.FromErr(err)

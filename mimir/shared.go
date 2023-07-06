@@ -124,7 +124,10 @@ func SliceFind(slice []string, val string) bool {
 }
 
 func formatPromQLExpr(v interface{}) string {
-	value, _ := parser.ParseExpr(v.(string))
-	// remove spaces causing decoding issues with multiline yaml marshal/unmarshall
-	return strings.TrimLeft(parser.Prettify(value), " ")
+	if enablePromQLExprFormat {
+		value, _ := parser.ParseExpr(v.(string))
+		// remove spaces causing decoding issues with multiline yaml marshal/unmarshall
+		return strings.TrimLeft(parser.Prettify(value), " ")
+	}
+	return v.(string)
 }

@@ -1,6 +1,7 @@
 package mimir
 
 import (
+	"os"
 	"regexp"
 	"testing"
 
@@ -152,16 +153,6 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccResourceRuleGroupAlerting_prettify_promql_expr,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_prettify", "alert_1_prettify", client),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "name", "alert_1_prettify"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "namespace", "namespace_1"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "rule.0.alert", "checkPrettifyPromQL"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "rule.0.expr", "up == 0\nunless\n  my_very_very_long_useless_metric_that_mean_nothing_but_necessary_to_check_prettify_promql > 300"),
-				),
-			},
-			{
 				Config: testAccResourceRuleGroupAlerting_federated_rule_group,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_federated_rule_group", "alert_1", client),
@@ -175,6 +166,33 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccResourceRuleGroupAlerting_FormatPromQLExpr(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Setenv("MIMIR_FORMAT_PROMQL_EXPR", "true")
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupAlerting_prettify_promql_expr,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_prettify", "alert_1_prettify", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "name", "alert_1_prettify"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "rule.0.alert", "checkPrettifyPromQL"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_prettify", "rule.0.expr", "up == 0\nunless\n  my_very_very_long_useless_metric_that_mean_nothing_but_necessary_to_check_prettify_promql > 300"),
+				),
+			},
+		},
+	})
+	os.Setenv("MIMIR_FORMAT_PROMQL_EXPR", "false")
 }
 
 const testAccResourceRuleGroupAlerting_basic = `
