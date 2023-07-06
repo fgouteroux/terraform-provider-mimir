@@ -373,11 +373,10 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 	return receiverConf
 }
 
-func expandSnsSigV4Config(v interface{}) sigV4Config {
-	var sigV4ConfigConf sigV4Config
+func expandSnsSigV4Config(v interface{}) *sigV4Config {
+	sigV4ConfigConf := &sigV4Config{}
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
-		sigV4ConfigConf := &sigV4Config{}
 		cfg := data[0].(map[string]interface{})
 		sigV4ConfigConf.Region = cfg["region"].(string)
 		sigV4ConfigConf.AccessKey = cfg["access_key"].(string)
@@ -388,7 +387,7 @@ func expandSnsSigV4Config(v interface{}) sigV4Config {
 	return sigV4ConfigConf
 }
 
-func flattenSnsSigV4Config(v sigV4Config) []interface{} {
+func flattenSnsSigV4Config(v *sigV4Config) []interface{} {
 	sigV4ConfigConf := make(map[string]interface{})
 	sigV4ConfigConf["region"] = v.Region
 	sigV4ConfigConf["access_key"] = v.AccessKey

@@ -304,7 +304,7 @@ type snsConfig struct {
 	VSendResolved *bool             `yaml:"send_resolved,omitempty" json:"send_resolved,omitempty"`
 	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 	APIUrl        string            `yaml:"api_url,omitempty" json:"api_url,omitempty"`
-	Sigv4         sigV4Config       `yaml:"sigv4,omitempty" json:"sigv4,omitempty"`
+	Sigv4         *sigV4Config      `yaml:"sigv4,omitempty" json:"sigv4,omitempty"`
 	TopicARN      string            `yaml:"topic_arn,omitempty" json:"topic_arn,omitempty"`
 	PhoneNumber   string            `yaml:"phone_number,omitempty" json:"phone_number,omitempty"`
 	TargetARN     string            `yaml:"target_arn,omitempty" json:"target_arn,omitempty"`
