@@ -3,11 +3,11 @@
 This terraform provider allows you to interact with grafana mimir.
 
 Currently only these components could be managed with the api:
-  - [alertmanager](https://grafana.com/docs/mimir/v2.7.x/operators-guide/architecture/components/alertmanager/)
-  - [ruler](https://grafana.com/docs/mimir/v2.7.x/operators-guide/architecture/components/ruler/)
+  - [alertmanager](https://grafana.com/docs/mimir/latest/references/architecture/components/alertmanager/)
+  - [ruler](https://grafana.com/docs/mimir/latest/references/architecture/components/ruler/)
 
 
-See [Mimir API Reference](https://grafana.com/docs/mimir/v2.7.x/operators-guide/reference-http-api/)
+See [Mimir API Reference](https://grafana.com/docs/mimir/latest/references/http-api/)
 
 ## Provider `mimir`
 
