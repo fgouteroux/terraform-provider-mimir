@@ -8,13 +8,11 @@ description: |-
 
 # mimir_alertmanager_config (Resource)
 
-Manage alertmanager configuration.
 
-For full documention on alertmanager config, see [here](https://prometheus.io/docs/alerting/latest/configuration/#configuration)
 
-## Basic Example
+## Example Usage
 
-```hcl
+```terraform
 resource "mimir_alertmanager_config" "mytenant" {
   route {
     group_by = ["..."]
@@ -1338,4 +1336,10 @@ Optional:
 - `begin` (Number)
 - `end` (Number)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import mimir_alertmanager_config.mytenant {{org_id}}
+```

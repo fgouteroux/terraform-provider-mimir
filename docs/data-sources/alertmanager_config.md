@@ -8,9 +8,11 @@ description: |-
 
 # mimir_alertmanager_config (Data Source)
 
-## Basic Example
 
-```hcl
+
+## Example Usage
+
+```terraform
 data "mimir_alertmanager_config" "mytenant" {}
 ```
 

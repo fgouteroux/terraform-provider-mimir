@@ -1,0 +1,1 @@
+terraform import mimir_rule_group_recording.test {{namespace/name}}

@@ -1,0 +1,1 @@
+data "mimir_alertmanager_config" "mytenant" {}

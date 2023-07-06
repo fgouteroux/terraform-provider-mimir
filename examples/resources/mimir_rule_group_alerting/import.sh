@@ -1,0 +1,1 @@
+terraform import mimir_rule_group_alerting.test {{namespace/name}}

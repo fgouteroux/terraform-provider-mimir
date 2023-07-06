@@ -1,0 +1,31 @@
+---
+layout: ""
+page_title: "Provider: Mimir"
+description: |-
+  The Mimir provider provides configuration management resources for Grafana Mimir.
+---
+
+# Mimir Provider
+
+The Mimir provider provides configuration management resources for
+[Grafana Mimir](https://grafana.com/oss/mimir/).
+
+## Example Usage
+
+### Creating a Mimir provider
+
+{{ tffile "examples/provider/provider.tf" }}
+
+### Creating a Mimir provider with basic auth
+
+{{ tffile "examples/provider/provider-basic-auth.tf" }}
+
+### Creating a Mimir provider with token auth
+
+{{ tffile "examples/provider/provider-token-auth.tf" }}
+
+### Creating a Mimir provider with custom headers
+
+{{ tffile "examples/provider/provider-custom-headers.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

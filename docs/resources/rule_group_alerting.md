@@ -8,13 +8,11 @@ description: |-
 
 # mimir_rule_group_alerting (Resource)
 
-Manage prometheus alerting rule group.
 
-For full documention on prometheus alerting rule, see [here](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
 
-## Basic Example
+## Example Usage
 
-```hcl
+```terraform
 resource "mimir_rule_group_alerting" "test" {
   name      = "test1"
   namespace = "namespace1"
@@ -64,4 +62,10 @@ Optional:
 - `keep_firing_for` (String) How long an alert will continue firing after the condition that triggered it has cleared.
 - `labels` (Map of String) Labels to add or overwrite for each alert.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import mimir_rule_group_alerting.test {{namespace/name}}
+```

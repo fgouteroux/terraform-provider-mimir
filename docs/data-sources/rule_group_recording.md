@@ -8,9 +8,11 @@ description: |-
 
 # mimir_rule_group_recording (Data Source)
 
-## Basic Example
 
-```hcl
+
+## Example Usage
+
+```terraform
 data "mimir_rule_group_recording" "record" {
   name      = "test1"
   namespace = "namespace1"
@@ -32,6 +34,7 @@ data "mimir_rule_group_recording" "record" {
 
 - `id` (String) The ID of this resource.
 - `rule` (List of Object) (see [below for nested schema](#nestedatt--rule))
+- `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 
 <a id="nestedatt--rule"></a>
 ### Nested Schema for `rule`

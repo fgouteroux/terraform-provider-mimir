@@ -8,14 +8,12 @@ description: |-
 
 # mimir_rule_group_recording (Resource)
 
-Manage prometheus recording rule group.
 
-For full documention on prometheus recording rule, see [here](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/)
 
-## Basic Example
+## Example Usage
 
-```hcl
-resource "mimir_rule_group_recording" "record" {
+```terraform
+resource "mimir_rule_group_recording" "test" {
   name      = "test1"
   namespace = "namespace1"
   rule {
@@ -54,4 +52,10 @@ Optional:
 
 - `labels` (Map of String) Labels to add or overwrite before storing the result.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import mimir_rule_group_recording.test {{namespace/name}}
+```
