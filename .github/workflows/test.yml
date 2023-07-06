@@ -58,11 +58,10 @@ jobs:
           - ubuntu-latest
         terraform:
           - '0.12.*'
-          - '1.2.*'
-          - '1.3.*'
           - '1.4.*'
+          - '1.5.*'
         mimir-version:
-          - '2.7.2'
+          - '2.8.0'
           - '2.9.0'
     steps:
 
