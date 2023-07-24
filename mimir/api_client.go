@@ -20,6 +20,7 @@ type apiClientOpt struct {
 	uri             string
 	rulerURI        string
 	alertmanagerURI string
+	configPrefix    string
 	cert            string
 	key             string
 	ca              string
@@ -37,6 +38,7 @@ type apiClient struct {
 	uri             string
 	rulerURI        string
 	alertmanagerURI string
+	configPrefix    string
 	insecure        bool
 	token           string
 	username        string
@@ -106,6 +108,7 @@ func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 		uri:             opt.uri,
 		rulerURI:        opt.rulerURI,
 		alertmanagerURI: opt.alertmanagerURI,
+		configPrefix:    opt.configPrefix,
 		insecure:        opt.insecure,
 		token:           opt.token,
 		username:        opt.username,

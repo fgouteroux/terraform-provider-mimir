@@ -105,6 +105,12 @@ func Provider(version string) func() *schema.Provider {
 					DefaultFunc: schema.EnvDefaultFunc("MIMIR_FORMAT_PROMQL_EXPR", false),
 					Description: "Enable the formatting of PromQL expression.",
 				},
+				"config_prefix": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					Default:      "/config",
+					Description: "The path on top of the ruler uri used to access the config.",
+				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"mimir_alertmanager_config":  dataSourcemimirAlertmanagerConfig(),
@@ -145,6 +151,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		uri:             d.Get("uri").(string),
 		rulerURI:        d.Get("ruler_uri").(string),
 		alertmanagerURI: d.Get("alertmanager_uri").(string),
+		configPrefix:    d.Get("config_prefix").(string),
 		headers:         headers,
 		timeout:         d.Get("timeout").(int),
 		debug:           d.Get("debug").(bool),

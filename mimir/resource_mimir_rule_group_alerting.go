@@ -106,7 +106,7 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 	data, _ := yaml.Marshal(rules)
 	headers := map[string]string{"Content-Type": "application/yaml"}
 
-	path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+	path := fmt.Sprintf("%s/v1/rules/%s", client.configPrefix, namespace)
 	_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
 	baseMsg := fmt.Sprintf("Cannot create alerting rule group '%s' -", name)
 	err = handleHTTPError(err, baseMsg)
@@ -126,7 +126,7 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 	name := idArr[1]
 
 	var headers map[string]string
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	path := fmt.Sprintf("%s/v1/rules/%s/%s", client.configPrefix, namespace, name)
 	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
 
 	baseMsg := fmt.Sprintf("Cannot read alerting rule group '%s' -", name)
@@ -179,7 +179,7 @@ func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.Resourc
 		data, _ := yaml.Marshal(rules)
 		headers := map[string]string{"Content-Type": "application/yaml"}
 
-		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+		path := fmt.Sprintf("%s/v1/rules/%s", client.configPrefix, namespace)
 		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
 		baseMsg := fmt.Sprintf("Cannot update alerting rule group '%s' -", name)
 
@@ -196,7 +196,7 @@ func resourcemimirRuleGroupAlertingDelete(ctx context.Context, d *schema.Resourc
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
 	var headers map[string]string
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	path := fmt.Sprintf("%s/v1/rules/%s/%s", client.configPrefix, namespace, name)
 	_, err := client.sendRequest("ruler", "DELETE", path, "", headers)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf(
