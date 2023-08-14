@@ -50,7 +50,7 @@ type apiClient struct {
 // Make a new api client for RESTful calls
 func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 	if opt.uri == "" && opt.rulerURI == "" && opt.alertmanagerURI == "" {
-		return nil, fmt.Errorf("no provider URIs defined. Please set uri, or ruler_uui/alertmanager_uri")
+		return nil, fmt.Errorf("no provider URIs defined. Please set uri, or ruler_uri/alertmanager_uri")
 	}
 
 	/* Remove any trailing slashes since we will append
