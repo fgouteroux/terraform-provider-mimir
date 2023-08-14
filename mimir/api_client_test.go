@@ -28,6 +28,7 @@ func TestAPIClient(t *testing.T) {
 		insecure:        false,
 		username:        "",
 		password:        "",
+		proxyURL:        "",
 		token:           "",
 		cert:            "",
 		key:             "",
@@ -36,10 +37,12 @@ func TestAPIClient(t *testing.T) {
 		timeout:         2,
 		debug:           debug,
 	}
-	client, _ := NewAPIClient(opt)
+	client, err := NewAPIClient(opt)
+	if err != nil {
+		t.Fatalf("client_test.go: %s", err)
+	}
 
 	var res string
-	var err error
 
 	if debug {
 		log.Printf("api_client_test.go: Testing standard OK request\n")

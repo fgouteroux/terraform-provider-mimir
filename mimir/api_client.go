@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -27,6 +28,7 @@ type apiClientOpt struct {
 	insecure        bool
 	username        string
 	password        string
+	proxyURL        string
 	headers         map[string]string
 	timeout         int
 	debug           bool
@@ -96,6 +98,16 @@ func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 
 	tr := &http.Transport{
 		TLSClientConfig: tlsConfig,
+		Proxy:           http.ProxyFromEnvironment,
+	}
+
+	if opt.proxyURL != "" {
+		log.Printf("api_client.go: Using proxy: %s\n", opt.proxyURL)
+		proxy, err := url.Parse(opt.proxyURL)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing proxy url: %s", err)
+		}
+		tr.Proxy = http.ProxyURL(proxy)
 	}
 
 	client := apiClient{

@@ -81,6 +81,7 @@ func setupClient() *apiClientOpt {
 		insecure:        false,
 		username:        "",
 		password:        "",
+		proxyURL:        "",
 		token:           "",
 		cert:            "",
 		key:             "",

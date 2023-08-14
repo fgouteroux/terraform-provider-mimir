@@ -60,6 +60,12 @@ func Provider(version string) func() *schema.Provider {
 					DefaultFunc: schema.EnvDefaultFunc("MIMIR_PASSWORD", nil),
 					Description: "When set, will use this password for BASIC auth to the API.",
 				},
+				"proxy_url": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "URL to the proxy to be used for all API requests",
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_PROXY_URL", nil),
+				},
 				"insecure": {
 					Type:        schema.TypeBool,
 					Optional:    true,
@@ -138,6 +144,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		token:           d.Get("token").(string),
 		username:        d.Get("username").(string),
 		password:        d.Get("password").(string),
+		proxyURL:        d.Get("proxy_url").(string),
 		cert:            d.Get("cert").(string),
 		key:             d.Get("key").(string),
 		ca:              d.Get("ca").(string),
