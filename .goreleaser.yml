@@ -76,3 +76,4 @@ changelog:
     # Commit messages matching the regexp listed here will be removed from
     exclude:
       - '^doc:'
+      - '^ci:'

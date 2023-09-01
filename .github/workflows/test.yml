@@ -58,7 +58,6 @@ jobs:
           - ubuntu-latest
         terraform:
           - '0.12.*'
-          - '1.4.*'
           - '1.5.*'
         mimir-version:
           - '2.8.0'
