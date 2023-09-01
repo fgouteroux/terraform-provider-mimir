@@ -3,6 +3,7 @@ package mimir
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -14,6 +15,8 @@ var (
 	groupRuleNameRegexp = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-_.]*$`)
 	labelNameRegexp     = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 	metricNameRegexp    = regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
+	validTime           = "^((([01][0-9])|(2[0-3])):[0-5][0-9])$|(^24:00$)"
+	validTimeRE         = regexp.MustCompile(validTime)
 )
 
 func handleHTTPError(err error, baseMsg string) error {
@@ -130,4 +133,45 @@ func formatPromQLExpr(v interface{}) string {
 		return strings.TrimLeft(parser.Prettify(value), " ")
 	}
 	return v.(string)
+}
+
+// Converts a string of the form "HH:MM" into the number of minutes elapsed in the day.
+func parseTime(in string) (mins int) {
+	timestampComponents := strings.Split(in, ":")
+	timeStampHours, _ := strconv.Atoi(timestampComponents[0])
+	timeStampMinutes, _ := strconv.Atoi(timestampComponents[1])
+
+	// Timestamps are stored as minutes elapsed in the day, so multiply hours by 60.
+	mins = timeStampHours*60 + timeStampMinutes
+	return mins
+}
+
+func validateTime(v interface{}, k string) (ws []string, errors []error) {
+	in := v.(string)
+
+	if in == "" {
+		return
+	}
+
+	if !validTimeRE.MatchString(in) {
+		errors = append(errors, fmt.Errorf("\"%s\": couldn't parse timestamp %s, invalid format", k, in))
+		return
+	}
+	timestampComponents := strings.Split(in, ":")
+	if len(timestampComponents) != 2 {
+		errors = append(errors, fmt.Errorf("\"%s\": invalid timestamp format: %s", k, in))
+		return
+	}
+	timeStampHours, err := strconv.Atoi(timestampComponents[0])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("\"%s\": %v", k, err))
+	}
+	timeStampMinutes, err := strconv.Atoi(timestampComponents[1])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("\"%s\": %v", k, err))
+	}
+	if timeStampHours < 0 || timeStampHours > 24 || timeStampMinutes < 0 || timeStampMinutes > 60 {
+		errors = append(errors, fmt.Errorf("\"%s\": timestamp %s out of range", k, in))
+	}
+	return
 }

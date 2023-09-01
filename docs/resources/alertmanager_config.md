@@ -1315,8 +1315,8 @@ Optional:
 
 Optional:
 
-- `end_minute` (Number)
-- `start_minute` (Number)
+- `end_time` (String) End time in HH:MM format.
+- `start_time` (String) Start time in HH:MM format.
 
 
 <a id="nestedblock--time_interval--time_intervals--weekdays"></a>

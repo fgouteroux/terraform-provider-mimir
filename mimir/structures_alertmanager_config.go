@@ -1,6 +1,7 @@
 package mimir
 
 import (
+	"fmt"
 	"net"
 	"net/url"
 	"time"
@@ -1752,11 +1753,11 @@ func expandTimeRange(v []interface{}) []timeinterval.TimeRange {
 		var cfg timeinterval.TimeRange
 		data := v.(map[string]interface{})
 
-		if raw, ok := data["start_minute"]; ok {
-			cfg.StartMinute = raw.(int)
+		if raw, ok := data["start_time"]; ok {
+			cfg.StartMinute = parseTime(raw.(string))
 		}
-		if raw, ok := data["end_minute"]; ok {
-			cfg.EndMinute = raw.(int)
+		if raw, ok := data["end_time"]; ok {
+			cfg.EndMinute = parseTime(raw.(string))
 		}
 
 		timeRangeConf = append(timeRangeConf, cfg)
@@ -1773,8 +1774,15 @@ func flattenTimeRange(v []timeinterval.TimeRange) []interface{} {
 
 	for _, v := range v {
 		cfg := make(map[string]interface{})
-		cfg["start_minute"] = v.StartMinute
-		cfg["end_minute"] = v.EndMinute
+
+		startHr := v.StartMinute / 60
+		endHr := v.EndMinute / 60
+		startMin := v.StartMinute % 60
+		endMin := v.EndMinute % 60
+
+		cfg["start_time"] = fmt.Sprintf("%02d:%02d", startHr, startMin)
+		cfg["end_time"] = fmt.Sprintf("%02d:%02d", endHr, endMin)
+
 		timeRangeConf = append(timeRangeConf, cfg)
 	}
 	return timeRangeConf

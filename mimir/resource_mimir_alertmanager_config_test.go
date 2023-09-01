@@ -188,6 +188,8 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.name", "offhours"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.begin", "0"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.end", "6"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.times.0.start_time", "03:00"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.times.0.end_time", "09:00"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.location", "UTC"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
@@ -206,6 +208,8 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.name", "offhours"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.begin", "5"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.end", "6"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.times.0.start_time", "03:30"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.times.0.end_time", "09:30"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -426,6 +430,10 @@ const testAccResourceAlertmanagerConfig_time_interval = `
             begin = 0
             end = 6
           }
+          times {
+            start_time = "03:00"
+            end_time   = "09:00"
+          }
         }
       }
       route {
@@ -455,6 +463,10 @@ const testAccResourceAlertmanagerConfig_time_interval_update = `
           weekdays {
             begin = 5
             end = 6
+          }
+          times {
+            start_time = "03:30"
+            end_time   = "09:30"
           }
         }
       }
