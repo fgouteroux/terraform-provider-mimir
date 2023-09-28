@@ -124,6 +124,17 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "rule.0.expr", "test1_metric"),
 				),
 			},
+			{
+				Config: testAccResourceRuleGroupRecording_interval,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_interval", "record_1", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "name", "record_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "interval", "6h"),
+				),
+			},
 		},
 	})
 }
@@ -167,4 +178,16 @@ const testAccResourceRuleGroupRecording_federated_rule_group = `
 			expr   = "test1_metric"
 		}
 	}
+`
+
+const testAccResourceRuleGroupRecording_interval = `
+        resource "mimir_rule_group_recording" "record_1_interval" {
+                name = "record_1"
+                namespace = "namespace_1"
+                interval = "6h"
+                rule {
+                        record = "test1_info"
+                        expr   = "test1_metric"
+                }
+        }
 `

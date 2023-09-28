@@ -29,6 +29,11 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateGroupRuleName,
 			},
+			"interval": {
+				Type:        schema.TypeString,
+				Description: "Recording Rule group interval",
+				Computed:    true,
+			},
 			"source_tenants": {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -83,6 +88,9 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(fmt.Errorf("unable to decode recording rule group '%s' data: %v", name, err))
 	}
 	if err := d.Set("rule", flattenRecordingRules(data.Rules)); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("interval", data.Interval); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("source_tenants", data.SourceTenants); err != nil {
