@@ -34,6 +34,12 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateGroupRuleName,
 			},
+			"interval": {
+				Type:         schema.TypeString,
+				Description:  "Recording Rule interval",
+				Optional:     true,
+				ValidateFunc: validateDuration,
+			},
 			"source_tenants": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -79,6 +85,7 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 
 	rules := &recordingRuleGroup{
 		Name:          name,
+		Interval:      d.Get("interval").(string),
 		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 		Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
 	}
@@ -136,6 +143,10 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set("interval", data.Interval)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	err = d.Set("source_tenants", data.SourceTenants)
 	if err != nil {
 		return diag.FromErr(err)
@@ -152,6 +163,7 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 
 		rules := &recordingRuleGroup{
 			Name:          name,
+			Interval:      d.Get("interval").(string),
 			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 			Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
 		}
@@ -256,6 +268,7 @@ type recordingRule struct {
 
 type recordingRuleGroup struct {
 	Name          string          `yaml:"name"`
+	Interval      string          `yaml:"interval,omitempty"`
 	Rules         []recordingRule `yaml:"rules"`
 	SourceTenants []string        `yaml:"source_tenants,omitempty"`
 }
