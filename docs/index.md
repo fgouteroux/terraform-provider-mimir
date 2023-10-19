@@ -18,6 +18,7 @@ The Mimir provider provides configuration management resources for
 provider "mimir" {
   ruler_uri = "http://127.0.0.1:8080/prometheus"
   alertmanager_uri = "http://127.0.0.1:8080"
+  distributor_uri = "http://127.0.0.1:8080/distributor"
   org_id = "mytenant"
 }
 ```
@@ -28,6 +29,7 @@ provider "mimir" {
 provider "mimir" {
   ruler_uri = "http://127.0.0.1:8080/prometheus"
   alertmanager_uri = "http://127.0.0.1:8080"
+  distributor_uri = "http://127.0.0.1:8080/distributor"
   org_id = "mytenant"
   username = "user"
   password = "password"
@@ -40,6 +42,7 @@ provider "mimir" {
 provider "mimir" {
   ruler_uri = "http://127.0.0.1:8080/prometheus"
   alertmanager_uri = "http://127.0.0.1:8080"
+  distributor_uri = "http://127.0.0.1:8080/distributor"
   org_id = "mytenant"
   token = "supersecrettoken"
 }
@@ -51,6 +54,7 @@ provider "mimir" {
 provider "mimir" {
   ruler_uri = "http://127.0.0.1:8080/prometheus"
   alertmanager_uri = "http://127.0.0.1:8080"
+  distributor_uri = "http://127.0.0.1:8080/distributor"
   org_id = "mytenant"
   header = {
     "Custom-Auth" = "Custom value"
@@ -71,6 +75,7 @@ provider "mimir" {
 - `ca` (String) Client ca for client authentication
 - `cert` (String) Client cert for client authentication
 - `debug` (Boolean) Enable debug mode to trace requests executed.
+- `distributor_uri` (String) mimir distributor base url
 - `format_promql_expr` (Boolean) Enable the formatting of PromQL expression.
 - `headers` (Map of String) A map of header names and values to set on all outbound requests.
 - `insecure` (Boolean) When using https, this disables TLS verification of the host.
