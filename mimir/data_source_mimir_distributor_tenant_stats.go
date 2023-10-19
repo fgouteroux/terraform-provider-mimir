@@ -3,19 +3,19 @@ package mimir
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nfx/go-htmltable"
-	"gopkg.in/yaml.v3"
 )
 
 type Stats struct {
 	User            string `header:"User"`
-	Series          string `header:"# Series"`
-	TotalIngestRage string `header:"Total Ingest Rate"`
-	APIIngestRate   string `header:"API Ingest Rate"`
+	Series          int    `header:"# Series"`
+	TotalIngestRate string `header:"Total Ingest Rate"`
+	ApiIngestRate   string `header:"API Ingest Rate"`
 	RuleIngestRate  string `header:"Rule Ingest Rate"`
 }
 
@@ -70,7 +70,7 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 	var headers map[string]string
 	jobraw, err := client.sendRequest("distributor", "GET", "/all_user_stats", "", headers)
 
-	baseMsg := fmt.Println("Cannot read user stats")
+	baseMsg := fmt.Sprintf("Cannot read user stats")
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		if strings.Contains(err.Error(), "response code '404'") {
@@ -89,12 +89,27 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 	// transform the output into a list of maps
 	var stats []map[string]interface{}
 	for _, stat := range output {
+
+		// convert the string values to float
+		totalIngestRate, err := strconv.ParseFloat(stat.TotalIngestRate, 64)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("unable to convert total ingest rate to float: %v", err))
+		}
+		apiIngestRate, err := strconv.ParseFloat(stat.ApiIngestRate, 64)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("unable to convert api ingest rate to float: %v", err))
+		}
+		ruleIngestRate, err := strconv.ParseFloat(stat.RuleIngestRate, 64)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("unable to convert rule ingest rate to float: %v", err))
+		}
+
 		stats = append(stats, map[string]interface{}{
 			"user":              stat.User,
 			"series":            stat.Series,
-			"total_ingest_rate": stat.TotalIngestRate,
-			"api_ingest_rate":   stat.ApiIngestRate,
-			"rule_ingest_rate":  stat.RuleIngestRate,
+			"total_ingest_rate": totalIngestRate,
+			"api_ingest_rate":   apiIngestRate,
+			"rule_ingest_rate":  ruleIngestRate,
 		})
 	}
 

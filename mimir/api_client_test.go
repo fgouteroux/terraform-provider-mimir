@@ -25,6 +25,7 @@ func TestAPIClient(t *testing.T) {
 		uri:             "http://127.0.0.1:8082/",
 		rulerURI:        "http://127.0.0.1:8082/",
 		alertmanagerURI: "http://127.0.0.1:8082/",
+		distributorURI:  "http://127.0.0.1:8082/",
 		insecure:        false,
 		username:        "",
 		password:        "",
