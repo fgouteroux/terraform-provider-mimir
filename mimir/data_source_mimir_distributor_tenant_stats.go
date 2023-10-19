@@ -3,12 +3,14 @@ package mimir
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nfx/go-htmltable"
+	"golang.org/x/net/html"
 )
 
 type Stats struct {
@@ -30,9 +32,15 @@ func dataSourcemimirDistributorTenantStats() *schema.Resource {
 				ForceNew:    true,
 				Optional:    true,
 			},
+			"replication_factor": {
+				Type:        schema.TypeInt,
+				Description: "Stats replication factor",
+				Computed:    true,
+			},
 			"stats": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Description: "Stats list",
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"user": {
@@ -80,6 +88,30 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 		return diag.FromErr(err)
 	}
 
+	// get replication factor
+	var replicationFactor int
+	doc, err := html.Parse(strings.NewReader(jobraw))
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("unable to parse html: %v", err))
+	}
+
+	var f func(*html.Node)
+	f = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "p" {
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+				if c.Type == html.ElementNode && c.Data == "b" {
+					re := regexp.MustCompile(`\d+`)
+					replicationFactor, _ = strconv.Atoi(re.FindString(c.FirstChild.Data))
+				}
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
+		}
+	}
+	f(doc)
+
+	// get the stats
 	output, err := htmltable.NewSliceFromString[Stats](jobraw)
 
 	if err != nil {
@@ -122,6 +154,10 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 			}
 		}
 		stats = filteredStats
+	}
+
+	if err := d.Set("replication_factor", replicationFactor); err != nil {
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("stats", stats); err != nil {
