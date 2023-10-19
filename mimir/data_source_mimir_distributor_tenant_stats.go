@@ -17,7 +17,7 @@ type Stats struct {
 	User            string `header:"User"`
 	Series          int    `header:"# Series"`
 	TotalIngestRate string `header:"Total Ingest Rate"`
-	ApiIngestRate   string `header:"API Ingest Rate"`
+	APIIngestRate   string `header:"API Ingest Rate"`
 	RuleIngestRate  string `header:"Rule Ingest Rate"`
 }
 
@@ -78,7 +78,7 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 	var headers map[string]string
 	jobraw, err := client.sendRequest("distributor", "GET", "/all_user_stats", "", headers)
 
-	baseMsg := fmt.Sprintf("Cannot read user stats")
+	baseMsg := "Cannot read user stats"
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		if strings.Contains(err.Error(), "response code '404'") {
@@ -127,7 +127,7 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("unable to convert total ingest rate to float: %v", err))
 		}
-		apiIngestRate, err := strconv.ParseFloat(stat.ApiIngestRate, 64)
+		apiIngestRate, err := strconv.ParseFloat(stat.APIIngestRate, 64)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("unable to convert api ingest rate to float: %v", err))
 		}
