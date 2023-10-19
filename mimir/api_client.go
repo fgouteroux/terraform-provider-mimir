@@ -51,7 +51,6 @@ type apiClient struct {
 
 // Make a new api client for RESTful calls
 func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
-
 	if opt.uri == "" && opt.rulerURI == "" && opt.alertmanagerURI == "" && opt.distributorURI == "" {
 		return nil, fmt.Errorf("no provider URIs defined. Please set uri, or ruler_uri/alertmanager_uri/distributor_uri")
 	}

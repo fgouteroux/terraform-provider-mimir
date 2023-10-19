@@ -121,7 +121,6 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 	// transform the output into a list of maps
 	var stats []map[string]interface{}
 	for _, stat := range output {
-
 		// convert the string values to float
 		totalIngestRate, err := strconv.ParseFloat(stat.TotalIngestRate, 64)
 		if err != nil {
