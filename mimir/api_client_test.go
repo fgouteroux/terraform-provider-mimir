@@ -3,6 +3,7 @@ package mimir
 // Largely copied from https://github.com/Mastercard/terraform-provider-restapi/blob/master/restapi/api_client_test.go
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"testing"
@@ -13,33 +14,24 @@ var apiClientServer *http.Server
 
 func TestAPIClient(t *testing.T) {
 	debug := false
+	address := "127.0.0.1:8082"
 
 	if debug {
-		log.Println("client_test.go: Starting HTTP server")
+		log.Println("api_client_test.go: Starting HTTP server")
 	}
-	setupAPIClientServer(debug)
+	setupAPIClientServer(debug, address)
 	defer shutdownAPIClientServer()
 
 	/* Notice the intentional trailing / */
 	opt := &apiClientOpt{
-		uri:             "http://127.0.0.1:8082/",
-		rulerURI:        "http://127.0.0.1:8082/",
-		alertmanagerURI: "http://127.0.0.1:8082/",
-		insecure:        false,
-		username:        "",
-		password:        "",
-		proxyURL:        "",
-		token:           "",
-		cert:            "",
-		key:             "",
-		ca:              "",
-		headers:         make(map[string]string, 0),
-		timeout:         2,
-		debug:           debug,
+		uri:     "http://127.0.0.1:8082/",
+		headers: make(map[string]string, 0),
+		timeout: 2,
+		debug:   debug,
 	}
 	client, err := NewAPIClient(opt)
 	if err != nil {
-		t.Fatalf("client_test.go: %s", err)
+		t.Fatalf("api_client_test.go: Failed to init api client, err: %v", err)
 	}
 
 	var res string
@@ -50,10 +42,10 @@ func TestAPIClient(t *testing.T) {
 	var headers map[string]string
 	res, err = client.sendRequest("", "GET", "/ok", "", headers)
 	if err != nil {
-		t.Fatalf("client_test.go: %s", err)
+		t.Fatalf("api_client_test.go: %s", err)
 	}
 	if res != "It works!" {
-		t.Fatalf("client_test.go: Got back '%s' but expected 'It works!'\n", res)
+		t.Fatalf("api_client_test.go: Got back '%s' but expected 'It works!'\n", res)
 	}
 
 	if debug {
@@ -61,10 +53,10 @@ func TestAPIClient(t *testing.T) {
 	}
 	res, err = client.sendRequest("", "GET", "/redirect", "", headers)
 	if err != nil {
-		t.Fatalf("client_test.go: %s", err)
+		t.Fatalf("api_client_test.go: %s", err)
 	}
 	if res != "It works!" {
-		t.Fatalf("client_test.go: Got back '%s' but expected 'It works!'\n", res)
+		t.Fatalf("api_client_test.go: Got back '%s' but expected 'It works!'\n", res)
 	}
 
 	/* Verify timeout works */
@@ -74,18 +66,186 @@ func TestAPIClient(t *testing.T) {
 	_, err = client.sendRequest("", "GET", "/slow", "", headers)
 	if err != nil {
 		if debug {
-			log.Println("client_test.go: slow request expected")
+			log.Println("api_client_test.go: slow request expected")
 		}
 	} else {
-		t.Fatalf("client_test.go: Timeout did not trigger on slow request")
+		t.Fatalf("api_client_test.go: Timeout did not trigger on slow request")
 	}
 
 	if debug {
-		log.Println("client_test.go: Stopping HTTP server")
+		log.Println("api_client_test.go: Stopping HTTP server")
 	}
 }
 
-func setupAPIClientServer(debug bool) {
+func TestAPIClientTLSUnsecure(t *testing.T) {
+	debug := false
+	address := "127.0.0.1:8083"
+	setupAPIClientServer(debug, address)
+	defer shutdownAPIClientServer()
+
+	/* Notice the intentional trailing / */
+	opt := &apiClientOpt{
+		uri:      fmt.Sprintf("https://%s/", address),
+		insecure: true,
+		cert:     "../tests/certs/server.crt",
+		key:      "../tests/certs/server.key",
+		ca:       "../tests/certs/ca.crt",
+		headers:  make(map[string]string, 0),
+		timeout:  2,
+		debug:    debug,
+	}
+	_, err := NewAPIClient(opt)
+	if err != nil {
+		t.Fatalf("api_client_test.go: Failed to init api client, err: %v", err)
+	}
+}
+
+func TestAPIClientTLS(t *testing.T) {
+	debug := false
+	address := "127.0.0.1:8084"
+	setupAPIClientServer(debug, address)
+	defer shutdownAPIClientServer()
+
+	/* Notice the intentional trailing / */
+	opt := &apiClientOpt{
+		uri:     fmt.Sprintf("https://%s/", address),
+		cert:    "../tests/certs/server.crt",
+		key:     "../tests/certs/server.key",
+		ca:      "../tests/certs/ca.crt",
+		headers: make(map[string]string, 0),
+		timeout: 2,
+		debug:   debug,
+	}
+	_, err := NewAPIClient(opt)
+	if err != nil {
+		t.Fatalf("api_client_test.go: Failed to init api client, err: %v", err)
+	}
+}
+
+func TestAPIClientProxy(t *testing.T) {
+	debug := false
+	address := "127.0.0.1:8085"
+	setupAPIClientServer(debug, address)
+	defer shutdownAPIClientServer()
+
+	/* Notice the intentional trailing / */
+	opt := &apiClientOpt{
+		uri:      fmt.Sprintf("http://%s/", address),
+		insecure: false,
+		headers:  make(map[string]string, 0),
+		timeout:  2,
+		debug:    debug,
+		proxyURL: "http://localhost:3128",
+	}
+	_, err := NewAPIClient(opt)
+	if err != nil {
+		t.Fatalf("api_client_test.go: Failed to init api client, err: %v", err)
+	}
+}
+
+func TestAPIClientBasicAuth(t *testing.T) {
+	debug := false
+	address := "127.0.0.1:8086"
+	setupAPIClientServer(debug, address)
+	defer shutdownAPIClientServer()
+
+	/* Notice the intentional trailing / */
+	opt := &apiClientOpt{
+		uri:      fmt.Sprintf("http://%s/", address),
+		insecure: false,
+		username: "loki",
+		password: "password",
+		headers:  make(map[string]string, 0),
+		timeout:  2,
+		debug:    debug,
+	}
+	client, err := NewAPIClient(opt)
+	if err != nil {
+		t.Fatalf("api_client_test.go: Failed to init api client, err: %v", err)
+	}
+	var headers map[string]string
+	_, err = client.sendRequest("", "GET", "/ok", "", headers)
+	if err != nil {
+		t.Fatalf("api_client_test.go: %s", err)
+	}
+}
+
+func TestAPIClientBearerAuth(t *testing.T) {
+	debug := false
+	address := "127.0.0.1:8087"
+	setupAPIClientServer(debug, address)
+	defer shutdownAPIClientServer()
+
+	/* Notice the intentional trailing / */
+	opt := &apiClientOpt{
+		uri:     fmt.Sprintf("http://%s/", address),
+		token:   "supersecret",
+		headers: make(map[string]string, 0),
+		timeout: 2,
+		debug:   debug,
+	}
+	client, err := NewAPIClient(opt)
+	if err != nil {
+		t.Fatalf("api_client_test.go: Failed to init api client, err: %v", err)
+	}
+	var headers map[string]string
+	_, err = client.sendRequest("", "GET", "/ok", "", headers)
+	if err != nil {
+		t.Fatalf("api_client_test.go: %s", err)
+	}
+}
+
+func TestAPIClientDebug(t *testing.T) {
+	debug := true
+	address := "127.0.0.1:8088"
+	setupAPIClientServer(debug, address)
+	defer shutdownAPIClientServer()
+
+	/* Notice the intentional trailing / */
+	opt := &apiClientOpt{
+		uri:     fmt.Sprintf("http://%s/", address),
+		headers: make(map[string]string, 0),
+		timeout: 2,
+		debug:   debug,
+	}
+	client, err := NewAPIClient(opt)
+	if err != nil {
+		t.Fatalf("api_client_test.go: Failed to init api client, err: %v", err)
+	}
+	var headers map[string]string
+	_, err = client.sendRequest("", "GET", "/ok", "", headers)
+	if err != nil {
+		t.Fatalf("api_client_test.go: %s", err)
+	}
+}
+
+func TestAPIClientHeaders(t *testing.T) {
+	debug := false
+	address := "127.0.0.1:8089"
+	setupAPIClientServer(debug, address)
+	defer shutdownAPIClientServer()
+
+	headers := map[string]string{
+		"Custom": "header set",
+	}
+	/* Notice the intentional trailing / */
+	opt := &apiClientOpt{
+		uri:     fmt.Sprintf("http://%s/", address),
+		headers: headers,
+		timeout: 2,
+		debug:   debug,
+	}
+	client, err := NewAPIClient(opt)
+	if err != nil {
+		t.Fatalf("api_client_test.go: Failed to init api client, err: %v", err)
+	}
+	_, err = client.sendRequest("", "GET", "/ok", "", headers)
+	if err != nil {
+		t.Fatalf("api_client_test.go: %s", err)
+	}
+}
+
+func setupAPIClientServer(debug bool, address string) {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/ok", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("It works!"))
@@ -99,7 +259,7 @@ func setupAPIClientServer(debug bool) {
 	})
 
 	apiClientServer = &http.Server{
-		Addr:              "127.0.0.1:8082",
+		Addr:              address,
 		Handler:           serverMux,
 		ReadTimeout:       1 * time.Second,
 		WriteTimeout:      1 * time.Second,
