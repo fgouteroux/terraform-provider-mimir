@@ -3,7 +3,9 @@ package mimir
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -100,10 +102,23 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 	d.SetId(fmt.Sprintf("%s/%s", namespace, name))
+
+	// Retry read as mimir api could return a 404 status code.
+	// Add delay of 1s between each retry with a 3 max retries.
+	for i := 1; i < 4; i++ {
+		result := resourcemimirRuleGroupRecordingRead(ctx, d, meta)
+		if len(result) > 0 && !result.HasError() {
+			log.Printf("[WARN] Recording rule group previously created'%s' not found (%d/3)", name, i)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		return result
+	}
 	return resourcemimirRuleGroupRecordingRead(ctx, d, meta)
 }
 
 func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
 	client := meta.(*apiClient)
 
 	// use id as read is also called by import
@@ -118,9 +133,19 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' -", name)
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
-		if strings.Contains(err.Error(), "response code '404'") {
+		if d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Recording rule group '%s' not found", name),
+			})
+			return diags
+		} else if !d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Recording rule group '%s' (id: %s) not found, removing from state", name, d.Id()),
+			})
 			d.SetId("")
-			return diag.Diagnostics{}
+			return diags
 		}
 		return diag.FromErr(err)
 	}
@@ -151,8 +176,7 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	return diag.Diagnostics{}
+	return diags
 }
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

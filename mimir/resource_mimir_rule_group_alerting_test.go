@@ -134,6 +134,8 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "namespace", "namespace_1"),
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.alert", "test1"),
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.1.alert", "test2"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.1.expr", "test2_metric"),
 				),
 			},
 			{
@@ -152,11 +154,27 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.1.annotations.description", "test 2 alert description"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccResourceRuleGroupAlerting_Federated(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceRuleGroupAlerting_federated_rule_group,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_federated_rule_group", "alert_1", client),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "name", "alert_1"),
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_federated_rule_group", "alert_1_federated_rule_group", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "name", "alert_1_federated_rule_group"),
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "namespace", "namespace_1"),
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.0", "tenant-a"),
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.1", "tenant-b"),
@@ -203,6 +221,10 @@ const testAccResourceRuleGroupAlerting_basic = `
 			alert = "test1"
 			expr  = "test1_metric"
 		}
+		rule {
+			alert = "test2"
+			expr   = "test2_metric"
+		}
 	}
 `
 
@@ -242,7 +264,7 @@ const testAccResourceRuleGroupAlerting_prettify_promql_expr = `
 
 const testAccResourceRuleGroupAlerting_federated_rule_group = `
 	resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
-		name = "alert_1"
+		name = "alert_1_federated_rule_group"
 		source_tenants = ["tenant-a", "tenant-b"]
 		namespace = "namespace_1"
 		rule {
