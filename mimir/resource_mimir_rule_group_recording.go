@@ -123,13 +123,13 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	}
 	d.SetId(fmt.Sprintf("%s/%s", namespace, name))
 
-	// Retry read as mimir api could return a 404 status code.
-	// Add delay of 1s between each retry with a 3 max retries.
+	// Retry read as mimir api could return a 404 status code caused by the event change notification propagation.
+	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a 3 max retries.
 	for i := 1; i < 4; i++ {
 		result := resourcemimirRuleGroupRecordingRead(ctx, d, meta)
 		if len(result) > 0 && !result.HasError() {
 			log.Printf("[WARN] Recording rule group previously created'%s' not found (%d/3)", name, i)
-			time.Sleep(1 * time.Second)
+			time.Sleep(ruleGroupReadDelayAfterChangeDuration)
 			continue
 		}
 		return result
@@ -150,13 +150,13 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
 	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
 
-	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' -", name)
+	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' (namespace: %s) -", name, namespace)
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		if d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
-				Summary:  fmt.Sprintf("Recording rule group '%s' (id: %s) not found", name, d.Id()),
+				Summary:  fmt.Sprintf("Recording rule group '%s' (namespace: %s) not found. You should increase the provider parameter 'rule_group_read_delay_after_change' (current: %s)", name, namespace, ruleGroupReadDelayAfterChange),
 			})
 			return diags
 		} else if !d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
@@ -222,6 +222,8 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 			return diag.FromErr(err)
 		}
 	}
+	// Add time delay before read to wait the event change notification propagation to finish
+	time.Sleep(ruleGroupReadDelayAfterChangeDuration)
 	return resourcemimirRuleGroupRecordingRead(ctx, d, meta)
 }
 
