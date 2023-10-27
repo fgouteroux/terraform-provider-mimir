@@ -25,6 +25,25 @@ func resourcemimirAlertmanagerConfig() *schema.Resource {
 
 func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
+
+	if !overwriteAlertmanagerConfig {
+		alertmanagerConfigExists := true
+		_, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
+		baseMsg := "Cannot read alertmanager config"
+		err = handleHTTPError(err, baseMsg)
+		if err != nil {
+			if strings.Contains(err.Error(), "response code '404'") {
+				alertmanagerConfigExists = false
+			} else {
+				return diag.FromErr(err)
+			}
+		}
+
+		if alertmanagerConfigExists {
+			return diag.Errorf("alertmanager config already exists")
+		}
+	}
+
 	_, err := alertmanagerConfigCreateUpdate(client, d, apiAlertsPath)
 	baseMsg := "Cannot create alertmanager config"
 	err = handleHTTPError(err, baseMsg)

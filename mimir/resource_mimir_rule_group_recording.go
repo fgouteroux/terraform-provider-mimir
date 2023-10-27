@@ -38,7 +38,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 			},
 			"interval": {
 				Type:         schema.TypeString,
-				Description:  "Recording Rule interval",
+				Description:  "Recording Rule group interval",
 				Optional:     true,
 				ValidateFunc: validateDuration,
 			},
@@ -85,6 +85,26 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
 
+	if !overwriteRuleGroupConfig {
+		ruleGroupConfigExists := true
+
+		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+		_, err := client.sendRequest("ruler", "GET", path, "", make(map[string]string))
+		baseMsg := fmt.Sprintf("Cannot create recording rule group '%s' (namespace: %s) -", name, namespace)
+		err = handleHTTPError(err, baseMsg)
+		if err != nil {
+			if strings.Contains(err.Error(), "response code '404'") {
+				ruleGroupConfigExists = false
+			} else {
+				return diag.FromErr(err)
+			}
+		}
+
+		if ruleGroupConfigExists {
+			return diag.Errorf("recording rule group '%s' (namespace: %s) already exists", name, namespace)
+		}
+	}
+
 	rules := &recordingRuleGroup{
 		Name:          name,
 		Interval:      d.Get("interval").(string),
@@ -96,7 +116,7 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 
 	path := fmt.Sprintf("/config/v1/rules/%s", namespace)
 	_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
-	baseMsg := fmt.Sprintf("Cannot create recording rule group '%s' -", name)
+	baseMsg := fmt.Sprintf("Cannot create recording rule group '%s' (namespace: %s) -", name, namespace)
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		return diag.FromErr(err)
@@ -136,7 +156,7 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 		if d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
-				Summary:  fmt.Sprintf("Recording rule group '%s' not found", name),
+				Summary:  fmt.Sprintf("Recording rule group '%s' (id: %s) not found", name, d.Id()),
 			})
 			return diags
 		} else if !d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
@@ -196,7 +216,7 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 
 		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
 		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
-		baseMsg := fmt.Sprintf("Cannot update recording rule group '%s' -", name)
+		baseMsg := fmt.Sprintf("Cannot update recording rule group '%s' (namespace: %s)  -", name, namespace)
 		err = handleHTTPError(err, baseMsg)
 		if err != nil {
 			return diag.FromErr(err)

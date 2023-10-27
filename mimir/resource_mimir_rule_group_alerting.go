@@ -100,6 +100,26 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
 
+	if !overwriteRuleGroupConfig {
+		ruleGroupConfigExists := true
+
+		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+		_, err := client.sendRequest("ruler", "GET", path, "", make(map[string]string))
+		baseMsg := fmt.Sprintf("Cannot create alerting rule group '%s' (namespace: %s) -", name, namespace)
+		err = handleHTTPError(err, baseMsg)
+		if err != nil {
+			if strings.Contains(err.Error(), "response code '404'") {
+				ruleGroupConfigExists = false
+			} else {
+				return diag.FromErr(err)
+			}
+		}
+
+		if ruleGroupConfigExists {
+			return diag.Errorf("alerting rule group '%s' (namespace: %s) already exists", name, namespace)
+		}
+	}
+
 	rules := &alertingRuleGroup{
 		Name:          name,
 		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
@@ -206,7 +226,7 @@ func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.Resourc
 
 		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
 		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
-		baseMsg := fmt.Sprintf("Cannot update alerting rule group '%s' -", name)
+		baseMsg := fmt.Sprintf("Cannot update alerting rule group '%s' (namespace: %s) -", name, namespace)
 
 		err = handleHTTPError(err, baseMsg)
 		if err != nil {

@@ -9,8 +9,10 @@ import (
 )
 
 var (
-	apiAlertsPath          = "/api/v1/alerts"
-	enablePromQLExprFormat bool
+	apiAlertsPath               = "/api/v1/alerts"
+	enablePromQLExprFormat      bool
+	overwriteAlertmanagerConfig bool
+	overwriteRuleGroupConfig    bool
 )
 
 func Provider(version string) func() *schema.Provider {
@@ -75,17 +77,17 @@ func Provider(version string) func() *schema.Provider {
 				"cert": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client cert for client authentication",
+					Description: "Client cert (filepath or inline) for client authentication",
 				},
 				"key": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client key for client authentication",
+					Description: "Client key (filepath or inline) for client authentication",
 				},
 				"ca": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client ca for client authentication",
+					Description: "Client ca (filepath or inline) for client authentication",
 				},
 				"headers": {
 					Type:        schema.TypeMap,
@@ -110,6 +112,18 @@ func Provider(version string) func() *schema.Provider {
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MIMIR_FORMAT_PROMQL_EXPR", false),
 					Description: "Enable the formatting of PromQL expression.",
+				},
+				"overwrite_alertmanager_config": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_OVERWRITE_ALERTMANAGER_CONFIG", false),
+					Description: "Overwrite the current alertmanager config on create.",
+				},
+				"overwrite_rule_group_config": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_OVERWRITE_RULE_GROUP_CONFIG", false),
+					Description: "Overwrite the current rule group (alerting/recording) config on create.",
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
@@ -158,6 +172,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	}
 
 	enablePromQLExprFormat = d.Get("format_promql_expr").(bool)
+	overwriteAlertmanagerConfig = d.Get("overwrite_alertmanager_config").(bool)
+	overwriteRuleGroupConfig = d.Get("overwrite_rule_group_config").(bool)
 
 	client, err := NewAPIClient(opt)
 	return client, diag.FromErr(err)
