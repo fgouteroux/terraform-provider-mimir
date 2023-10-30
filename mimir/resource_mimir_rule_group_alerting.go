@@ -3,7 +3,9 @@ package mimir
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -98,6 +100,26 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
 
+	if !overwriteRuleGroupConfig {
+		ruleGroupConfigExists := true
+
+		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+		_, err := client.sendRequest("ruler", "GET", path, "", make(map[string]string))
+		baseMsg := fmt.Sprintf("Cannot create alerting rule group '%s' (namespace: %s) -", name, namespace)
+		err = handleHTTPError(err, baseMsg)
+		if err != nil {
+			if strings.Contains(err.Error(), "response code '404'") {
+				ruleGroupConfigExists = false
+			} else {
+				return diag.FromErr(err)
+			}
+		}
+
+		if ruleGroupConfigExists {
+			return diag.Errorf("alerting rule group '%s' (namespace: %s) already exists", name, namespace)
+		}
+	}
+
 	rules := &alertingRuleGroup{
 		Name:          name,
 		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
@@ -108,16 +130,29 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 
 	path := fmt.Sprintf("/config/v1/rules/%s", namespace)
 	_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
-	baseMsg := fmt.Sprintf("Cannot create alerting rule group '%s' -", name)
+	baseMsg := fmt.Sprintf("Cannot create alerting rule group '%s' (namespace: %s) -", name, namespace)
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.SetId(fmt.Sprintf("%s/%s", namespace, name))
+
+	// Retry read as mimir api could return a 404 status code caused by the event change notification propagation.
+	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a 3 max retries.
+	for i := 1; i < 4; i++ {
+		result := resourcemimirRuleGroupAlertingRead(ctx, d, meta)
+		if len(result) > 0 && !result.HasError() {
+			log.Printf("[WARN] Alerting rule group previously created'%s' not found (%d/3)", name, i)
+			time.Sleep(ruleGroupReadDelayAfterChangeDuration)
+			continue
+		}
+		return result
+	}
 	return resourcemimirRuleGroupAlertingRead(ctx, d, meta)
 }
 
 func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
 	client := meta.(*apiClient)
 
 	// use id as read is also called by import
@@ -129,12 +164,22 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
 	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
 
-	baseMsg := fmt.Sprintf("Cannot read alerting rule group '%s' -", name)
+	baseMsg := fmt.Sprintf("Cannot read alerting rule group '%s' (namespace: %s) -", name, namespace)
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
-		if strings.Contains(err.Error(), "response code '404'") {
+		if d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Alerting rule group '%s' not found. You should increase the provider parameter 'rule_group_read_delay_after_change' (current: %s)", name, ruleGroupReadDelayAfterChange),
+			})
+			return diags
+		} else if !d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Alerting rule group '%s' (id: %s) not found, removing from state", name, d.Id()),
+			})
 			d.SetId("")
-			return nil
+			return diags
 		}
 		return diag.FromErr(err)
 	}
@@ -162,7 +207,7 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	return diag.Diagnostics{}
+	return diags
 }
 
 func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -181,13 +226,15 @@ func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.Resourc
 
 		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
 		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
-		baseMsg := fmt.Sprintf("Cannot update alerting rule group '%s' -", name)
+		baseMsg := fmt.Sprintf("Cannot update alerting rule group '%s' (namespace: %s) -", name, namespace)
 
 		err = handleHTTPError(err, baseMsg)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
+	// Add time delay before read to wait the event change notification propagation to finish
+	time.Sleep(ruleGroupReadDelayAfterChangeDuration)
 	return resourcemimirRuleGroupAlertingRead(ctx, d, meta)
 }
 
