@@ -2,23 +2,21 @@ package mimir
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"regexp"
-	"strconv"
+	"math"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nfx/go-htmltable"
-	"golang.org/x/net/html"
 )
 
 type Stats struct {
-	User            string `header:"User"`
-	Series          int    `header:"# Series"`
-	TotalIngestRate string `header:"Total Ingest Rate"`
-	APIIngestRate   string `header:"API Ingest Rate"`
-	RuleIngestRate  string `header:"Rule Ingest Rate"`
+	User            string  `json:"UserID"`
+	Series          int     `json:"numSeries"`
+	TotalIngestRate float64 `json:"ingestionRate"`
+	APIIngestRate   float64 `json:"APIIngestionRate"`
+	RuleIngestRate  float64 `json:"RuleIngestionRate"`
 }
 
 func dataSourcemimirDistributorTenantStats() *schema.Resource {
@@ -31,11 +29,6 @@ func dataSourcemimirDistributorTenantStats() *schema.Resource {
 				Description: "Query specific user stats",
 				ForceNew:    true,
 				Optional:    true,
-			},
-			"replication_factor": {
-				Type:        schema.TypeInt,
-				Description: "Stats replication factor",
-				Computed:    true,
 			},
 			"stats": {
 				Type:        schema.TypeList,
@@ -75,7 +68,7 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 	client := meta.(*apiClient)
 	user := d.Get("user").(string)
 
-	var headers map[string]string
+	headers := map[string]string{"Accept": "json"}
 	jobraw, err := client.sendRequest("distributor", "GET", "/all_user_stats", "", headers)
 
 	baseMsg := "Cannot read user stats"
@@ -88,59 +81,26 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 		return diag.FromErr(err)
 	}
 
-	// get replication factor
-	var replicationFactor int
-	doc, err := html.Parse(strings.NewReader(jobraw))
+	// unmarshal the json using json/encoding into Stats struct
+	var output []Stats
+	err = json.Unmarshal([]byte(jobraw), &output)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to parse html: %v", err))
+		return diag.FromErr(fmt.Errorf("unable to unmarshal json: %v", err))
 	}
 
-	var f func(*html.Node)
-	f = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "p" {
-			for c := n.FirstChild; c != nil; c = c.NextSibling {
-				if c.Type == html.ElementNode && c.Data == "b" {
-					re := regexp.MustCompile(`\d+`)
-					replicationFactor, _ = strconv.Atoi(re.FindString(c.FirstChild.Data))
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c)
-		}
-	}
-	f(doc)
-
-	// get the stats
-	output, err := htmltable.NewSliceFromString[Stats](jobraw)
-
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to decode stats data: %v", err))
-	}
-
-	// transform the output into a list of maps
 	var stats []map[string]interface{}
+	// transform the output into a list of maps
 	for _, stat := range output {
-		// convert the string values to float
-		totalIngestRate, err := strconv.ParseFloat(stat.TotalIngestRate, 64)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("unable to convert total ingest rate to float: %v", err))
-		}
-		apiIngestRate, err := strconv.ParseFloat(stat.APIIngestRate, 64)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("unable to convert api ingest rate to float: %v", err))
-		}
-		ruleIngestRate, err := strconv.ParseFloat(stat.RuleIngestRate, 64)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("unable to convert rule ingest rate to float: %v", err))
-		}
-
+		// trim float to 2 decimal places
+		stat.TotalIngestRate = math.Round(stat.TotalIngestRate*100) / 100
+		stat.APIIngestRate = math.Round(stat.APIIngestRate*100) / 100
+		stat.RuleIngestRate = math.Round(stat.RuleIngestRate*100) / 100
 		stats = append(stats, map[string]interface{}{
 			"user":              stat.User,
 			"series":            stat.Series,
-			"total_ingest_rate": totalIngestRate,
-			"api_ingest_rate":   apiIngestRate,
-			"rule_ingest_rate":  ruleIngestRate,
+			"total_ingest_rate": stat.TotalIngestRate,
+			"api_ingest_rate":   stat.APIIngestRate,
+			"rule_ingest_rate":  stat.RuleIngestRate,
 		})
 	}
 
@@ -153,10 +113,6 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 			}
 		}
 		stats = filteredStats
-	}
-
-	if err := d.Set("replication_factor", replicationFactor); err != nil {
-		return diag.FromErr(err)
 	}
 
 	if err := d.Set("stats", stats); err != nil {

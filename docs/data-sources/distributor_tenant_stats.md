@@ -26,7 +26,6 @@ data "mimir_distributor_tenant_stats" "tenants" {}
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `replication_factor` (Number) Stats replication factor
 - `stats` (List of Object) Stats list (see [below for nested schema](#nestedatt--stats))
 
 <a id="nestedatt--stats"></a>
