@@ -42,6 +42,12 @@ func Provider(version string) func() *schema.Provider {
 					DefaultFunc: schema.EnvDefaultFunc("MIMIR_ALERTMANAGER_URI", nil),
 					Description: "mimir alertmanager base url",
 				},
+				"distributor_uri": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_DISTRIBUTOR_URI", nil),
+					Description: "mimir distributor base url",
+				},
 				"org_id": {
 					Type:         schema.TypeString,
 					Required:     true,
@@ -146,9 +152,10 @@ func Provider(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"mimir_alertmanager_config":  dataSourcemimirAlertmanagerConfig(),
-				"mimir_rule_group_alerting":  dataSourcemimirRuleGroupAlerting(),
-				"mimir_rule_group_recording": dataSourcemimirRuleGroupRecording(),
+				"mimir_alertmanager_config":      dataSourcemimirAlertmanagerConfig(),
+				"mimir_rule_group_alerting":      dataSourcemimirRuleGroupAlerting(),
+				"mimir_rule_group_recording":     dataSourcemimirRuleGroupRecording(),
+				"mimir_distributor_tenant_stats": dataSourcemimirDistributorTenantStats(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"mimir_alertmanager_config":  resourcemimirAlertmanagerConfig(),
@@ -185,6 +192,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		uri:             d.Get("uri").(string),
 		rulerURI:        d.Get("ruler_uri").(string),
 		alertmanagerURI: d.Get("alertmanager_uri").(string),
+		distributorURI:  d.Get("distributor_uri").(string),
 		headers:         headers,
 		timeout:         d.Get("timeout").(int),
 		debug:           d.Get("debug").(bool),

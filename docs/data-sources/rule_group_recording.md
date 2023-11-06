@@ -44,5 +44,3 @@ Read-Only:
 
 - `expr` (String)
 - `record` (String)
-
-

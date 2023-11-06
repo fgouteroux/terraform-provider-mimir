@@ -21,6 +21,7 @@ type apiClientOpt struct {
 	uri             string
 	rulerURI        string
 	alertmanagerURI string
+	distributorURI  string
 	cert            string
 	key             string
 	ca              string
@@ -39,6 +40,7 @@ type apiClient struct {
 	uri             string
 	rulerURI        string
 	alertmanagerURI string
+	distributorURI  string
 	insecure        bool
 	token           string
 	username        string
@@ -49,8 +51,8 @@ type apiClient struct {
 
 // Make a new api client for RESTful calls
 func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
-	if opt.uri == "" && opt.rulerURI == "" && opt.alertmanagerURI == "" {
-		return nil, fmt.Errorf("no provider URIs defined. Please set uri, or ruler_uri/alertmanager_uri")
+	if opt.uri == "" && opt.rulerURI == "" && opt.alertmanagerURI == "" && opt.distributorURI == "" {
+		return nil, fmt.Errorf("no provider URIs defined. Please set uri, or ruler_uri/alertmanager_uri/distributor_uri")
 	}
 
 	/* Remove any trailing slashes since we will append
@@ -118,6 +120,7 @@ func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 		uri:             opt.uri,
 		rulerURI:        opt.rulerURI,
 		alertmanagerURI: opt.alertmanagerURI,
+		distributorURI:  opt.distributorURI,
 		insecure:        opt.insecure,
 		token:           opt.token,
 		username:        opt.username,
@@ -142,6 +145,8 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 		fullURI = client.rulerURI + path
 	case component == "alertmanager" && client.alertmanagerURI != "":
 		fullURI = client.alertmanagerURI + path
+	case component == "distributor" && client.distributorURI != "":
+		fullURI = client.distributorURI + path
 	default:
 		fullURI = client.uri + path
 	}
