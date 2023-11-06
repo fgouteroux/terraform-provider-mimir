@@ -71,17 +71,21 @@ provider "mimir" {
 
 ### Optional
 
+- `alertmanager_read_delay_after_change` (String) When set, add a delay (time duration) to read the alertmanager config after a change.
 - `alertmanager_uri` (String) mimir alertmanager base url
-- `ca` (String) Client ca for client authentication
-- `cert` (String) Client cert for client authentication
+- `ca` (String) Client ca (filepath or inline) for client authentication
+- `cert` (String) Client cert (filepath or inline) for client authentication
 - `debug` (Boolean) Enable debug mode to trace requests executed.
 - `distributor_uri` (String) mimir distributor base url
 - `format_promql_expr` (Boolean) Enable the formatting of PromQL expression.
 - `headers` (Map of String) A map of header names and values to set on all outbound requests.
 - `insecure` (Boolean) When using https, this disables TLS verification of the host.
-- `key` (String) Client key for client authentication
+- `key` (String) Client key (filepath or inline) for client authentication
+- `overwrite_alertmanager_config` (Boolean) Overwrite the current alertmanager config on create.
+- `overwrite_rule_group_config` (Boolean) Overwrite the current rule group (alerting/recording) config on create.
 - `password` (String) When set, will use this password for BASIC auth to the API.
 - `proxy_url` (String) URL to the proxy to be used for all API requests
+- `rule_group_read_delay_after_change` (String) When set, add a delay (time duration) to read the rule group after a change.
 - `ruler_uri` (String) mimir ruler base url
 - `timeout` (Number) When set, will cause requests taking longer than this time (in seconds) to be aborted.
 - `token` (String) When set, will use this token for Bearer auth to the API.

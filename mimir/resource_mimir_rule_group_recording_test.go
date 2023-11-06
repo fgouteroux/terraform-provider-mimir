@@ -113,26 +113,42 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccResourceRuleGroupRecording_interval,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_interval", "record_1_interval", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "name", "record_1_interval"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "interval", "6h"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceRuleGroupRecording_Federated(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
 				Config: testAccResourceRuleGroupRecording_federated_rule_group,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_federated_rule_group", "record_1", client),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "name", "record_1"),
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_federated_rule_group", "record_1_federated_rule_group", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "name", "record_1_federated_rule_group"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "namespace", "namespace_1"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "source_tenants.0", "tenant-a"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "source_tenants.1", "tenant-b"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "rule.0.record", "test1_info"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_federated_rule_group", "rule.0.expr", "test1_metric"),
-				),
-			},
-			{
-				Config: testAccResourceRuleGroupRecording_interval,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_interval", "record_1", client),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "name", "record_1"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "namespace", "namespace_1"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.record", "test1_info"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.expr", "test1_metric"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "interval", "6h"),
 				),
 			},
 		},
@@ -170,7 +186,7 @@ const testAccResourceRuleGroupRecording_basic_update = `
 
 const testAccResourceRuleGroupRecording_federated_rule_group = `
 	resource "mimir_rule_group_recording" "record_1_federated_rule_group" {
-		name = "record_1"
+		name = "record_1_federated_rule_group"
 		namespace = "namespace_1"
 		source_tenants = ["tenant-a", "tenant-b"]
 		rule {
@@ -181,13 +197,13 @@ const testAccResourceRuleGroupRecording_federated_rule_group = `
 `
 
 const testAccResourceRuleGroupRecording_interval = `
-        resource "mimir_rule_group_recording" "record_1_interval" {
-                name = "record_1"
-                namespace = "namespace_1"
-                interval = "6h"
-                rule {
-                        record = "test1_info"
-                        expr   = "test1_metric"
-                }
-        }
+    resource "mimir_rule_group_recording" "record_1_interval" {
+            name = "record_1_interval"
+            namespace = "namespace_1"
+            interval = "6h"
+            rule {
+                    record = "test1_info"
+                    expr   = "test1_metric"
+            }
+    }
 `

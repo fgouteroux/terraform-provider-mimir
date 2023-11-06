@@ -18,9 +18,11 @@ fmt:
 	gofmt -s -w -e .
 
 test:
-	go test -v -cover -timeout=120s -parallel=4 ./...
+	go test -v -cover -timeout=120s -coverprofile=cover.out -parallel=4 ./...
+	go tool cover -func=cover.out
 
 testacc:
-	TF_ACC=1 go test -v -cover -timeout 120m ./...
+	TF_ACC=1 go test -v -cover -coverprofile=cover.out -timeout 120m ./...
+	go tool cover -func=cover.out
 
 .PHONY: build install lint generate fmt test testacc

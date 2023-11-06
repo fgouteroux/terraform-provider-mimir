@@ -2,6 +2,7 @@ package mimir
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -9,8 +10,14 @@ import (
 )
 
 var (
-	apiAlertsPath          = "/api/v1/alerts"
-	enablePromQLExprFormat bool
+	apiAlertsPath                            = "/api/v1/alerts"
+	enablePromQLExprFormat                   bool
+	overwriteAlertmanagerConfig              bool
+	overwriteRuleGroupConfig                 bool
+	ruleGroupReadDelayAfterChange            string
+	alertmanagerReadDelayAfterChange         string
+	ruleGroupReadDelayAfterChangeDuration    time.Duration
+	alertmanagerReadDelayAfterChangeDuration time.Duration
 )
 
 func Provider(version string) func() *schema.Provider {
@@ -81,17 +88,17 @@ func Provider(version string) func() *schema.Provider {
 				"cert": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client cert for client authentication",
+					Description: "Client cert (filepath or inline) for client authentication",
 				},
 				"key": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client key for client authentication",
+					Description: "Client key (filepath or inline) for client authentication",
 				},
 				"ca": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client ca for client authentication",
+					Description: "Client ca (filepath or inline) for client authentication",
 				},
 				"headers": {
 					Type:        schema.TypeMap,
@@ -116,6 +123,32 @@ func Provider(version string) func() *schema.Provider {
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("MIMIR_FORMAT_PROMQL_EXPR", false),
 					Description: "Enable the formatting of PromQL expression.",
+				},
+				"overwrite_alertmanager_config": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_OVERWRITE_ALERTMANAGER_CONFIG", false),
+					Description: "Overwrite the current alertmanager config on create.",
+				},
+				"overwrite_rule_group_config": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_OVERWRITE_RULE_GROUP_CONFIG", false),
+					Description: "Overwrite the current rule group (alerting/recording) config on create.",
+				},
+				"rule_group_read_delay_after_change": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					DefaultFunc:  schema.EnvDefaultFunc("MIMIR_RULE_GROUP_READ_DELAY_AFTER_CHANGE", "1s"),
+					Description:  "When set, add a delay (time duration) to read the rule group after a change.",
+					ValidateFunc: validateDuration,
+				},
+				"alertmanager_read_delay_after_change": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					DefaultFunc:  schema.EnvDefaultFunc("MIMIR_ALERTMANAGER_READ_DELAY_AFTER_CHANGE", "1s"),
+					Description:  "When set, add a delay (time duration) to read the alertmanager config after a change.",
+					ValidateFunc: validateDuration,
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
@@ -166,6 +199,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	}
 
 	enablePromQLExprFormat = d.Get("format_promql_expr").(bool)
+	overwriteAlertmanagerConfig = d.Get("overwrite_alertmanager_config").(bool)
+	overwriteRuleGroupConfig = d.Get("overwrite_rule_group_config").(bool)
+	ruleGroupReadDelayAfterChange = d.Get("rule_group_read_delay_after_change").(string)
+	alertmanagerReadDelayAfterChange = d.Get("alertmanager_read_delay_after_change").(string)
+	ruleGroupReadDelayAfterChangeDuration, _ = time.ParseDuration(d.Get("rule_group_read_delay_after_change").(string))
+	alertmanagerReadDelayAfterChangeDuration, _ = time.ParseDuration(d.Get("alertmanager_read_delay_after_change").(string))
 
 	client, err := NewAPIClient(opt)
 	return client, diag.FromErr(err)
