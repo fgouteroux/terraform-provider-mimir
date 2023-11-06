@@ -112,7 +112,11 @@ func validateDuration(v interface{}, k string) (ws []string, errors []error) {
 
 func formatDuration(v interface{}) string {
 	value, _ := model.ParseDuration(v.(string))
-	return value.String()
+	str := value.String()
+	if str == "0s" {
+		return ""
+	}
+	return str
 }
 
 func formatPromQLExpr(v interface{}) string {

@@ -136,6 +136,7 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.expr", "test1_metric"),
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.1.alert", "test2"),
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.1.expr", "test2_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.1.for", ""),
 				),
 			},
 			{
@@ -224,6 +225,7 @@ const testAccResourceRuleGroupAlerting_basic = `
 		rule {
 			alert = "test2"
 			expr   = "test2_metric"
+			for    = "0s"
 		}
 	}
 `
