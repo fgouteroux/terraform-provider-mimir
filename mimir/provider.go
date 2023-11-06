@@ -90,17 +90,20 @@ func Provider(version string) func() *schema.Provider {
 				"cert": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client cert (filepath or inline) for client authentication",
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_TLS_CERT", nil),
+					Description: "Client cert (filepath or inline) for TLS client authentication.",
 				},
 				"key": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client key (filepath or inline) for client authentication",
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_TLS_KEY", nil),
+					Description: "Client key (filepath or inline) for TLS client authentication.",
 				},
 				"ca": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Client ca (filepath or inline) for client authentication",
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_TLS_CA", nil),
+					Description: "Client ca (filepath or inline) for TLS client authentication.",
 				},
 				"headers": {
 					Type:        schema.TypeMap,
@@ -111,7 +114,7 @@ func Provider(version string) func() *schema.Provider {
 				"timeout": {
 					Type:        schema.TypeInt,
 					Optional:    true,
-					Default:     60,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_TIMEOUT", 60),
 					Description: "When set, will cause requests taking longer than this time (in seconds) to be aborted.",
 				},
 				"debug": {
