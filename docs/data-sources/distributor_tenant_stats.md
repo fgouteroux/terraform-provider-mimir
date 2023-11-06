@@ -21,12 +21,12 @@ data "mimir_distributor_tenant_stats" "tenants" {}
 
 ### Optional
 
-- `user` (String) Query specific user stats
+- `user` (String) Query specific user stats, if not specified, all users are returned
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `stats` (List of Object) Stats list (see [below for nested schema](#nestedatt--stats))
+- `stats` (List of Object) Stats list, does not account for replication factor (see [below for nested schema](#nestedatt--stats))
 
 <a id="nestedatt--stats"></a>
 ### Nested Schema for `stats`

@@ -33,7 +33,7 @@ resource "mimir_rule_group_recording" "test" {
 
 ### Optional
 
-- `interval` (String) Recording Rule interval
+- `interval` (String) Recording Rule group interval
 - `namespace` (String) Recording Rule group namespace
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 

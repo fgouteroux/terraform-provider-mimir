@@ -36,7 +36,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 			},
 			"interval": {
 				Type:         schema.TypeString,
-				Description:  "Recording Rule interval",
+				Description:  "Recording Rule group interval",
 				Optional:     true,
 				ValidateFunc: validateDuration,
 			},

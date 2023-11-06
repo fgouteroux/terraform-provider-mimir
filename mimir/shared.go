@@ -2,7 +2,6 @@ package mimir
 
 import (
 	"fmt"
-	"hash/crc32"
 	"regexp"
 	"strconv"
 	"strings"
@@ -175,17 +174,4 @@ func validateTime(v interface{}, k string) (ws []string, errors []error) {
 		errors = append(errors, fmt.Errorf("\"%s\": timestamp %s out of range", k, in))
 	}
 	return
-}
-
-// StringHashcode hashes a string to a unique hashcode.
-func StringHashcode(s string) int {
-	v := int(crc32.ChecksumIEEE([]byte(s)))
-	if v >= 0 {
-		return v
-	}
-	if -v >= 0 {
-		return -v
-	}
-	// v == MinInt
-	return 0
 }

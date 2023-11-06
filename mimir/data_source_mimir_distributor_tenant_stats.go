@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -26,13 +27,13 @@ func dataSourcemimirDistributorTenantStats() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"user": {
 				Type:        schema.TypeString,
-				Description: "Query specific user stats",
+				Description: "Query specific user stats, if not specified, all users are returned",
 				ForceNew:    true,
 				Optional:    true,
 			},
 			"stats": {
 				Type:        schema.TypeList,
-				Description: "Stats list",
+				Description: "Stats list, does not account for replication factor",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -119,7 +120,7 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 		return diag.FromErr(err)
 	}
 
-	d.SetId(fmt.Sprintf("%d", StringHashcode(jobraw)))
+	d.SetId(resource.UniqueId())
 
 	return nil
 }
