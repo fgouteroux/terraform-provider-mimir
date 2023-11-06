@@ -18,6 +18,8 @@ var (
 	alertmanagerReadDelayAfterChange         string
 	ruleGroupReadDelayAfterChangeDuration    time.Duration
 	alertmanagerReadDelayAfterChangeDuration time.Duration
+	ruleGroupReadRetryAfterChange            int
+	alertmanagerReadRetryAfterChange         int
 )
 
 func Provider(version string) func() *schema.Provider {
@@ -143,12 +145,24 @@ func Provider(version string) func() *schema.Provider {
 					Description:  "When set, add a delay (time duration) to read the rule group after a change.",
 					ValidateFunc: validateDuration,
 				},
+				"rule_group_read_retry_after_change": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_RULE_GROUP_READ_RETRY_AFTER_CHANGE", 3),
+					Description: "Max retries to read the rule group after a change.",
+				},
 				"alertmanager_read_delay_after_change": {
 					Type:         schema.TypeString,
 					Optional:     true,
 					DefaultFunc:  schema.EnvDefaultFunc("MIMIR_ALERTMANAGER_READ_DELAY_AFTER_CHANGE", "1s"),
 					Description:  "When set, add a delay (time duration) to read the alertmanager config after a change.",
 					ValidateFunc: validateDuration,
+				},
+				"alertmanager_read_retry_after_change": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_ALERTMANAGER_READ_RETRY_AFTER_CHANGE", 3),
+					Description: "Max retries to read the alertmanager config after a change.",
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
@@ -205,6 +219,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	alertmanagerReadDelayAfterChange = d.Get("alertmanager_read_delay_after_change").(string)
 	ruleGroupReadDelayAfterChangeDuration, _ = time.ParseDuration(d.Get("rule_group_read_delay_after_change").(string))
 	alertmanagerReadDelayAfterChangeDuration, _ = time.ParseDuration(d.Get("alertmanager_read_delay_after_change").(string))
+	ruleGroupReadRetryAfterChange = d.Get("rule_group_read_retry_after_change").(int)
+	alertmanagerReadRetryAfterChange = d.Get("alertmanager_read_retry_after_change").(int)
 
 	client, err := NewAPIClient(opt)
 	return client, diag.FromErr(err)

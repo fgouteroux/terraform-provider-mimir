@@ -55,8 +55,8 @@ func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.Resour
 	d.SetId(client.headers["X-Scope-OrgID"])
 
 	// Retry read as mimir api could return a 404 status code caused by the event change notification propagation.
-	// Add delay of <alertmanagerReadDelayAfterChange> * time.Second) between each retry with a 3 max retries.
-	for i := 1; i < 4; i++ {
+	// Add delay of <alertmanagerReadDelayAfterChange> * time.Second) between each retry with a <alertmanagerReadRetryAfterChange> max retries.
+	for i := 1; i <= alertmanagerReadRetryAfterChange; i++ {
 		result := resourcemimirAlertmanagerConfigRead(ctx, d, meta)
 		if len(result) > 0 && !result.HasError() {
 			log.Printf("[WARN] Alertmanager config previously created not found (%d/3)", i)

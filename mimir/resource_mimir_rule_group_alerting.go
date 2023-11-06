@@ -138,8 +138,8 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 	d.SetId(fmt.Sprintf("%s/%s", namespace, name))
 
 	// Retry read as mimir api could return a 404 status code caused by the event change notification propagation.
-	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a 3 max retries.
-	for i := 1; i < 4; i++ {
+	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a <ruleGroupReadRetryAfterChange> max retries.
+	for i := 1; i <= ruleGroupReadRetryAfterChange; i++ {
 		result := resourcemimirRuleGroupAlertingRead(ctx, d, meta)
 		if len(result) > 0 && !result.HasError() {
 			log.Printf("[WARN] Alerting rule group previously created'%s' not found (%d/3)", name, i)

@@ -72,6 +72,7 @@ provider "mimir" {
 ### Optional
 
 - `alertmanager_read_delay_after_change` (String) When set, add a delay (time duration) to read the alertmanager config after a change.
+- `alertmanager_read_retry_after_change` (Number) Max retries to read the alertmanager config after a change.
 - `alertmanager_uri` (String) mimir alertmanager base url
 - `ca` (String) Client ca (filepath or inline) for client authentication
 - `cert` (String) Client cert (filepath or inline) for client authentication
@@ -86,6 +87,7 @@ provider "mimir" {
 - `password` (String) When set, will use this password for BASIC auth to the API.
 - `proxy_url` (String) URL to the proxy to be used for all API requests
 - `rule_group_read_delay_after_change` (String) When set, add a delay (time duration) to read the rule group after a change.
+- `rule_group_read_retry_after_change` (Number) Max retries to read the rule group after a change.
 - `ruler_uri` (String) mimir ruler base url
 - `timeout` (Number) When set, will cause requests taking longer than this time (in seconds) to be aborted.
 - `token` (String) When set, will use this token for Bearer auth to the API.
