@@ -30,7 +30,7 @@ func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.Resour
 
 	if !overwriteAlertmanagerConfig {
 		alertmanagerConfigExists := true
-		_, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
+		resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
 		baseMsg := "Cannot read alertmanager config"
 		err = handleHTTPError(err, baseMsg)
 		if err != nil {
@@ -39,6 +39,11 @@ func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.Resour
 			} else {
 				return diag.FromErr(err)
 			}
+		}
+
+		// Check if an empty config has been set
+		if _, isEmpty := alertmanagerEmptyConfigCheck(d, resp); isEmpty {
+			alertmanagerConfigExists = false
 		}
 
 		if alertmanagerConfigExists {
@@ -91,6 +96,11 @@ func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.Resource
 			return diags
 		}
 		return diag.FromErr(err)
+	}
+
+	// Check if an empty config has been set
+	if diag, isEmpty := alertmanagerEmptyConfigCheck(d, resp); isEmpty {
+		return diag
 	}
 
 	var alertmanagerUserConf alertmanagerUserConfig
@@ -182,4 +192,24 @@ func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, p
 	resp, err := client.sendRequest("alertmanager", "POST", path, string(dataBytes), headers)
 
 	return resp, err
+}
+
+func alertmanagerEmptyConfigCheck(d *schema.ResourceData, data string) (diag.Diagnostics, bool) {
+	var isEmpty bool
+	var diags diag.Diagnostics
+	var alertmanagerUserConf alertmanagerUserConfig
+	err := yaml.Unmarshal([]byte(data), &alertmanagerUserConf)
+	if err != nil {
+		return diag.FromErr(err), isEmpty
+	}
+
+	if alertmanagerUserConf.AlertmanagerConfig == "" {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  fmt.Sprintf("Alertmanager config (id: %s) is empty, removing from state", d.Id()),
+		})
+		d.SetId("")
+		isEmpty = true
+	}
+	return diags, isEmpty
 }
