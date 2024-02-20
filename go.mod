@@ -1,6 +1,6 @@
 module github.com/fgouteroux/terraform-provider-mimir
 
-go 1.20
+go 1.21
 
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.15.0
