@@ -182,13 +182,13 @@ func Provider(version string) func() *schema.Provider {
 		}
 		p.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			p.UserAgent("terraform-provider-mimir", version)
-			return providerConfigure(d)
+			return providerConfigure(version, p, d)
 		}
 		return p
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func providerConfigure(version string, p *schema.Provider, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	headers := make(map[string]string)
 	if initHeaders := d.Get("headers"); initHeaders != nil {
 		for k, v := range initHeaders.(map[string]interface{}) {
@@ -196,6 +196,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		}
 	}
 	headers["X-Scope-OrgID"] = d.Get("org_id").(string)
+	headers["User-Agent"] = p.UserAgent("terraform-provider-mimir", version)
 
 	opt := &apiClientOpt{
 		token:           d.Get("token").(string),
