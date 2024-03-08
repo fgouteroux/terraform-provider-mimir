@@ -640,7 +640,6 @@ func opsgenieConfigFields() map[string]*schema.Schema {
 		"responders": {
 			Type:        schema.TypeList,
 			Optional:    true,
-			MaxItems:    1,
 			Description: "List of responders responsible for notifications.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
@@ -1236,7 +1235,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"time_intervals": {
 						Type:        schema.TypeList,
 						Optional:    true,
-						MaxItems:    1,
 						Description: "The actual definition for an interval of time.",
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
@@ -1355,7 +1353,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"pagerduty_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: pagerdutyConfigFields(),
 						},
@@ -1363,7 +1360,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"email_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: emailConfigFields(),
 						},
@@ -1371,7 +1367,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"wechat_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: weChatConfigFields(),
 						},
@@ -1379,7 +1374,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"webhook_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: webhookConfigFields(),
 						},
@@ -1387,7 +1381,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"webex_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: webexConfigFields(),
 						},
@@ -1395,7 +1388,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"discord_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: discordConfigFields(),
 						},
@@ -1403,7 +1395,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"pushover_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: pushoverConfigFields(),
 						},
@@ -1411,7 +1402,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"opsgenie_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: opsgenieConfigFields(),
 						},
@@ -1419,7 +1409,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"slack_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: slackConfigFields(),
 						},
@@ -1427,7 +1416,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"telegram_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: telegramConfigFields(),
 						},
@@ -1435,7 +1423,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"victorops_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: victorOpsConfigFields(),
 						},
@@ -1443,7 +1430,6 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"sns_configs": {
 						Type:     schema.TypeList,
 						Optional: true,
-						MaxItems: 1,
 						Elem: &schema.Resource{
 							Schema: snsConfigFields(),
 						},

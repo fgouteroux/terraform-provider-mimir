@@ -210,6 +210,10 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.weekdays.0.end", "6"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.times.0.start_time", "03:30"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.times.0.end_time", "09:30"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.1.weekdays.0.begin", "0"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.1.weekdays.0.end", "6"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.1.times.0.start_time", "12:00"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.1.times.0.end_time", "14:00"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -469,6 +473,16 @@ const testAccResourceAlertmanagerConfig_time_interval_update = `
             end_time   = "09:30"
           }
         }
+        time_intervals {
+          weekdays {
+            begin = 0
+            end = 6
+          }
+          times {
+            start_time = "12:00"
+            end_time   = "14:00"
+          }
+        }
       }
       route {
         group_by = ["..."]
@@ -577,6 +591,8 @@ func TestAccResourceAlertmanagerConfig_PagerdutyReceiver(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "pagerduty"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pagerduty_configs.0.routing_key", "secret"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pagerduty_configs.0.details.environment", "dev2"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pagerduty_configs.1.routing_key", "anothersecret"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pagerduty_configs.1.details.environment", "dev3"),
 				),
 			},
 		},
@@ -619,6 +635,12 @@ const testAccResourceAlertmanagerConfig_PagerdutyReceiver_update = `
           routing_key = "secret"
           details = {
             environment = "dev2"
+          }
+        }
+        pagerduty_configs {
+          routing_key = "anothersecret"
+          details = {
+            environment = "dev3"
           }
         }
       }
@@ -665,6 +687,9 @@ func TestAccResourceAlertmanagerConfig_EmailReceiver(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.to", "user2@example.com"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.from", "no-reply@example.com"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.smarthost", "smtp.example.com:25"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.1.to", "user3@example.com"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.1.from", "no-reply@example.com"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.1.smarthost", "smtp.example.com:25"),
 				),
 			},
 		},
@@ -704,6 +729,11 @@ const testAccResourceAlertmanagerConfig_EmailReceiver_update = `
         name = "email"
         email_configs {
           to = "user2@example.com"
+          from = "no-reply@example.com"
+          smarthost = "smtp.example.com:25"
+        }
+        email_configs {
+          to = "user3@example.com"
           from = "no-reply@example.com"
           smarthost = "smtp.example.com:25"
         }
@@ -752,6 +782,9 @@ func TestAccResourceAlertmanagerConfig_OpsgenieReceiver(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.update_alerts", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.name", "escalation-Z"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.0.responders.0.type", "escalation"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.1.api_key", "qwe456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.1.responders.0.name", "escalation-X"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.opsgenie_configs.1.responders.0.type", "escalation"),
 				),
 			},
 		},
@@ -799,6 +832,13 @@ const testAccResourceAlertmanagerConfig_OpsgenieReceiver_update = `
           api_key = "qwe456"
           update_alerts = true
         }
+        opsgenie_configs {
+          responders {
+            name = "escalation-X"
+            type = "escalation"
+          }
+          api_key = "qwe456"
+        }
       }
     }
 `
@@ -843,6 +883,9 @@ func TestAccResourceAlertmanagerConfig_DiscordReceiver(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.webhook_url", "https://discord.com/api/webhooks/123456"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.title", "title2"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.message", "test message updated"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.1.webhook_url", "https://discord.com/api/webhooks/123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.1.title", "title3"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.1.message", "test message"),
 				),
 			},
 		},
@@ -884,6 +927,11 @@ const testAccResourceAlertmanagerConfig_DiscordReceiver_update = `
           webhook_url = "https://discord.com/api/webhooks/123456"
           title = "title2"
           message = "test message updated"
+        }
+        discord_configs {
+          webhook_url = "https://discord.com/api/webhooks/123456"
+          title = "title3"
+          message = "test message"
         }
       }
     }
@@ -927,6 +975,8 @@ func TestAccResourceAlertmanagerConfig_WebexReceiver(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "webex"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webex_configs.0.api_url", "https://webexapis.com/v1/messages"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webex_configs.0.room_id", "room-789"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webex_configs.1.api_url", "https://webexapis.com/v1/messages"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webex_configs.1.room_id", "room-1234567"),
 				),
 			},
 		},
@@ -976,6 +1026,15 @@ const testAccResourceAlertmanagerConfig_WebexReceiver_update = `
 		  }
           api_url = "https://webexapis.com/v1/messages"
           room_id = "room-789"
+        }
+		webex_configs {
+		  http_config {
+			authorization {
+			  credentials = "xxxyyyzz"
+			}
+		  }
+          api_url = "https://webexapis.com/v1/messages"
+          room_id = "room-1234567"
         }
       }
     }
