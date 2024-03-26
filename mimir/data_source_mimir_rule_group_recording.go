@@ -53,6 +53,12 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"labels": {
+							Type:        schema.TypeMap,
+							Description: "Recording Rule labels",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Computed:    true,
+						},
 					},
 				},
 			},
