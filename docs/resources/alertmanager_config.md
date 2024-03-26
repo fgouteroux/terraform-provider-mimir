@@ -62,18 +62,18 @@ Required:
 
 Optional:
 
-- `discord_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--discord_configs))
-- `email_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--email_configs))
-- `opsgenie_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs))
-- `pagerduty_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs))
-- `pushover_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--pushover_configs))
-- `slack_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--slack_configs))
-- `sns_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--sns_configs))
-- `telegram_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--telegram_configs))
-- `victorops_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--victorops_configs))
-- `webex_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webex_configs))
-- `webhook_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--webhook_configs))
-- `wechat_configs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--receiver--wechat_configs))
+- `discord_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--discord_configs))
+- `email_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--email_configs))
+- `opsgenie_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs))
+- `pagerduty_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs))
+- `pushover_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--pushover_configs))
+- `slack_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--slack_configs))
+- `sns_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--sns_configs))
+- `telegram_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--telegram_configs))
+- `victorops_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--victorops_configs))
+- `webex_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--webex_configs))
+- `webhook_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--webhook_configs))
+- `wechat_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--wechat_configs))
 
 <a id="nestedblock--receiver--discord_configs"></a>
 ### Nested Schema for `receiver.discord_configs`
@@ -202,7 +202,7 @@ Optional:
 - `message` (String) Alert text limited to 130 characters.
 - `note` (String) Additional alert note.
 - `priority` (String) Priority level of alert. Possible values are P1, P2, P3, P4, and P5.
-- `responders` (Block List, Max: 1) List of responders responsible for notifications. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--responders))
+- `responders` (Block List) List of responders responsible for notifications. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--responders))
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `source` (String) A backlink to the sender of the notification.
 - `tags` (String) Comma separated list of tags attached to the notifications.
@@ -1151,18 +1151,18 @@ Optional:
 
 Required:
 
-- `group_interval` (String) How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.
-- `group_wait` (String) How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.
 - `receiver` (String) Name of the receiver to send the notification.
-- `repeat_interval` (String) How long to wait before sending a notification again if it has already been sent successfully for an alert.
 
 Optional:
 
 - `active_time_intervals` (List of String) Times when the route should be active. These must match the name of a mute time interval defined in the time_interval block.
 - `continue` (Boolean) Whether an alert should continue matching subsequent sibling nodes.
 - `group_by` (List of String) The labels by which incoming alerts are grouped together.
+- `group_interval` (String) How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.
+- `group_wait` (String) How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.
 - `matchers` (List of String) A list of matchers that an alert has to fulfill to match the node.
 - `mute_time_intervals` (List of String) Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.
+- `repeat_interval` (String) How long to wait before sending a notification again if it has already been sent successfully for an alert.
 
 
 
@@ -1278,7 +1278,7 @@ Optional:
 Optional:
 
 - `name` (String) Name interval of time that may be referenced in the routing tree to mute/activate particular routes for particular times of the day.
-- `time_intervals` (Block List, Max: 1) The actual definition for an interval of time. (see [below for nested schema](#nestedblock--time_interval--time_intervals))
+- `time_intervals` (Block List) The actual definition for an interval of time. (see [below for nested schema](#nestedblock--time_interval--time_intervals))
 
 <a id="nestedblock--time_interval--time_intervals"></a>
 ### Nested Schema for `time_interval.time_intervals`
