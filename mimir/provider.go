@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	apiAlertsPath                            = "/api/v1/alerts"
+	apiAlertsPath                            = "/api/v2/alerts"
 	enablePromQLExprFormat                   bool
 	overwriteAlertmanagerConfig              bool
 	overwriteRuleGroupConfig                 bool
