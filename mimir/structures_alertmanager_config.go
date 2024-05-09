@@ -1936,13 +1936,18 @@ func flattenTimeIntervalConfig(v []timeinterval.TimeInterval) []interface{} {
 	}
 
 	for _, v := range v {
+		location := ""
+		if v.Location != nil {
+			location = v.Location.String()
+		}
+
 		cfg := make(map[string]interface{})
 		cfg["times"] = flattenTimeRange(v.Times)
 		cfg["weekdays"] = flattenWeekdayRange(v.Weekdays)
 		cfg["days_of_month"] = flattenDayOfMonthRange(v.DaysOfMonth)
 		cfg["months"] = flattenMonthRange(v.Months)
 		cfg["years"] = flattenYearRange(v.Years)
-		cfg["location"] = v.Location.String()
+		cfg["location"] = location
 		timeIntervalConf = append(timeIntervalConf, cfg)
 	}
 	return timeIntervalConf
