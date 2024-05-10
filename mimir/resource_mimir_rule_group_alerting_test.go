@@ -183,6 +183,32 @@ func TestAccResourceRuleGroupAlerting_Federated(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "rule.0.expr", "test1_metric"),
 				),
 			},
+			{
+				Config: testAccResourceRuleGroupAlerting_federated_rule_group_tenant_change,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_federated_rule_group", "alert_1_federated_rule_group", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "name", "alert_1_federated_rule_group"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.0", "tenant-a"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.1", "tenant-c"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.2", "tenant-d"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "rule.0.alert", "test1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "rule.0.expr", "test1_metric"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupAlerting_federated_rule_group_rule_change,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_federated_rule_group", "alert_1_federated_rule_group", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "name", "alert_1_federated_rule_group"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.0", "tenant-a"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.1", "tenant-c"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "source_tenants.2", "tenant-d"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "rule.0.alert", "test2"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_federated_rule_group", "rule.0.expr", "test2_metric"),
+				),
+			},
 		},
 	})
 }
@@ -272,6 +298,30 @@ const testAccResourceRuleGroupAlerting_federated_rule_group = `
 		rule {
 			alert = "test1"
 			expr  = "test1_metric"
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_federated_rule_group_tenant_change = `
+	resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
+		name = "alert_1_federated_rule_group"
+		source_tenants = ["tenant-a", "tenant-c", "tenant-d"]
+		namespace = "namespace_1"
+		rule {
+			alert = "test1"
+			expr  = "test1_metric"
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_federated_rule_group_rule_change = `
+	resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
+		name = "alert_1_federated_rule_group"
+		source_tenants = ["tenant-a", "tenant-c", "tenant-d"]
+		namespace = "namespace_1"
+		rule {
+			alert = "test2"
+			expr  = "test2_metric"
 		}
 	}
 `
