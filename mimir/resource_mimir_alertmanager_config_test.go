@@ -2,11 +2,14 @@ package mimir
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/go-version"
 )
 
 func testAccCheckMimirAlertmanagerConfigExists(client *apiClient) resource.TestCheckFunc {
@@ -1035,6 +1038,131 @@ const testAccResourceAlertmanagerConfig_WebexReceiver_update = `
 		  }
           api_url = "https://webexapis.com/v1/messages"
           room_id = "room-1234567"
+        }
+      }
+    }
+`
+
+func TestAccResourceAlertmanagerConfig_MsteamsReceiver(t *testing.T) {
+	/* Skip this test if mimir version is older than 2.12.0
+		   https://github.com/grafana/mimir/commit/6ca9b40d748d66d386039deecbd92307c2608f9d
+
+		=== RUN   TestAccResourceAlertmanagerConfig_MsteamsReceiver
+	    resource_mimir_alertmanager_config_test.go:1050: Step 1/2 error: Error running apply: exit status 1
+	        2024/05/13 07:39:33 [DEBUG] Using modified User-Agent: Terraform/0.12.31 HashiCorp-terraform-exec/0.18.1
+
+	        Error: Cannot create alertmanager config unexpected response code '400': error validating Alertmanager config: yaml: unmarshal errors:
+	          line 14: field summary not found in type config.plain
+
+
+	          on terraform_plugin_test.tf line 2, in resource "mimir_alertmanager_config" "mytenant":
+	           2:     resource "mimir_alertmanager_config" "mytenant" {
+
+
+		--- FAIL: TestAccResourceAlertmanagerConfig_MsteamsReceiver (0.44s)
+	*/
+	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
+	minVersion, _ := version.NewVersion("2.12.0")
+
+	if currentVersion.LessThan(minVersion) {
+		fmt.Printf("Skipping alertmanager msteams receiver tests (current version '%s' is less than '%s')\n", currentVersion, minVersion)
+		return
+	}
+
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAlertmanagerConfig_MsteamsReceiver,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists(client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "msteams"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "msteams"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.0.webhook_url", "https://msteams.com/api/webhooks/123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.0.title", "title1"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.0.summary", "test summary"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.0.text", "test body message"),
+				),
+			},
+			{
+				Config: testAccResourceAlertmanagerConfig_MsteamsReceiver_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists(client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "msteams"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "msteams"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.0.webhook_url", "https://msteams.com/api/webhooks/123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.0.title", "title2"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.0.summary", "test summary updated"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.0.text", "test body2 message"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.1.webhook_url", "https://msteams.com/api/webhooks/123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.1.title", "title3"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.1.summary", "test summary"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.msteams_configs.1.text", "test body3 message"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceAlertmanagerConfig_MsteamsReceiver = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "msteams"
+      }
+      receiver {
+        name = "msteams"
+        msteams_configs {
+          webhook_url = "https://msteams.com/api/webhooks/123456"
+          title = "title1"
+          summary = "test summary"
+          text = "test body message"
+        }
+      }
+    }
+`
+
+const testAccResourceAlertmanagerConfig_MsteamsReceiver_update = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "msteams"
+      }
+      receiver {
+        name = "msteams"
+        msteams_configs {
+          webhook_url = "https://msteams.com/api/webhooks/123456"
+          title = "title2"
+          summary = "test summary updated"
+          text = "test body2 message"
+        }
+        msteams_configs {
+          webhook_url = "https://msteams.com/api/webhooks/123456"
+          title = "title3"
+          summary = "test summary"
+          text = "test body3 message"
         }
       }
     }
