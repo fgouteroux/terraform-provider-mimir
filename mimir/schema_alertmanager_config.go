@@ -234,6 +234,46 @@ func emailConfigFields() map[string]*schema.Schema {
 	}
 }
 
+func msteamsConfigFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"send_resolved": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Whether to notify about resolved alerts.",
+		},
+		"webhook_url": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The incoming webhook URL.",
+		},
+		"title": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Message title template.",
+		},
+		"summary": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Message summary template.",
+		},
+		"text": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Message body template.",
+		},
+		"http_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: httpConfigFields(),
+			},
+			Description: "The HTTP client's configuration.",
+		},
+	}
+}
+
 func pagerdutyConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"send_resolved": {
@@ -1434,6 +1474,13 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 							Schema: snsConfigFields(),
 						},
 					},
+					"msteams_configs": {
+						Type:     schema.TypeList,
+						Optional: true,
+						Elem: &schema.Resource{
+							Schema: msteamsConfigFields(),
+						},
+					},
 				},
 			},
 		},
@@ -1912,6 +1959,13 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Computed: true,
 						Elem: &schema.Resource{
 							Schema: snsConfigFields(),
+						},
+					},
+					"msteams_configs": {
+						Type:     schema.TypeList,
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: msteamsConfigFields(),
 						},
 					},
 				},

@@ -60,8 +60,8 @@ jobs:
           - '0.12.*'
           - '1.5.*'
         mimir-version:
-          - '2.10.3'
           - '2.11.0'
+          - '2.12.0'
     steps:
 
     - name: Setup Go
@@ -90,4 +90,4 @@ jobs:
           -c "mimir -target=alertmanager,ruler -tenant-federation.enabled=true -ruler.tenant-federation.enabled=true"
 
     - name: Run acceptance test
-      run: make testacc
+      run: MIMIR_VERSION=${{ matrix.mimir-version }} make testacc

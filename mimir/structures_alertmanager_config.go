@@ -342,6 +342,9 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		if raw, ok := data["sns_configs"]; ok {
 			cfg.SNSConfigs = expandSnsConfig(raw.([]interface{}))
 		}
+		if raw, ok := data["msteams_configs"]; ok {
+			cfg.MsteamsConfigs = expandMsteamsConfig(raw.([]interface{}))
+		}
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -369,6 +372,7 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 		cfg["telegram_configs"] = flattenTelegramConfig(v.TelegramConfigs)
 		cfg["victorops_configs"] = flattenVictorOpsConfig(v.VictorOpsConfigs)
 		cfg["sns_configs"] = flattenSnsConfig(v.SNSConfigs)
+		cfg["msteams_configs"] = flattenMsteamsConfig(v.MsteamsConfigs)
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -1502,6 +1506,60 @@ func flattenPushoverConfig(v []*pushoverConfig) []interface{} {
 		pushoverConf = append(pushoverConf, cfg)
 	}
 	return pushoverConf
+}
+
+func expandMsteamsConfig(v []interface{}) []*msteamsConfig {
+	var msteamsConf []*msteamsConfig
+
+	for _, v := range v {
+		cfg := &msteamsConfig{}
+		data := v.(map[string]interface{})
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw)
+		}
+
+		if raw, ok := data["webhook_url"]; ok {
+			cfg.WebhookURL = raw.(string)
+		}
+		if raw, ok := data["title"]; ok {
+			cfg.Title = raw.(string)
+		}
+		if raw, ok := data["summary"]; ok {
+			cfg.Summary = raw.(string)
+		}
+		if raw, ok := data["text"]; ok {
+			cfg.Text = raw.(string)
+		}
+		msteamsConf = append(msteamsConf, cfg)
+	}
+	return msteamsConf
+}
+
+func flattenMsteamsConfig(v []*msteamsConfig) []interface{} {
+	var msteamsConf []interface{}
+
+	if v == nil {
+		return msteamsConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["webhook_url"] = v.WebhookURL
+		cfg["title"] = v.Title
+		cfg["summary"] = v.Summary
+		cfg["text"] = v.Text
+
+		msteamsConf = append(msteamsConf, cfg)
+	}
+	return msteamsConf
 }
 
 func expandRouteConfig(v interface{}) *route {
