@@ -40,6 +40,7 @@ resource "mimir_rule_group_alerting" "test" {
 
 ### Optional
 
+- `interval` (String) Alerting Rule group interval
 - `namespace` (String) Alerting Rule group namespace
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 

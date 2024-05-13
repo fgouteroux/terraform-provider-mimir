@@ -64,6 +64,7 @@ Optional:
 
 - `discord_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--discord_configs))
 - `email_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--email_configs))
+- `msteams_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--msteams_configs))
 - `opsgenie_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs))
 - `pagerduty_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs))
 - `pushover_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--pushover_configs))
@@ -184,6 +185,87 @@ Optional:
 - `max_version` (String) Maximum acceptable TLS version.
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
+
+
+
+<a id="nestedblock--receiver--msteams_configs"></a>
+### Nested Schema for `receiver.msteams_configs`
+
+Optional:
+
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config))
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `summary` (String) Message summary template.
+- `text` (String) Message body template.
+- `title` (String) Message title template.
+- `webhook_url` (String) The incoming webhook URL.
+
+<a id="nestedblock--receiver--msteams_configs--http_config"></a>
+### Nested Schema for `receiver.msteams_configs.http_config`
+
+Optional:
+
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--basic_auth))
+- `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--tls_config))
+
+<a id="nestedblock--receiver--msteams_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.authorization`
+
+Optional:
+
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
+
+
+<a id="nestedblock--receiver--msteams_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.basic_auth`
+
+Optional:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedblock--receiver--msteams_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.oauth2`
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
+
+<a id="nestedblock--receiver--msteams_configs--http_config--oauth2--tls_config"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.oauth2.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
+
+
+<a id="nestedblock--receiver--msteams_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
 
 
 

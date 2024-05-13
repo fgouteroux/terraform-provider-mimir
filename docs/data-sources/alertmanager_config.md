@@ -147,6 +147,7 @@ Read-Only:
 
 - `discord_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs))
 - `email_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--email_configs))
+- `msteams_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs))
 - `name` (String)
 - `opsgenie_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs))
 - `pagerduty_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs))
@@ -268,6 +269,87 @@ Read-Only:
 - `max_version` (String)
 - `min_version` (String)
 - `server_name` (String)
+
+
+
+<a id="nestedobjatt--receiver--msteams_configs"></a>
+### Nested Schema for `receiver.msteams_configs`
+
+Read-Only:
+
+- `http_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config))
+- `send_resolved` (Boolean)
+- `summary` (String)
+- `text` (String)
+- `title` (String)
+- `webhook_url` (String)
+
+<a id="nestedobjatt--receiver--msteams_configs--http_config"></a>
+### Nested Schema for `receiver.msteams_configs.http_config`
+
+Read-Only:
+
+- `authorization` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--authorization))
+- `basic_auth` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--basic_auth))
+- `bearer_token` (String)
+- `enable_http2` (Boolean)
+- `follow_redirects` (Boolean)
+- `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--tls_config))
+
+<a id="nestedobjatt--receiver--msteams_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.tls_config`
+
+Read-Only:
+
+- `credentials` (String)
+- `type` (String)
+
+
+<a id="nestedobjatt--receiver--msteams_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.tls_config`
+
+Read-Only:
+
+- `password` (String)
+- `username` (String)
+
+
+<a id="nestedobjatt--receiver--msteams_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.tls_config`
+
+Read-Only:
+
+- `client_id` (String)
+- `client_secret` (String)
+- `endpoint_params` (Map of String)
+- `scopes` (List of String)
+- `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--tls_config--tls_config))
+- `token_url` (String)
+
+<a id="nestedobjatt--receiver--msteams_configs--http_config--tls_config--tls_config"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.tls_config.tls_config`
+
+Read-Only:
+
+- `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
+- `server_name` (String)
+
+
+
+<a id="nestedobjatt--receiver--msteams_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.tls_config`
+
+Read-Only:
+
+- `insecure_skip_verify` (Boolean)
+- `max_version` (String)
+- `min_version` (String)
+- `server_name` (String)
+
 
 
 
