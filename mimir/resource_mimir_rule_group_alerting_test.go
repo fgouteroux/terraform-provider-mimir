@@ -155,6 +155,28 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.1.annotations.description", "test 2 alert description"),
 				),
 			},
+			{
+				Config: testAccResourceRuleGroupAlerting_interval,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_interval", "alert_1_interval", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "name", "alert_1_interval"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "rule.0.alert", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "interval", "6h"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupAlerting_interval_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_interval", "alert_1_interval", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "name", "alert_1_interval"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "rule.0.alert", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "interval", "10m"),
+				),
+			},
 		},
 	})
 }
@@ -277,6 +299,30 @@ const testAccResourceRuleGroupAlerting_basic_update = `
 			}
 		}
 	}
+`
+
+const testAccResourceRuleGroupAlerting_interval = `
+    resource "mimir_rule_group_alerting" "alert_1_interval" {
+            name = "alert_1_interval"
+            namespace = "namespace_1"
+            interval = "6h"
+            rule {
+                    alert = "test1_info"
+                    expr  = "test1_metric"
+            }
+    }
+`
+
+const testAccResourceRuleGroupAlerting_interval_update = `
+    resource "mimir_rule_group_alerting" "alert_1_interval" {
+            name = "alert_1_interval"
+            namespace = "namespace_1"
+            interval = "10m"
+            rule {
+                    alert = "test1_info"
+                    expr  = "test1_metric"
+            }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_prettify_promql_expr = `
