@@ -200,7 +200,7 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 }
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChange("rule") {
+	if d.HasChanges("rule", "interval", "source_tenants") {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get("namespace").(string)
