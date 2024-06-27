@@ -134,6 +134,28 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "interval", "10m"),
 				),
 			},
+			{
+				Config: testAccResourceRuleGroupRecording_query_offset,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_query_offset", "record_1_query_offset", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "name", "record_1_query_offset"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "query_offset", "5m"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupRecording_query_offset_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_query_offset", "record_1_query_offset", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "name", "record_1_query_offset"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "query_offset", "1m"),
+				),
+			},
 		},
 	})
 }
@@ -272,6 +294,30 @@ const testAccResourceRuleGroupRecording_interval_update = `
             name = "record_1_interval"
             namespace = "namespace_1"
             interval = "10m"
+            rule {
+                    record = "test1_info"
+                    expr   = "test1_metric"
+            }
+    }
+`
+
+const testAccResourceRuleGroupRecording_query_offset = `
+    resource "mimir_rule_group_recording" "record_1_query_offset" {
+            name = "record_1_query_offset"
+            namespace = "namespace_1"
+            query_offset = "5m"
+            rule {
+                    record = "test1_info"
+                    expr   = "test1_metric"
+            }
+    }
+`
+
+const testAccResourceRuleGroupRecording_query_offset_update = `
+    resource "mimir_rule_group_recording" "record_1_query_offset" {
+            name = "record_1_query_offset"
+            namespace = "namespace_1"
+            query_offset = "1m"
             rule {
                     record = "test1_info"
                     expr   = "test1_metric"

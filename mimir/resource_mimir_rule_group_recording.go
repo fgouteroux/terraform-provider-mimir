@@ -42,6 +42,12 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validateDuration,
 			},
+			"query_offset": {
+				Type:         schema.TypeString,
+				Description:  "The duration by which to delay the execution of the recording rule.",
+				Optional:     true,
+				ValidateFunc: validateDuration,
+			},
 			"source_tenants": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -108,6 +114,7 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	rules := &recordingRuleGroup{
 		Name:          name,
 		Interval:      d.Get("interval").(string),
+		QueryOffset:   d.Get("query_offset").(string),
 		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 		Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
 	}
@@ -192,6 +199,10 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set("query_offset", data.QueryOffset)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	err = d.Set("source_tenants", data.SourceTenants)
 	if err != nil {
 		return diag.FromErr(err)
@@ -208,6 +219,7 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 		rules := &recordingRuleGroup{
 			Name:          name,
 			Interval:      d.Get("interval").(string),
+			QueryOffset:   d.Get("query_offset").(string),
 			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 			Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
 		}
@@ -315,6 +327,7 @@ type recordingRule struct {
 type recordingRuleGroup struct {
 	Name          string          `yaml:"name"`
 	Interval      string          `yaml:"interval,omitempty"`
+	QueryOffset   string          `yaml:"query_offset,omitempty"`
 	Rules         []recordingRule `yaml:"rules"`
 	SourceTenants []string        `yaml:"source_tenants,omitempty"`
 }
