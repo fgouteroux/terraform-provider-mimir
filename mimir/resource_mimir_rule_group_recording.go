@@ -42,6 +42,12 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validateDuration,
 			},
+			"evaluation_delay": {
+				Type:         schema.TypeString,
+				Description:  "The duration by which to delay the execution of the recording rule.",
+				Optional:     true,
+				ValidateFunc: validateDuration,
+			},
 			"source_tenants": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -106,10 +112,11 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	}
 
 	rules := &recordingRuleGroup{
-		Name:          name,
-		Interval:      d.Get("interval").(string),
-		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
-		Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
+		Name:            name,
+		Interval:        d.Get("interval").(string),
+		EvaluationDelay: d.Get("evaluation_delay").(string),
+		SourceTenants:   expandStringArray(d.Get("source_tenants").([]interface{})),
+		Rules:           expandRecordingRules(d.Get("rule").([]interface{})),
 	}
 	data, _ := yaml.Marshal(rules)
 	headers := map[string]string{"Content-Type": "application/yaml"}
@@ -192,6 +199,10 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set("evaluation_delay", data.EvaluationDelay)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	err = d.Set("source_tenants", data.SourceTenants)
 	if err != nil {
 		return diag.FromErr(err)
@@ -200,16 +211,17 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 }
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", "interval", "source_tenants") {
+	if d.HasChanges("rule", "interval", "evaluation_delay", "source_tenants") {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get("namespace").(string)
 
 		rules := &recordingRuleGroup{
-			Name:          name,
-			Interval:      d.Get("interval").(string),
-			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
-			Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
+			Name:            name,
+			Interval:        d.Get("interval").(string),
+			EvaluationDelay: d.Get("evaluation_delay").(string),
+			SourceTenants:   expandStringArray(d.Get("source_tenants").([]interface{})),
+			Rules:           expandRecordingRules(d.Get("rule").([]interface{})),
 		}
 		data, _ := yaml.Marshal(rules)
 		headers := map[string]string{"Content-Type": "application/yaml"}
@@ -313,8 +325,9 @@ type recordingRule struct {
 }
 
 type recordingRuleGroup struct {
-	Name          string          `yaml:"name"`
-	Interval      string          `yaml:"interval,omitempty"`
-	Rules         []recordingRule `yaml:"rules"`
-	SourceTenants []string        `yaml:"source_tenants,omitempty"`
+	Name            string          `yaml:"name"`
+	Interval        string          `yaml:"interval,omitempty"`
+	EvaluationDelay string          `yaml:"evaluation_delay,omitempty"`
+	Rules           []recordingRule `yaml:"rules"`
+	SourceTenants   []string        `yaml:"source_tenants,omitempty"`
 }

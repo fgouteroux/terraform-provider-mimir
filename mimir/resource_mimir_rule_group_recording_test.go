@@ -134,6 +134,28 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "interval", "10m"),
 				),
 			},
+			{
+				Config: testAccResourceRuleGroupRecording_evaluation_delay,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_evaluation_delay", "record_1_evaluation_delay", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "name", "record_1_evaluation_delay"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "evaluation_delay", "5m"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupRecording_evaluation_delay_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_evaluation_delay", "record_1_evaluation_delay", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "name", "record_1_evaluation_delay"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "evaluation_delay", "1m"),
+				),
+			},
 		},
 	})
 }
@@ -272,6 +294,30 @@ const testAccResourceRuleGroupRecording_interval_update = `
             name = "record_1_interval"
             namespace = "namespace_1"
             interval = "10m"
+            rule {
+                    record = "test1_info"
+                    expr   = "test1_metric"
+            }
+    }
+`
+
+const testAccResourceRuleGroupRecording_evaluation_delay = `
+    resource "mimir_rule_group_recording" "record_1_evaluation_delay" {
+            name = "record_1_evaluation_delay"
+            namespace = "namespace_1"
+            evaluation_delay = "5m"
+            rule {
+                    record = "test1_info"
+                    expr   = "test1_metric"
+            }
+    }
+`
+
+const testAccResourceRuleGroupRecording_evaluation_delay_update = `
+    resource "mimir_rule_group_recording" "record_1_evaluation_delay" {
+            name = "record_1_evaluation_delay"
+            namespace = "namespace_1"
+            evaluation_delay = "1m"
             rule {
                     record = "test1_info"
                     expr   = "test1_metric"
