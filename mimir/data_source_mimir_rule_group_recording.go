@@ -34,7 +34,7 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 				Description: "Recording Rule group interval",
 				Computed:    true,
 			},
-			"query_offset": {
+			"evaluation_delay": {
 				Type:        schema.TypeString,
 				Description: "The duration by which to delay the execution of the recording rule.",
 				Computed:    true,
@@ -104,7 +104,7 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 	if err := d.Set("interval", data.Interval); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("query_offset", data.QueryOffset); err != nil {
+	if err := d.Set("evaluation_delay", data.EvaluationDelay); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("source_tenants", data.SourceTenants); err != nil {
