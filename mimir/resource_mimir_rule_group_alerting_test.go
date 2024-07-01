@@ -262,6 +262,33 @@ func TestAccResourceRuleGroupAlerting_FormatPromQLExpr(t *testing.T) {
 	os.Setenv("MIMIR_FORMAT_PROMQL_EXPR", "false")
 }
 
+func TestAccResourceRuleGroupAlerting_ValidatePromQLExpr(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Setenv("MIMIR_VALIDATE_PROMQL_EXPR", "false")
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupAlerting_expectPromQLValidationError,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1", "alert_1", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "name", "alert_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.alert", "test1_alert"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.expr", "rate(hi)"),
+				),
+			},
+		},
+	})
+	os.Setenv("MIMIR_VALIDATE_PROMQL_EXPR", "true")
+}
+
 const testAccResourceRuleGroupAlerting_basic = `
 	resource "mimir_rule_group_alerting" "alert_1" {
 		name = "alert_1"

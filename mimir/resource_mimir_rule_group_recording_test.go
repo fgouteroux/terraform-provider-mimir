@@ -1,6 +1,7 @@
 package mimir
 
 import (
+	"os"
 	"regexp"
 	"testing"
 
@@ -212,6 +213,33 @@ func TestAccResourceRuleGroupRecording_Federated(t *testing.T) {
 	})
 }
 
+func TestAccResourceRuleGroupRecording_ValidatePromQLExpr(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Setenv("MIMIR_VALIDATE_PROMQL_EXPR", "false")
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupRecording_skip_promql_validation,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1", "record_1", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "name", "record_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.0.record", "test1_record"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.0.expr", "test1_metric"),
+				),
+			},
+		},
+	})
+	os.Setenv("MIMIR_VALIDATE_PROMQL_EXPR", "true")
+}
+
 const testAccResourceRuleGroupRecording_basic = `
 	resource "mimir_rule_group_recording" "record_1" {
 		name = "record_1"
@@ -323,4 +351,16 @@ const testAccResourceRuleGroupRecording_evaluation_delay_update = `
                     expr   = "test1_metric"
             }
     }
+`
+
+const testAccResourceRuleGroupRecording_skip_promql_validation = `
+	resource "mimir_rule_group_recording" "record_1" {
+		name = "record_1"
+		namespace = "namespace_1"
+		evaluation_delay = "1m"
+		rule {
+			record = "test1_record"
+			expr   = "test1_metric"
+		}
+	}
 `
