@@ -79,6 +79,7 @@ provider "mimir" {
 - `debug` (Boolean) Enable debug mode to trace requests executed.
 - `distributor_uri` (String) mimir distributor base url
 - `format_promql_expr` (Boolean) Enable the formatting of PromQL expression.
+- `validate_promql_expr` (Boolean) Enable the validation of PromQL expression.
 - `headers` (Map of String) A map of header names and values to set on all outbound requests.
 - `insecure` (Boolean) When using https, this disables TLS verification of the host.
 - `key` (String) Client key (filepath or inline) for TLS client authentication.

@@ -59,13 +59,14 @@ func validateGroupRuleName(v interface{}, k string) (ws []string, errors []error
 }
 
 func validatePromQLExpr(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
+	if enablePromQLExprValidation {
+		value := v.(string)
 
-	if _, err := parser.ParseExpr(value); err != nil {
-		errors = append(errors, fmt.Errorf(
-			"\"%s\": Invalid PromQL expression %q: %v", k, value, err))
+		if _, err := parser.ParseExpr(value); err != nil {
+			errors = append(errors, fmt.Errorf(
+				"\"%s\": Invalid PromQL expression %q: %v", k, value, err))
+		}
 	}
-
 	return
 }
 

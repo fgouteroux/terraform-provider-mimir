@@ -12,6 +12,7 @@ import (
 var (
 	apiAlertsPath                            = "/api/v1/alerts"
 	enablePromQLExprFormat                   bool
+	enablePromQLExprValidation               bool
 	overwriteAlertmanagerConfig              bool
 	overwriteRuleGroupConfig                 bool
 	ruleGroupReadDelayAfterChange            string
@@ -129,6 +130,12 @@ func Provider(version string) func() *schema.Provider {
 					DefaultFunc: schema.EnvDefaultFunc("MIMIR_FORMAT_PROMQL_EXPR", false),
 					Description: "Enable the formatting of PromQL expression.",
 				},
+				"validate_promql_expr": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("MIMIR_VALIDATE_PROMQL_EXPR", true),
+					Description: "Enable the validation of PromQL expression.",
+				},
 				"overwrite_alertmanager_config": {
 					Type:        schema.TypeBool,
 					Optional:    true,
@@ -217,6 +224,7 @@ func providerConfigure(version string, p *schema.Provider, d *schema.ResourceDat
 	}
 
 	enablePromQLExprFormat = d.Get("format_promql_expr").(bool)
+	enablePromQLExprValidation = d.Get("validate_promql_expr").(bool)
 	overwriteAlertmanagerConfig = d.Get("overwrite_alertmanager_config").(bool)
 	overwriteRuleGroupConfig = d.Get("overwrite_rule_group_config").(bool)
 	ruleGroupReadDelayAfterChange = d.Get("rule_group_read_delay_after_change").(string)
