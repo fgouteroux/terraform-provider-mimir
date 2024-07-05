@@ -235,6 +235,32 @@ func TestAccResourceRuleGroupAlerting_Federated(t *testing.T) {
 	})
 }
 
+func TestAccResourceRuleGroupAlerting_PromQLValidation(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupAlerting_promql_validation_histogram_avg,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_histogram_avg_rule_group", "alert_1_histogram_avg_rule_group", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_histogram_avg_rule_group", "name", "alert_1_histogram_avg_rule_group"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_histogram_avg_rule_group", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_histogram_avg_rule_group", "rule.0.alert", "test1_histogram_avg"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_histogram_avg_rule_group", "rule.0.expr", "histogram_avg(rate(test_metric[5m])) by (dimension) > 1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceRuleGroupAlerting_FormatPromQLExpr(t *testing.T) {
 	// Init client
 	client, err := NewAPIClient(setupClient())
@@ -368,6 +394,17 @@ const testAccResourceRuleGroupAlerting_federated_rule_group_rule_change = `
 		rule {
 			alert = "test2"
 			expr  = "test2_metric"
+		}
+	}
+`
+
+const testAccResourceRuleGroupAlerting_promql_validation_histogram_avg = `
+	resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group" {
+		name = "alert_1_histogram_avg_rule_group"
+		namespace = "namespace_1"
+		rule {
+			alert = "test_histogram_avg"
+			expr  = "histogram_avg(rate(test_metric[5m])) by (dimension) > 1"
 		}
 	}
 `
