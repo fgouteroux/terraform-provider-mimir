@@ -238,7 +238,6 @@ func TestAccResourceRuleGroupAlerting_Federated(t *testing.T) {
 }
 
 func TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg(t *testing.T) {
-
 	/* Skip this test if mimir version is older than 2.12.0
 
 	=== RUN   TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg
