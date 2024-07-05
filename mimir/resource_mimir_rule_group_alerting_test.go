@@ -404,7 +404,7 @@ const testAccResourceRuleGroupAlerting_promql_validation_histogram_avg = `
 		namespace = "namespace_1"
 		rule {
 			alert = "test_histogram_avg"
-			expr  = "histogram_avg(rate(test_metric[5m])) by (dimension) > 1"
+			expr  = "histogram_avg(rate(test_metric[5m])) > 1"
 		}
 	}
 `
