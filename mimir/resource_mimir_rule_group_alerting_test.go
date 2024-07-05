@@ -1,10 +1,12 @@
 package mimir
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -235,7 +237,32 @@ func TestAccResourceRuleGroupAlerting_Federated(t *testing.T) {
 	})
 }
 
-func TestAccResourceRuleGroupAlerting_PromQLValidation(t *testing.T) {
+func TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg(t *testing.T) {
+
+	/* Skip this test if mimir version is older than 2.12.0
+
+	=== RUN   TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg
+		resource_mimir_rule_group_alerting_test.go:245: Step 1/1 error: Error running apply: exit status 1
+			2024/07/05 09:20:03 [DEBUG] Using modified User-Agent: Terraform/0.12.31 HashiCorp-terraform-exec/0.18.1
+
+			Error: Cannot create alerting rule group 'alert_1_histogram_avg_rule_group' (namespace: namespace_1) - unexpected response code '400': 4:13: group "alert_1_histogram_avg_rule_group", rule 0, "test_histogram_avg": could not parse expression: 1:1: parse error: unknown function with name "histogram_avg"
+
+
+			on terraform_plugin_test.tf line 2, in resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group":
+			2: 	resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group" {
+
+
+	--- FAIL: TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg (0.28s)
+
+	*/
+	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
+	minVersion, _ := version.NewVersion("2.12.0")
+
+	if currentVersion.LessThan(minVersion) {
+		fmt.Printf("Skipping PromQL HistogramAvg tests (current version '%s' is less than '%s')\n", currentVersion, minVersion)
+		return
+	}
+
 	// Init client
 	client, err := NewAPIClient(setupClient())
 	if err != nil {
