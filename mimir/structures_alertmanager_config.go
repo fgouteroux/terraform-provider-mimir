@@ -1607,6 +1607,13 @@ func expandChildRouteConfig(v interface{}) *route {
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
 		cfg := data[0].(map[string]interface{})
+		if raw, ok := cfg["child_route"]; ok {
+			var routes []*route
+			for _, item := range raw.([]interface{}) {
+				routes = append(routes, expandChildRouteConfig([]interface{}{item.(map[string]interface{})}))
+			}
+			routeConf.Routes = routes
+		}
 		if raw, ok := cfg["receiver"]; ok {
 			routeConf.Receiver = raw.(string)
 		}
@@ -1674,6 +1681,14 @@ func flattenRouteConfig(v *route) []interface{} {
 
 func flattenChildRouteConfig(v *route) []interface{} {
 	routeConf := make(map[string]interface{})
+
+	if v.Routes != nil {
+		var routes []interface{}
+		for _, route := range v.Routes {
+			routes = append(routes, flattenChildRouteConfig(route)[0])
+		}
+		routeConf["child_route"] = routes
+	}
 
 	routeConf["receiver"] = v.Receiver
 

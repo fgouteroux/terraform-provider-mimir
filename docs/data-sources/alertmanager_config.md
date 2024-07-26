@@ -1312,6 +1312,7 @@ Read-Only:
 Read-Only:
 
 - `active_time_intervals` (List of String)
+- `child_route` (List of Object) (see [below for nested schema](#nestedobjatt--route--child_route--child_route))
 - `continue` (Boolean)
 - `group_by` (List of String)
 - `group_interval` (String)
@@ -1320,6 +1321,39 @@ Read-Only:
 - `mute_time_intervals` (List of String)
 - `receiver` (String)
 - `repeat_interval` (String)
+
+<a id="nestedobjatt--route--child_route--child_route"></a>
+### Nested Schema for `route.child_route.child_route`
+
+Read-Only:
+
+- `active_time_intervals` (List of String)
+- `child_route` (List of Object) (see [below for nested schema](#nestedobjatt--route--child_route--child_route--child_route))
+- `continue` (Boolean)
+- `group_by` (List of String)
+- `group_interval` (String)
+- `group_wait` (String)
+- `matchers` (List of String)
+- `mute_time_intervals` (List of String)
+- `receiver` (String)
+- `repeat_interval` (String)
+
+<a id="nestedobjatt--route--child_route--child_route--child_route"></a>
+### Nested Schema for `route.child_route.child_route.repeat_interval`
+
+Read-Only:
+
+- `active_time_intervals` (List of String)
+- `continue` (Boolean)
+- `group_by` (List of String)
+- `group_interval` (String)
+- `group_wait` (String)
+- `matchers` (List of String)
+- `mute_time_intervals` (List of String)
+- `receiver` (String)
+- `repeat_interval` (String)
+
+
 
 
 
