@@ -19,14 +19,36 @@ resource "mimir_alertmanager_config" "mytenant" {
     group_wait = "30s"
     group_interval = "5m"
     repeat_interval = "1h"
-    receiver = "pagerduty"
+    receiver = "pagerduty_dev"
+  }
+  child_route {
+    matchers = ["severity=\"critical\""]
+
+    child_route {
+      receiver = "pagerduty_prod"
+      matchers = ["environment=\"prod\""]
+    }
+
+    child_route {
+      receiver = "pagerduty_dev"
+      matchers = ["environment=\"dev\""]
+    }
   }
   receiver {
-    name = "pagerduty"
+    name = "pagerduty_dev"
     pagerduty_configs {
       routing_key = "secret"
       details = {
         environment = "dev"
+      }
+    }
+  }
+  receiver {
+    name = "pagerduty_prod"
+    pagerduty_configs {
+      routing_key = "secret"
+      details = {
+        environment = "prod"
       }
     }
   }
@@ -1231,9 +1253,37 @@ Optional:
 <a id="nestedblock--route--child_route"></a>
 ### Nested Schema for `route.child_route`
 
-Required:
+Optional:
 
+- `active_time_intervals` (List of String) Times when the route should be active. These must match the name of a mute time interval defined in the time_interval block.
+- `child_route` (Block List) Although the `child_route` block is recursive, only 3 levels are supported by default. It could be defined by `MIMIR_ALERTMANAGER_CHILD_ROUTE_MAX_LEVEL` env var. (see [below for nested schema](#nestedblock--route--child_route--child_route))
+- `continue` (Boolean) Whether an alert should continue matching subsequent sibling nodes.
+- `group_by` (List of String) The labels by which incoming alerts are grouped together.
+- `group_interval` (String) How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.
+- `group_wait` (String) How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.
+- `matchers` (List of String) A list of matchers that an alert has to fulfill to match the node.
+- `mute_time_intervals` (List of String) Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.
 - `receiver` (String) Name of the receiver to send the notification.
+- `repeat_interval` (String) How long to wait before sending a notification again if it has already been sent successfully for an alert.
+
+<a id="nestedblock--route--child_route--child_route"></a>
+### Nested Schema for `route.child_route.child_route`
+
+Optional:
+
+- `active_time_intervals` (List of String) Times when the route should be active. These must match the name of a mute time interval defined in the time_interval block.
+- `child_route` (Block List) Although the `child_route` block is recursive, only 3 levels are supported by default. It could be defined by `MIMIR_ALERTMANAGER_CHILD_ROUTE_MAX_LEVEL` env var. (see [below for nested schema](#nestedblock--route--child_route--child_route--child_route))
+- `continue` (Boolean) Whether an alert should continue matching subsequent sibling nodes.
+- `group_by` (List of String) The labels by which incoming alerts are grouped together.
+- `group_interval` (String) How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.
+- `group_wait` (String) How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.
+- `matchers` (List of String) A list of matchers that an alert has to fulfill to match the node.
+- `mute_time_intervals` (List of String) Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.
+- `receiver` (String) Name of the receiver to send the notification.
+- `repeat_interval` (String) How long to wait before sending a notification again if it has already been sent successfully for an alert.
+
+<a id="nestedblock--route--child_route--child_route--child_route"></a>
+### Nested Schema for `route.child_route.child_route.child_route`
 
 Optional:
 
@@ -1244,7 +1294,10 @@ Optional:
 - `group_wait` (String) How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.
 - `matchers` (List of String) A list of matchers that an alert has to fulfill to match the node.
 - `mute_time_intervals` (List of String) Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.
+- `receiver` (String) Name of the receiver to send the notification.
 - `repeat_interval` (String) How long to wait before sending a notification again if it has already been sent successfully for an alert.
+
+
 
 
 

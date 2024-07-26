@@ -1,8 +1,167 @@
 package mimir
 
 import (
+	"os"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func getChildRouteSchemaLevel() int {
+	// level is a string as the only way to set level is from env var
+	level := os.Getenv("MIMIR_ALERTMANAGER_CHILD_ROUTE_MAX_LEVEL")
+
+	// set default level to 3 if var is not set or empty
+	if level == "" {
+		level = "3"
+	}
+	// convert to int
+	lev, _ := strconv.Atoi(level)
+
+	return lev
+}
+
+func childRouteSchema(level int) map[string]*schema.Schema {
+	elem := map[string]*schema.Schema{
+		"group_by": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "The labels by which incoming alerts are grouped together.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+		"matchers": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "A list of matchers that an alert has to fulfill to match the node.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+		"group_wait": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.",
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
+		"group_interval": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.",
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
+		"repeat_interval": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "How long to wait before sending a notification again if it has already been sent successfully for an alert.",
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
+		"receiver": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Name of the receiver to send the notification.",
+		},
+		"continue": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Whether an alert should continue matching subsequent sibling nodes.",
+		},
+		"mute_time_intervals": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+		"active_time_intervals": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Times when the route should be active. These must match the name of a mute time interval defined in the time_interval block.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+	}
+
+	// manage recursivity of child_route attribute
+	if level > 1 {
+		elem["child_route"] = &schema.Schema{
+			Type:        schema.TypeList,
+			Description: "Although the `child_route` block is recursive, only 3 levels are supported by default. It could be defined by `MIMIR_ALERTMANAGER_CHILD_ROUTE_MAX_LEVEL` env var.",
+			Optional:    true,
+			Elem: &schema.Resource{
+				Schema: childRouteSchema(level - 1),
+			},
+		}
+	}
+	return elem
+}
+
+func childRouteDatasourceSchema(level int) map[string]*schema.Schema {
+	elem := map[string]*schema.Schema{
+		"group_by": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "The labels by which incoming alerts are grouped together.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+		"matchers": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "A list of matchers that an alert has to fulfill to match the node.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+		"group_wait": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.",
+		},
+		"group_interval": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.",
+		},
+		"repeat_interval": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "How long to wait before sending a notification again if it has already been sent successfully for an alert.",
+		},
+		"receiver": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Name of the receiver to send the notification.",
+		},
+		"continue": {
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Default:     nil,
+			Description: "Whether an alert should continue matching subsequent sibling nodes.",
+		},
+		"mute_time_intervals": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+		"active_time_intervals": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "Times when the route should be active. These must match the name of a mute time interval defined in the time_interval block.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+	}
+
+	// manage recursivity of child_route attribute
+	if level > 1 {
+		elem["child_route"] = &schema.Schema{
+			Type:        schema.TypeList,
+			Description: "Although the `child_route` block is recursive, only 3 levels are supported by default. It could be defined by `MIMIR_ALERTMANAGER_CHILD_ROUTE_MAX_LEVEL` env var.",
+			Computed:    true,
+			Elem: &schema.Resource{
+				Schema: childRouteSchema(level - 1),
+			},
+		}
+	}
+	return elem
+}
 
 func tlsConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
@@ -1527,64 +1686,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Type:     schema.TypeList,
 						Optional: true,
 						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"group_by": {
-									Type:        schema.TypeList,
-									Optional:    true,
-									Description: "The labels by which incoming alerts are grouped together.",
-									Elem:        &schema.Schema{Type: schema.TypeString},
-								},
-								"matchers": {
-									Type:        schema.TypeList,
-									Optional:    true,
-									Description: "A list of matchers that an alert has to fulfill to match the node.",
-									Elem:        &schema.Schema{Type: schema.TypeString},
-								},
-								"group_wait": {
-									Type:         schema.TypeString,
-									Optional:     true,
-									Description:  "How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.",
-									ValidateFunc: validateDuration,
-									StateFunc:    formatDuration,
-								},
-								"group_interval": {
-									Type:         schema.TypeString,
-									Optional:     true,
-									Description:  "How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.",
-									ValidateFunc: validateDuration,
-									StateFunc:    formatDuration,
-								},
-								"repeat_interval": {
-									Type:         schema.TypeString,
-									Optional:     true,
-									Description:  "How long to wait before sending a notification again if it has already been sent successfully for an alert.",
-									ValidateFunc: validateDuration,
-									StateFunc:    formatDuration,
-								},
-								"receiver": {
-									Type:        schema.TypeString,
-									Required:    true,
-									Description: "Name of the receiver to send the notification.",
-								},
-								"continue": {
-									Type:        schema.TypeBool,
-									Optional:    true,
-									Default:     false,
-									Description: "Whether an alert should continue matching subsequent sibling nodes.",
-								},
-								"mute_time_intervals": {
-									Type:        schema.TypeList,
-									Optional:    true,
-									Description: "Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.",
-									Elem:        &schema.Schema{Type: schema.TypeString},
-								},
-								"active_time_intervals": {
-									Type:        schema.TypeList,
-									Optional:    true,
-									Description: "Times when the route should be active. These must match the name of a mute time interval defined in the time_interval block.",
-									Elem:        &schema.Schema{Type: schema.TypeString},
-								},
-							},
+							Schema: childRouteSchema(getChildRouteSchemaLevel()),
 						},
 					},
 				},
@@ -2007,58 +2109,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Type:     schema.TypeList,
 						Computed: true,
 						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"group_by": {
-									Type:        schema.TypeList,
-									Computed:    true,
-									Description: "The labels by which incoming alerts are grouped together.",
-									Elem:        &schema.Schema{Type: schema.TypeString},
-								},
-								"matchers": {
-									Type:        schema.TypeList,
-									Computed:    true,
-									Description: "A list of matchers that an alert has to fulfill to match the node.",
-									Elem:        &schema.Schema{Type: schema.TypeString},
-								},
-								"group_wait": {
-									Type:        schema.TypeString,
-									Required:    true,
-									Description: "How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group.",
-								},
-								"group_interval": {
-									Type:        schema.TypeString,
-									Required:    true,
-									Description: "How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent.",
-								},
-								"repeat_interval": {
-									Type:        schema.TypeString,
-									Required:    true,
-									Description: "How long to wait before sending a notification again if it has already been sent successfully for an alert.",
-								},
-								"receiver": {
-									Type:        schema.TypeString,
-									Required:    true,
-									Description: "Name of the receiver to send the notification.",
-								},
-								"continue": {
-									Type:        schema.TypeBool,
-									Computed:    true,
-									Default:     nil,
-									Description: "Whether an alert should continue matching subsequent sibling nodes.",
-								},
-								"mute_time_intervals": {
-									Type:        schema.TypeList,
-									Computed:    true,
-									Description: "Times when the route should be muted. These must match the name of a mute time interval defined in the time_interval block.",
-									Elem:        &schema.Schema{Type: schema.TypeString},
-								},
-								"active_time_intervals": {
-									Type:        schema.TypeList,
-									Computed:    true,
-									Description: "Times when the route should be active. These must match the name of a mute time interval defined in the time_interval block.",
-									Elem:        &schema.Schema{Type: schema.TypeString},
-								},
-							},
+							Schema: childRouteDatasourceSchema(getChildRouteSchemaLevel()),
 						},
 					},
 				},

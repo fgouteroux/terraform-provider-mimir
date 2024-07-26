@@ -106,6 +106,30 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccResourceAlertmanagerConfig_nested_child_route,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists(client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "nowhere"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "nowhere"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.1.name", "receiver_1"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.2.name", "receiver_2"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.0.matchers.0", "severity=\"warning\""),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.0.child_route.0.receiver", "receiver_1"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.1.matchers.0", "severity=\"critical\""),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.1.child_route.0.matchers.0", "environment=\"prod\""),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.1.child_route.0.child_route.0.receiver", "receiver_1"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.1.child_route.0.child_route.0.continue", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.1.child_route.0.child_route.1.receiver", "receiver_2"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.1.child_route.0.child_route.1.continue", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.1.child_route.1.matchers.0", "environment!=\"prod\""),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.child_route.1.child_route.1.child_route.0.receiver", "receiver_1"),
+				),
+			},
+			{
 				Config: testAccResourceAlertmanagerConfig_global,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMimirAlertmanagerConfigExists(client),
@@ -314,6 +338,63 @@ const testAccResourceAlertmanagerConfig_basic_update = `
         }
       }
     }
+`
+
+const testAccResourceAlertmanagerConfig_nested_child_route = `
+    resource "mimir_alertmanager_config" "mytenant" {
+	  route {
+	    group_by = ["..."]
+	    group_wait = "30s"
+	    group_interval = "5m"
+	    repeat_interval = "1h"
+	    receiver = "nowhere"
+
+	    child_route {
+	      matchers = ["severity=\"warning\""]
+
+	      child_route {
+	        receiver = "receiver_1"
+	      }
+	    }
+
+	    child_route {
+	      matchers = ["severity=\"critical\""]
+
+	      child_route {
+	        matchers = ["environment=\"prod\""]
+
+	        child_route {
+	          receiver = "receiver_1"
+	          continue = true
+	        }
+
+	        child_route {
+	          receiver = "receiver_2"
+	          continue = true
+	        }
+	      }
+
+	      child_route {
+	        matchers = ["environment!=\"prod\""]
+
+	        child_route {
+	          receiver = "receiver_1"
+	          continue = true
+	        }
+	      }
+	    }
+	  }
+
+	  receiver {
+	    name = "nowhere"
+	  }
+	  receiver {
+	    name = "receiver_1"
+	  }
+	  receiver {
+	    name = "receiver_2"
+	  }
+	}
 `
 
 const testAccResourceAlertmanagerConfig_global = `
