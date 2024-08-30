@@ -160,19 +160,13 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 
 func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	client := meta.(*apiClient)
 
 	// use id as read is also called by import
 	idArr := strings.Split(d.Id(), "/")
 	namespace := idArr[0]
 	name := idArr[1]
 
-	var headers map[string]string
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
-	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
-
-	baseMsg := fmt.Sprintf("Cannot read alerting rule group '%s' (namespace: %s) -", name, namespace)
-	err = handleHTTPError(err, baseMsg)
+	jobraw, err := ruleGroupAlertingRead(meta, name, namespace)
 	if err != nil {
 		if d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
 			diags = append(diags, diag.Diagnostic{
@@ -264,9 +258,30 @@ func resourcemimirRuleGroupAlertingDelete(ctx context.Context, d *schema.Resourc
 			fmt.Sprintf("%s%s", client.uri, path),
 			err))
 	}
+	// Retry read as mimir api could return a 200 status code but the rule group still exist because of the event change notification propagation latency.
+	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a <ruleGroupReadRetryAfterChange> max retries.
+	for i := 1; i <= ruleGroupReadRetryAfterChange; i++ {
+		_, err := ruleGroupAlertingRead(meta, name, namespace)
+		if err == nil {
+			log.Printf("[WARN] Alerting rule group previously deleted '%s' still exist (%d/3)", name, i)
+			time.Sleep(ruleGroupReadDelayAfterChangeDuration)
+			continue
+		} else if strings.Contains(err.Error(), "response code '404'") {
+			break
+		}
+		return diag.FromErr(err)
+	}
 	d.SetId("")
-
 	return diag.Diagnostics{}
+}
+
+func ruleGroupAlertingRead(meta interface{}, name, namespace string) (string, error) {
+	var headers map[string]string
+	client := meta.(*apiClient)
+	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
+	baseMsg := fmt.Sprintf("Cannot read alerting rule group '%s' (namespace: %s) -", name, namespace)
+	return jobraw, handleHTTPError(err, baseMsg)
 }
 
 func expandAlertingRules(v []interface{}) []alertingRule {

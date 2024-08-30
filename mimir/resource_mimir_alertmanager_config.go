@@ -75,11 +75,7 @@ func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.Resour
 
 func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	client := meta.(*apiClient)
-
-	resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
-	baseMsg := "Cannot read alertmanager config"
-	err = handleHTTPError(err, baseMsg)
+	resp, err := alertmanagerConfigRead(meta)
 	if err != nil {
 		if d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
 			diags = append(diags, diag.Diagnostic{
@@ -164,9 +160,29 @@ func resourcemimirAlertmanagerConfigDelete(ctx context.Context, d *schema.Resour
 			fmt.Sprintf("%s%s", client.uri, apiAlertsPath),
 			err))
 	}
-	d.SetId("")
 
+	// Retry read as mimir api could return a 200 status code but the alertmanager config still exist because of the event change notification propagation latency.
+	// Add delay of <alertmanagerReadDelayAfterChange> * time.Second) between each retry with a <alertmanagerReadRetryAfterChange> max retries.
+	for i := 1; i <= alertmanagerReadRetryAfterChange; i++ {
+		_, err := alertmanagerConfigRead(meta)
+		if err == nil {
+			log.Printf("[WARN] Alertmanager config previously deleted still exist (%d/3)", i)
+			time.Sleep(alertmanagerReadDelayAfterChangeDuration)
+			continue
+		} else if strings.Contains(err.Error(), "response code '404'") {
+			break
+		}
+		return diag.FromErr(err)
+	}
+	d.SetId("")
 	return diag.Diagnostics{}
+}
+
+func alertmanagerConfigRead(meta interface{}) (string, error) {
+	client := meta.(*apiClient)
+	resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
+	baseMsg := "Cannot read alertmanager config"
+	return resp, handleHTTPError(err, baseMsg)
 }
 
 func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, path string) (string, error) {
