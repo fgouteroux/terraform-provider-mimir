@@ -53,7 +53,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Type:          schema.TypeString,
 				Description:   "**Deprecated** The duration by which to delay the execution of the recording rule.",
 				Optional:      true,
-				Deprecated:    "With Mimir >= 2.13, replaced by query_offset. This attribute will be removed in the next major version of this provider.",
+				Deprecated:    "With Mimir >= 2.13, replaced by query_offset. This attribute will be removed when it is no longer supported in Mimir.",
 				ConflictsWith: []string{"query_offset"},
 				ValidateFunc:  validateDuration,
 			},
