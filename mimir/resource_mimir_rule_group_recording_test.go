@@ -1,9 +1,12 @@
 package mimir
 
 import (
+	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -134,6 +137,76 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "interval", "10m"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccResourceRuleGroupRecording_EvaluationDelay(t *testing.T) {
+	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
+	validVersion, _ := version.NewVersion("2.12.0")
+
+	if !currentVersion.Equal(validVersion) {
+		fmt.Printf("Skipping ruler evaluation delay tests (current version '%s' is not '%s')\n", currentVersion, validVersion)
+		return
+	}
+
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupRecording_evaluation_delay,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_evaluation_delay", "record_1_evaluation_delay", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "name", "record_1_evaluation_delay"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "evaluation_delay", "5m"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupRecording_evaluation_delay_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_evaluation_delay", "record_1_evaluation_delay", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "name", "record_1_evaluation_delay"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_evaluation_delay", "evaluation_delay", "1m"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceRuleGroupRecording_QueryOffset(t *testing.T) {
+	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
+	minVersion, _ := version.NewVersion("2.13.0")
+
+	if currentVersion.LessThan(minVersion) {
+		fmt.Printf("Skipping ruler query offset tests (current version '%s' is less than '%s')\n", currentVersion, minVersion)
+		return
+	}
+
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceRuleGroupRecording_query_offset,
 				Check: resource.ComposeTestCheckFunc(
@@ -294,6 +367,30 @@ const testAccResourceRuleGroupRecording_interval_update = `
             name = "record_1_interval"
             namespace = "namespace_1"
             interval = "10m"
+            rule {
+                    record = "test1_info"
+                    expr   = "test1_metric"
+            }
+    }
+`
+
+const testAccResourceRuleGroupRecording_evaluation_delay = `
+    resource "mimir_rule_group_recording" "record_1_evaluation_delay" {
+            name = "record_1_evaluation_delay"
+            namespace = "namespace_1"
+            evaluation_delay = "5m"
+            rule {
+                    record = "test1_info"
+                    expr   = "test1_metric"
+            }
+    }
+`
+
+const testAccResourceRuleGroupRecording_evaluation_delay_update = `
+    resource "mimir_rule_group_recording" "record_1_evaluation_delay" {
+            name = "record_1_evaluation_delay"
+            namespace = "namespace_1"
+            evaluation_delay = "1m"
             rule {
                     record = "test1_info"
                     expr   = "test1_metric"

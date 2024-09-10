@@ -43,10 +43,19 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				ValidateFunc: validateDuration,
 			},
 			"query_offset": {
-				Type:         schema.TypeString,
-				Description:  "The duration by which to delay the execution of the recording rule.",
-				Optional:     true,
-				ValidateFunc: validateDuration,
+				Type:          schema.TypeString,
+				Description:   "The duration by which to delay the execution of the recording rule.",
+				Optional:      true,
+				ConflictsWith: []string{"evaluation_delay"},
+				ValidateFunc:  validateDuration,
+			},
+			"evaluation_delay": {
+				Type:          schema.TypeString,
+				Description:   "**Deprecated** The duration by which to delay the execution of the recording rule.",
+				Optional:      true,
+				Deprecated:    "With Mimir >= 2.13, replaced by query_offset. This attribute will be removed in the next major version of this provider.",
+				ConflictsWith: []string{"query_offset"},
+				ValidateFunc:  validateDuration,
 			},
 			"source_tenants": {
 				Type:        schema.TypeList,
@@ -112,12 +121,18 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	}
 
 	rules := &recordingRuleGroup{
-		Name:          name,
-		Interval:      d.Get("interval").(string),
-		QueryOffset:   d.Get("query_offset").(string),
-		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
-		Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
+		Name:            name,
+		Interval:        d.Get("interval").(string),
+		EvaluationDelay: d.Get("evaluation_delay").(string),
+		QueryOffset:     d.Get("query_offset").(string),
+		SourceTenants:   expandStringArray(d.Get("source_tenants").([]interface{})),
+		Rules:           expandRecordingRules(d.Get("rule").([]interface{})),
 	}
+	// if ed, ok := d.GetOk("evaluation_delay"); ok {
+	// 	rules.EvaluationDelay = ed.(string)
+	// } else {
+	// 	rules.QueryOffset = d.Get("query_offset").(string)
+	// }
 	data, _ := yaml.Marshal(rules)
 	headers := map[string]string{"Content-Type": "application/yaml"}
 
@@ -199,9 +214,16 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("query_offset", data.QueryOffset)
-	if err != nil {
-		return diag.FromErr(err)
+	if _, ok := d.GetOk("evaluation_delay"); ok {
+		err = d.Set("evaluation_delay", data.EvaluationDelay)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		err = d.Set("query_offset", data.QueryOffset)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 	err = d.Set("source_tenants", data.SourceTenants)
 	if err != nil {
@@ -211,7 +233,7 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 }
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", "interval", "query_offset", "source_tenants") {
+	if d.HasChanges("rule", "interval", "query_offset", "evaluation_delay", "source_tenants") {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get("namespace").(string)
@@ -219,9 +241,13 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 		rules := &recordingRuleGroup{
 			Name:          name,
 			Interval:      d.Get("interval").(string),
-			QueryOffset:   d.Get("query_offset").(string),
 			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 			Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
+		}
+		if ed, ok := d.GetOk("evaluation_delay"); ok {
+			rules.EvaluationDelay = ed.(string)
+		} else {
+			rules.QueryOffset = d.Get("query_offset").(string)
 		}
 		data, _ := yaml.Marshal(rules)
 		headers := map[string]string{"Content-Type": "application/yaml"}
@@ -325,9 +351,10 @@ type recordingRule struct {
 }
 
 type recordingRuleGroup struct {
-	Name          string          `yaml:"name"`
-	Interval      string          `yaml:"interval,omitempty"`
-	QueryOffset   string          `yaml:"query_offset,omitempty"`
-	Rules         []recordingRule `yaml:"rules"`
-	SourceTenants []string        `yaml:"source_tenants,omitempty"`
+	Name            string          `yaml:"name"`
+	Interval        string          `yaml:"interval,omitempty"`
+	QueryOffset     string          `yaml:"query_offset,omitempty"`
+	EvaluationDelay string          `yaml:"evaluation_delay,omitempty"`
+	Rules           []recordingRule `yaml:"rules"`
+	SourceTenants   []string        `yaml:"source_tenants,omitempty"`
 }
