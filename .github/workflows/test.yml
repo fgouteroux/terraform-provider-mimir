@@ -87,7 +87,7 @@ jobs:
           -d \
           -p 8080:8080 \
           --name mimir \
-          --entrypoint="/bin/bash" grafana/mimir:${{ matrix.mimir-version }} \
+          --entrypoint="/bin/sh" grafana/mimir:${{ matrix.mimir-version }} \
           -c "mimir -target=alertmanager,ruler -tenant-federation.enabled=true -ruler.tenant-federation.enabled=true"
 
     - name: Run acceptance test
