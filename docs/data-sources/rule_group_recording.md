@@ -32,9 +32,10 @@ data "mimir_rule_group_recording" "record" {
 
 ### Read-Only
 
-- `query_offset` (String) The duration by which to delay the execution of the recording rule.
+- `evaluation_delay` (String, Deprecated) **Deprecated** The duration by which to delay the execution of the recording rule.
 - `id` (String) The ID of this resource.
 - `interval` (String) Recording Rule group interval
+- `query_offset` (String) The duration by which to delay the execution of the recording rule.
 - `rule` (List of Object) (see [below for nested schema](#nestedatt--rule))
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 
