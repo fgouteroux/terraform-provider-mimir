@@ -35,9 +35,10 @@ resource "mimir_rule_group_recording" "test" {
 
 ### Optional
 
-- `query_offset` (String) The duration by which to delay the execution of the recording rule.
+- `evaluation_delay` (String, Deprecated) **Deprecated** The duration by which to delay the execution of the recording rule.
 - `interval` (String) Recording Rule group interval
 - `namespace` (String) Recording Rule group namespace
+- `query_offset` (String) The duration by which to delay the execution of the recording rule.
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 
 ### Read-Only
