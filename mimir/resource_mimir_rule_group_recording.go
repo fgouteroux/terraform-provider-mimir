@@ -164,6 +164,11 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 
 	// use id as read is also called by import
 	idArr := strings.Split(d.Id(), "/")
+
+	if len(idArr) != 2 {
+		return diag.FromErr(fmt.Errorf("invalid id format: expected 'namespace/name', got '%s'", d.Id()))
+	}
+
 	namespace := idArr[0]
 	name := idArr[1]
 
