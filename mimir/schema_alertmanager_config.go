@@ -1090,7 +1090,7 @@ func telegramConfigFields() map[string]*schema.Schema {
 			Description: "Telegram bot token",
 		},
 		"chat_id": {
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 			Optional:    true,
 			Description: "ID of the chat where to send the messages.",
 		},
