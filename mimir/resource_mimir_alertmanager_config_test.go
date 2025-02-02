@@ -1248,3 +1248,97 @@ const testAccResourceAlertmanagerConfig_MsteamsReceiver_update = `
       }
     }
 `
+
+func TestAccResourceAlertmanagerConfig_TelegramReceiver(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAlertmanagerConfig_TelegramReceiver,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists(client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "telegram"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "telegram"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.bot_token", "abcdef:123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.chat_id", "-1000000000000"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.message", "test message"),
+				),
+			},
+			{
+				Config: testAccResourceAlertmanagerConfig_TelegramReceiver_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists(client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.repeat_interval", "1h"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.receiver", "telegram"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "telegram"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.bot_token", "abcdef:123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.chat_id", "-1000000000000"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.message", "test message update"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.1.bot_token", "abcdef:123456"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.1.chat_id", "-1000000000000"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.1.message", "test message"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceAlertmanagerConfig_TelegramReceiver = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "telegram"
+      }
+      receiver {
+        name = "telegram"
+        telegram_configs {
+          bot_token = "abcdef:123456"
+          chat_id = -1000000000000
+          message = "test message"
+        }
+      }
+    }
+`
+
+const testAccResourceAlertmanagerConfig_TelegramReceiver_update = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "telegram"
+      }
+      receiver {
+        name = "telegram"
+        telegram_configs {
+          bot_token = "abcdef:123456"
+          chat_id = -1000000000000
+          message = "test message update"
+        }
+        telegram_configs {
+          bot_token = "abcdef:123456"
+          chat_id = -1000000000000
+          message = "test message"
+        }
+      }
+    }
+`
