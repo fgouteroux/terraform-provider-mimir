@@ -22,6 +22,12 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
+			"org_id": {
+				Type:        schema.TypeString,
+				ForceNew:    true,
+				Optional:    true,
+				Description: "The organization id to operate on within mimir.",
+			},
 			"namespace": {
 				Type:        schema.TypeString,
 				Description: "Recording Rule group namespace",
@@ -99,12 +105,17 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	client := meta.(*apiClient)
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
+	orgID := d.Get("org_id").(string)
 
 	if !overwriteRuleGroupConfig {
 		ruleGroupConfigExists := true
 
 		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
-		_, err := client.sendRequest("ruler", "GET", path, "", make(map[string]string))
+		headers := make(map[string]string)
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
+		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 		baseMsg := fmt.Sprintf("Cannot create recording rule group '%s' (namespace: %s) -", name, namespace)
 		err = handleHTTPError(err, baseMsg)
 		if err != nil {
@@ -135,6 +146,9 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	// }
 	data, _ := yaml.Marshal(rules)
 	headers := map[string]string{"Content-Type": "application/yaml"}
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
 
 	path := fmt.Sprintf("/config/v1/rules/%s", namespace)
 	_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
@@ -143,7 +157,11 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(fmt.Sprintf("%s/%s", namespace, name))
+	if orgID != "" {
+		d.SetId(fmt.Sprintf("%s/%s/%s", orgID, namespace, name))
+	} else {
+		d.SetId(fmt.Sprintf("%s/%s", namespace, name))
+	}
 
 	// Retry read as mimir api could return a 404 status code caused by the event change notification propagation.
 	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a <ruleGroupReadRetryAfterChange> max retries.
@@ -165,14 +183,21 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	// use id as read is also called by import
 	idArr := strings.Split(d.Id(), "/")
 
-	if len(idArr) != 2 {
-		return diag.FromErr(fmt.Errorf("invalid id format: expected 'namespace/name', got '%s'", d.Id()))
+	var name, namespace, orgID string
+
+	switch len(idArr) {
+	case 2:
+		namespace = idArr[0]
+		name = idArr[1]
+	case 3:
+		orgID = idArr[0]
+		namespace = idArr[1]
+		name = idArr[2]
+	default:
+		return diag.FromErr(fmt.Errorf("invalid id format: expected 'namespace/name' or 'org_id/namespace/name', got '%s'", d.Id()))
 	}
 
-	namespace := idArr[0]
-	name := idArr[1]
-
-	jobraw, err := ruleGroupRecordingRead(meta, name, namespace)
+	jobraw, err := ruleGroupRecordingRead(meta, name, namespace, orgID)
 	if err != nil {
 		if d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
 			diags = append(diags, diag.Diagnostic{
@@ -201,6 +226,10 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
+	err = d.Set("org_id", orgID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	err = d.Set("namespace", namespace)
 	if err != nil {
 		return diag.FromErr(err)
@@ -236,6 +265,7 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get("namespace").(string)
+		orgID := d.Get("org_id").(string)
 
 		rules := &recordingRuleGroup{
 			Name:          name,
@@ -250,6 +280,9 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 		}
 		data, _ := yaml.Marshal(rules)
 		headers := map[string]string{"Content-Type": "application/yaml"}
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
 
 		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
 		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
@@ -268,7 +301,12 @@ func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.Resour
 	client := meta.(*apiClient)
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
-	var headers map[string]string
+	orgID := d.Get("org_id").(string)
+
+	headers := make(map[string]string)
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
 	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
 	_, err := client.sendRequest("ruler", "DELETE", path, "", headers)
 	if err != nil {
@@ -281,7 +319,7 @@ func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.Resour
 	// Retry read as mimir api could return a 200 status code but the rule group still exist because of the event change notification propagation latency.
 	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a <ruleGroupReadRetryAfterChange> max retries.
 	for i := 1; i <= ruleGroupReadRetryAfterChange; i++ {
-		_, err := ruleGroupRecordingRead(meta, name, namespace)
+		_, err := ruleGroupRecordingRead(meta, name, namespace, orgID)
 		if err == nil {
 			log.Printf("[WARN] Recording rule group previously deleted '%s' still exist (%d/3)", name, i)
 			time.Sleep(ruleGroupReadDelayAfterChangeDuration)
@@ -295,8 +333,11 @@ func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.Resour
 	return diag.Diagnostics{}
 }
 
-func ruleGroupRecordingRead(meta interface{}, name, namespace string) (string, error) {
-	var headers map[string]string
+func ruleGroupRecordingRead(meta interface{}, name, namespace, orgID string) (string, error) {
+	headers := make(map[string]string)
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
 	client := meta.(*apiClient)
 	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
 	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
