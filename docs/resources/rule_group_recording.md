@@ -38,6 +38,7 @@ resource "mimir_rule_group_recording" "test" {
 - `evaluation_delay` (String, Deprecated) **Deprecated** The duration by which to delay the execution of the recording rule.
 - `interval` (String) Recording Rule group interval
 - `namespace` (String) Recording Rule group namespace
+- `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 - `query_offset` (String) The duration by which to delay the execution of the recording rule.
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 

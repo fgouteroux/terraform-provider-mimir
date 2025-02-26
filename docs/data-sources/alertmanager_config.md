@@ -22,6 +22,7 @@ data "mimir_alertmanager_config" "mytenant" {}
 ### Optional
 
 - `name` (String) Name of the alertmanager configuration. Only used for resource dependency.
+- `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 
 ### Read-Only
 
@@ -887,7 +888,7 @@ Read-Only:
 
 - `api_url` (String)
 - `bot_token` (String)
-- `chat_id` (String)
+- `chat_id` (Number)
 - `disable_notifications` (Boolean)
 - `http_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config))
 - `message` (String)

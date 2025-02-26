@@ -1276,6 +1276,12 @@ func snsConfigFields() map[string]*schema.Schema {
 
 func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"org_id": {
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+		},
 		"global": {
 			Type:     schema.TypeList,
 			Optional: true,
@@ -1709,6 +1715,12 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 
 func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"org_id": {
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+		},
 		"name": {
 			Type:        schema.TypeString,
 			Optional:    true,

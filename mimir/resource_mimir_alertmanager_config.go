@@ -27,10 +27,15 @@ func resourcemimirAlertmanagerConfig() *schema.Resource {
 
 func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
+	orgID := d.Get("org_id").(string)
 
 	if !overwriteAlertmanagerConfig {
 		alertmanagerConfigExists := true
-		resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
+		headers := make(map[string]string)
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
+		resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", headers)
 		baseMsg := "Cannot read alertmanager config"
 		err = handleHTTPError(err, baseMsg)
 		if err != nil {
@@ -74,8 +79,9 @@ func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	orgID := d.Get("org_id").(string)
 	var diags diag.Diagnostics
-	resp, err := alertmanagerConfigRead(meta)
+	resp, err := alertmanagerConfigRead(meta, orgID)
 	if err != nil {
 		if d.IsNewResource() && strings.Contains(err.Error(), "response code '404'") {
 			diags = append(diags, diag.Diagnostic{
@@ -107,6 +113,11 @@ func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.Resource
 
 	var alertmanagerConf alertmanagerConfig
 	err = yaml.Unmarshal([]byte(alertmanagerUserConf.AlertmanagerConfig), &alertmanagerConf)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("org_id", orgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -153,7 +164,12 @@ func resourcemimirAlertmanagerConfigUpdate(ctx context.Context, d *schema.Resour
 
 func resourcemimirAlertmanagerConfigDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
-	_, err := client.sendRequest("alertmanager", "DELETE", apiAlertsPath, "", make(map[string]string))
+	orgID := d.Get("org_id").(string)
+	headers := make(map[string]string)
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
+	_, err := client.sendRequest("alertmanager", "DELETE", apiAlertsPath, "", headers)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf(
 			"cannot delete alertmanager config from %s: %v",
@@ -164,7 +180,7 @@ func resourcemimirAlertmanagerConfigDelete(ctx context.Context, d *schema.Resour
 	// Retry read as mimir api could return a 200 status code but the alertmanager config still exist because of the event change notification propagation latency.
 	// Add delay of <alertmanagerReadDelayAfterChange> * time.Second) between each retry with a <alertmanagerReadRetryAfterChange> max retries.
 	for i := 1; i <= alertmanagerReadRetryAfterChange; i++ {
-		_, err := alertmanagerConfigRead(meta)
+		_, err := alertmanagerConfigRead(meta, orgID)
 		if err == nil {
 			log.Printf("[WARN] Alertmanager config previously deleted still exist (%d/3)", i)
 			time.Sleep(alertmanagerReadDelayAfterChangeDuration)
@@ -178,15 +194,23 @@ func resourcemimirAlertmanagerConfigDelete(ctx context.Context, d *schema.Resour
 	return diag.Diagnostics{}
 }
 
-func alertmanagerConfigRead(meta interface{}) (string, error) {
+func alertmanagerConfigRead(meta interface{}, orgID string) (string, error) {
 	client := meta.(*apiClient)
-	resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
+	headers := make(map[string]string)
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
+	resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", headers)
 	baseMsg := "Cannot read alertmanager config"
 	return resp, handleHTTPError(err, baseMsg)
 }
 
 func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, path string) (string, error) {
 	headers := map[string]string{"Content-Type": "application/yaml"}
+	orgID := d.Get("org_id").(string)
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
 
 	alertmanagerConf := &alertmanagerConfig{
 		Global:            expandGlobalConfig(d.Get("global").([]interface{})),

@@ -285,6 +285,32 @@ func TestAccResourceRuleGroupRecording_Federated(t *testing.T) {
 	})
 }
 
+func TestAccResourceRuleGroupRecording_WithOrgID(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupRecording_withOrgID,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_withOrgID", "record_1_withOrgID", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_withOrgID", "org_id", "another_tenant"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_withOrgID", "name", "record_1_withOrgID"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_withOrgID", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_withOrgID", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_withOrgID", "rule.0.expr", "test1_metric"),
+				),
+			},
+		},
+	})
+}
+
 const testAccResourceRuleGroupRecording_basic = `
 	resource "mimir_rule_group_recording" "record_1" {
 		name = "record_1"
@@ -418,6 +444,18 @@ const testAccResourceRuleGroupRecording_query_offset_update = `
             rule {
                     record = "test1_info"
                     expr   = "test1_metric"
+            }
+    }
+`
+
+const testAccResourceRuleGroupRecording_withOrgID = `
+    resource "mimir_rule_group_recording" "record_1_withOrgID" {
+            org_id = "another_tenant"
+            name = "record_1_withOrgID"
+            namespace = "namespace_1"
+            rule {
+                record = "test1_info"
+                expr  = "test1_metric"
             }
     }
 `

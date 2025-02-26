@@ -29,6 +29,7 @@ data "mimir_rule_group_recording" "record" {
 ### Optional
 
 - `namespace` (String) Recording Rule group namespace
+- `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 
 ### Read-Only
 

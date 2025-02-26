@@ -21,6 +21,7 @@ data "mimir_distributor_tenant_stats" "tenants" {}
 
 ### Optional
 
+- `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 - `user` (String) Query specific user stats, if not specified, all users are returned
 
 ### Read-Only

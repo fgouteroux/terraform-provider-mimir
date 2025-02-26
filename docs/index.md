@@ -67,7 +67,7 @@ provider "mimir" {
 
 ### Required
 
-- `org_id` (String) The organization id to operate on within mimir.
+- `org_id` (String) The default organization id to operate on within mimir. For resources that have an org_id attribute, the resource-level attribute has priority. May alternatively be set via the MIMIR_ORG_ID environment variable.
 
 ### Optional
 

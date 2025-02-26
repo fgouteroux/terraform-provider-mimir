@@ -25,6 +25,12 @@ func dataSourcemimirDistributorTenantStats() *schema.Resource {
 		ReadContext: dataSourcemimirDistributorTenantStatsRead,
 
 		Schema: map[string]*schema.Schema{
+			"org_id": {
+				Type:        schema.TypeString,
+				ForceNew:    true,
+				Optional:    true,
+				Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+			},
 			"user": {
 				Type:        schema.TypeString,
 				Description: "Query specific user stats, if not specified, all users are returned",
@@ -68,8 +74,13 @@ func dataSourcemimirDistributorTenantStats() *schema.Resource {
 func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 	user := d.Get("user").(string)
+	orgID := d.Get("org_id").(string)
 
 	headers := map[string]string{"Accept": "json"}
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
+
 	jobraw, err := client.sendRequest("distributor", "GET", "/all_user_stats", "", headers)
 
 	baseMsg := "Cannot read user stats"

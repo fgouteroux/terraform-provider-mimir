@@ -67,6 +67,7 @@ resource "mimir_alertmanager_config" "mytenant" {
 
 - `global` (Block List, Max: 1) (see [below for nested schema](#nestedblock--global))
 - `inhibit_rule` (Block List) Mutes an alert (target) matching a set of matchers when an alert (source) exists that matches another set of matchers. (see [below for nested schema](#nestedblock--inhibit_rule))
+- `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 - `templates` (List of String) A list of template names to use.
 - `templates_files` (Map of String) A map of key values string, where the key is the template name and the value the content of the template.
 - `time_interval` (Block List) A list of time intervals for muting/activating routes. (see [below for nested schema](#nestedblock--time_interval))
@@ -828,7 +829,7 @@ Optional:
 
 - `api_url` (String) The Telegram API URL. If not specified, default API URL will be used.
 - `bot_token` (String, Sensitive) Telegram bot token
-- `chat_id` (String) ID of the chat where to send the messages.
+- `chat_id` (Number) ID of the chat where to send the messages.
 - `disable_notifications` (Boolean) Disable telegram notifications
 - `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config))
 - `message` (String) Message template

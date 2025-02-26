@@ -33,9 +33,16 @@ func testAccCheckMimirRuleGroupExists(n string, name string, client *apiClient) 
 			return fmt.Errorf("mimir object name %s not set in terraform", name)
 		}
 
+		orgID := rs.Primary.Attributes["org_id"]
+		name := rs.Primary.Attributes["name"]
+		namespace := rs.Primary.Attributes["namespace"]
+
 		/* Make a throw-away API object to read from the API */
-		var headers map[string]string
-		path := fmt.Sprintf("/config/v1/rules/%s", rs.Primary.ID)
+		headers := make(map[string]string)
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
+		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
 		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 		if err != nil {
 			return err
@@ -56,8 +63,15 @@ func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		var headers map[string]string
-		path := fmt.Sprintf("/config/v1/rules/%s", rs.Primary.ID)
+		orgID := rs.Primary.Attributes["org_id"]
+		name := rs.Primary.Attributes["name"]
+		namespace := rs.Primary.Attributes["namespace"]
+
+		headers := make(map[string]string)
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
+		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
 		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 
 		// If the error is equivalent to 404 not found, the widget is destroyed.

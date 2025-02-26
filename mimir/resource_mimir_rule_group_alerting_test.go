@@ -44,76 +44,76 @@ func TestAccResourceRuleGroupAlerting_expectValidationError(t *testing.T) {
 }
 
 const testAccResourceRuleGroupAlerting_expectNameValidationError = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert-@error" 
-		namespace = "namespace_1"
-		rule {
-			alert = "test1_alert"
-			expr   = "test1_metric"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1" {
+        name = "alert-@error" 
+        namespace = "namespace_1"
+        rule {
+            alert = "test1_alert"
+            expr   = "test1_metric"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_expectRuleNameValidationError = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert_1"
-		namespace = "namespace_1"
-		rule {
-			alert = "test1 alert"
-			expr   = "test1_metric"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1" {
+        name = "alert_1"
+        namespace = "namespace_1"
+        rule {
+            alert = "test1 alert"
+            expr   = "test1_metric"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_expectPromQLValidationError = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert_1"
-		namespace = "namespace_1"
-		rule {
-			alert = "test1_alert"
-			expr   = "rate(hi)"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1" {
+        name = "alert_1"
+        namespace = "namespace_1"
+        rule {
+            alert = "test1_alert"
+            expr   = "rate(hi)"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_expectDurationValidationError = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert_1"
-		namespace = "namespace_1"
-		rule {
-			alert = "test1_alert"
-			expr  = "test1_metric"
-			for   = "3months"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1" {
+        name = "alert_1"
+        namespace = "namespace_1"
+        rule {
+            alert = "test1_alert"
+            expr  = "test1_metric"
+            for   = "3months"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_expectLabelNameValidationError = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert_1"
-		namespace = "namespace_1"
-		rule {
-			alert = "test1_alert"
-			expr   = "test1_metric"
-			labels = {
-				 ins-tance = "localhost"
-			}
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1" {
+        name = "alert_1"
+        namespace = "namespace_1"
+        rule {
+            alert = "test1_alert"
+            expr   = "test1_metric"
+            labels = {
+                 ins-tance = "localhost"
+            }
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_expectAnnotationNameValidationError = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert_1"
-		namespace = "namespace_1"
-		rule {
-			alert = "test1_alert"
-			expr   = "test1_metric"
-			annotations = {
-				 ins-tance = "localhost"
-			}
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1" {
+        name = "alert_1"
+        namespace = "namespace_1"
+        rule {
+            alert = "test1_alert"
+            expr   = "test1_metric"
+            annotations = {
+                 ins-tance = "localhost"
+            }
+        }
+    }
 `
 
 func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
@@ -240,18 +240,18 @@ func TestAccResourceRuleGroupAlerting_Federated(t *testing.T) {
 func TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg(t *testing.T) {
 	/* Skip this test if mimir version is older than 2.12.0
 
-	=== RUN   TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg
-		resource_mimir_rule_group_alerting_test.go:245: Step 1/1 error: Error running apply: exit status 1
-			2024/07/05 09:20:03 [DEBUG] Using modified User-Agent: Terraform/0.12.31 HashiCorp-terraform-exec/0.18.1
+	   === RUN   TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg
+	       resource_mimir_rule_group_alerting_test.go:245: Step 1/1 error: Error running apply: exit status 1
+	           2024/07/05 09:20:03 [DEBUG] Using modified User-Agent: Terraform/0.12.31 HashiCorp-terraform-exec/0.18.1
 
-			Error: Cannot create alerting rule group 'alert_1_histogram_avg_rule_group' (namespace: namespace_1) - unexpected response code '400': 4:13: group "alert_1_histogram_avg_rule_group", rule 0, "test_histogram_avg": could not parse expression: 1:1: parse error: unknown function with name "histogram_avg"
-
-
-			on terraform_plugin_test.tf line 2, in resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group":
-			2: 	resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group" {
+	           Error: Cannot create alerting rule group 'alert_1_histogram_avg_rule_group' (namespace: namespace_1) - unexpected response code '400': 4:13: group "alert_1_histogram_avg_rule_group", rule 0, "test_histogram_avg": could not parse expression: 1:1: parse error: unknown function with name "histogram_avg"
 
 
-	--- FAIL: TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg (0.28s)
+	           on terraform_plugin_test.tf line 2, in resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group":
+	           2:  resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group" {
+
+
+	   --- FAIL: TestAccResourceRuleGroupAlerting_PromQLValidation_HistogramAvg (0.28s)
 
 	*/
 	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
@@ -314,43 +314,69 @@ func TestAccResourceRuleGroupAlerting_FormatPromQLExpr(t *testing.T) {
 	os.Setenv("MIMIR_FORMAT_PROMQL_EXPR", "false")
 }
 
-const testAccResourceRuleGroupAlerting_basic = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert_1"
-		namespace = "namespace_1"
-		rule {
-			alert = "test1"
-			expr  = "test1_metric"
-		}
-		rule {
-			alert = "test2"
-			expr   = "test2_metric"
-			for    = "0s"
-		}
+func TestAccResourceRuleGroupAlerting_WithOrgID(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
 	}
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupAlerting_withOrgID,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_withOrgID", "alert_1_withOrgID", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_withOrgID", "org_id", "another_tenant"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_withOrgID", "name", "alert_1_withOrgID"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_withOrgID", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_withOrgID", "rule.0.alert", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_withOrgID", "rule.0.expr", "test1_metric"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceRuleGroupAlerting_basic = `
+    resource "mimir_rule_group_alerting" "alert_1" {
+        name = "alert_1"
+        namespace = "namespace_1"
+        rule {
+            alert = "test1"
+            expr  = "test1_metric"
+        }
+        rule {
+            alert = "test2"
+            expr   = "test2_metric"
+            for    = "0s"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_basic_update = `
-	resource "mimir_rule_group_alerting" "alert_1" {
-		name = "alert_1"
-		namespace = "namespace_1"
-		rule {
-			alert = "test1"
-			expr  = "test1_metric"
-		}
-		rule {
-			alert = "test2"
-			expr   = "test2_metric"
-			for = "1m"
-			labels = {
-				severity = "critical"
-			}
-			annotations = {
-				summary = "test 2 alert summary"
-				description = "test 2 alert description"
-			}
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1" {
+        name = "alert_1"
+        namespace = "namespace_1"
+        rule {
+            alert = "test1"
+            expr  = "test1_metric"
+        }
+        rule {
+            alert = "test2"
+            expr   = "test2_metric"
+            for = "1m"
+            labels = {
+                severity = "critical"
+            }
+            annotations = {
+                summary = "test 2 alert summary"
+                description = "test 2 alert description"
+            }
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_interval = `
@@ -378,59 +404,71 @@ const testAccResourceRuleGroupAlerting_interval_update = `
 `
 
 const testAccResourceRuleGroupAlerting_prettify_promql_expr = `
-	resource "mimir_rule_group_alerting" "alert_1_prettify" {
-		name = "alert_1_prettify"
-		namespace = "namespace_1"
-		rule {
-			alert = "checkPrettifyPromQL"
-			expr  = "up==0 unless my_very_very_long_useless_metric_that_mean_nothing_but_necessary_to_check_prettify_promql > 300"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1_prettify" {
+        name = "alert_1_prettify"
+        namespace = "namespace_1"
+        rule {
+            alert = "checkPrettifyPromQL"
+            expr  = "up==0 unless my_very_very_long_useless_metric_that_mean_nothing_but_necessary_to_check_prettify_promql > 300"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_federated_rule_group = `
-	resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
-		name = "alert_1_federated_rule_group"
-		source_tenants = ["tenant-a", "tenant-b"]
-		namespace = "namespace_1"
-		rule {
-			alert = "test1"
-			expr  = "test1_metric"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
+        name = "alert_1_federated_rule_group"
+        source_tenants = ["tenant-a", "tenant-b"]
+        namespace = "namespace_1"
+        rule {
+            alert = "test1"
+            expr  = "test1_metric"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_federated_rule_group_tenant_change = `
-	resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
-		name = "alert_1_federated_rule_group"
-		source_tenants = ["tenant-a", "tenant-c", "tenant-d"]
-		namespace = "namespace_1"
-		rule {
-			alert = "test1"
-			expr  = "test1_metric"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
+        name = "alert_1_federated_rule_group"
+        source_tenants = ["tenant-a", "tenant-c", "tenant-d"]
+        namespace = "namespace_1"
+        rule {
+            alert = "test1"
+            expr  = "test1_metric"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_federated_rule_group_rule_change = `
-	resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
-		name = "alert_1_federated_rule_group"
-		source_tenants = ["tenant-a", "tenant-c", "tenant-d"]
-		namespace = "namespace_1"
-		rule {
-			alert = "test2"
-			expr  = "test2_metric"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1_federated_rule_group" {
+        name = "alert_1_federated_rule_group"
+        source_tenants = ["tenant-a", "tenant-c", "tenant-d"]
+        namespace = "namespace_1"
+        rule {
+            alert = "test2"
+            expr  = "test2_metric"
+        }
+    }
 `
 
 const testAccResourceRuleGroupAlerting_promql_validation_histogram_avg = `
-	resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group" {
-		name = "alert_1_histogram_avg_rule_group"
-		namespace = "namespace_1"
-		rule {
-			alert = "test_histogram_avg"
-			expr  = "histogram_avg(rate(test_metric[5m])) > 1"
-		}
-	}
+    resource "mimir_rule_group_alerting" "alert_1_histogram_avg_rule_group" {
+        name = "alert_1_histogram_avg_rule_group"
+        namespace = "namespace_1"
+        rule {
+            alert = "test_histogram_avg"
+            expr  = "histogram_avg(rate(test_metric[5m])) > 1"
+        }
+    }
+`
+
+const testAccResourceRuleGroupAlerting_withOrgID = `
+    resource "mimir_rule_group_alerting" "alert_1_withOrgID" {
+            org_id = "another_tenant"
+            name = "alert_1_withOrgID"
+            namespace = "namespace_1"
+            rule {
+                alert = "test1_info"
+                expr  = "test1_metric"
+            }
+    }
 `

@@ -42,6 +42,7 @@ resource "mimir_rule_group_alerting" "test" {
 
 - `interval` (String) Alerting Rule group interval
 - `namespace` (String) Alerting Rule group namespace
+- `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 
 ### Read-Only
