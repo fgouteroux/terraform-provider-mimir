@@ -19,7 +19,7 @@ func dataSourcemimirRuleGroupAlerting() *schema.Resource {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Optional:    true,
-				Description: "The organization id to operate on within mimir.",
+				Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
 			},
 			"namespace": {
 				Type:        schema.TypeString,

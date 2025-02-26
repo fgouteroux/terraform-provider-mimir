@@ -1280,7 +1280,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			ForceNew:    true,
 			Optional:    true,
-			Description: "The organization id to operate on within mimir.",
+			Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
 		},
 		"global": {
 			Type:     schema.TypeList,
@@ -1719,7 +1719,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			ForceNew:    true,
 			Optional:    true,
-			Description: "The organization id to operate on within mimir.",
+			Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
 		},
 		"name": {
 			Type:        schema.TypeString,
