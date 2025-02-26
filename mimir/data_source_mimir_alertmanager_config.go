@@ -19,7 +19,13 @@ func dataSourcemimirAlertmanagerConfig() *schema.Resource {
 func dataSourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 	name := d.Get("name").(string)
-	resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", make(map[string]string))
+	orgID := d.Get("org_id").(string)
+
+	headers := make(map[string]string)
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
+	resp, err := client.sendRequest("alertmanager", "GET", apiAlertsPath, "", headers)
 	baseMsg := "Cannot read alertmanager config"
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {

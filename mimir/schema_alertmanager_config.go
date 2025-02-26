@@ -1715,6 +1715,12 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 
 func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"org_id": {
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "The organization id to operate on within mimir.",
+		},
 		"name": {
 			Type:        schema.TypeString,
 			Optional:    true,
