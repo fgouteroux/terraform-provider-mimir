@@ -246,30 +246,30 @@ func flattenGlobalConfig(v *globalConfig) []interface{} {
 		}
 
 		if v.PagerdutyURL != nil {
-			globalConf["pagerduty_url"] = v.PagerdutyURL.URL.String()
+			globalConf["pagerduty_url"] = v.PagerdutyURL.String()
 		}
 
 		if v.SlackAPIURL != nil {
-			globalConf["slack_api_url"] = v.SlackAPIURL.URL.String()
+			globalConf["slack_api_url"] = v.SlackAPIURL.String()
 		}
 
 		if v.OpsGenieAPIURL != nil {
-			globalConf["opsgenie_api_url"] = v.OpsGenieAPIURL.URL.String()
+			globalConf["opsgenie_api_url"] = v.OpsGenieAPIURL.String()
 		}
 
 		if v.WebexAPIURL != nil {
-			globalConf["webex_api_url"] = v.WebexAPIURL.URL.String()
+			globalConf["webex_api_url"] = v.WebexAPIURL.String()
 		}
 
 		if v.WeChatAPIURL != nil {
-			globalConf["wechat_api_url"] = v.WeChatAPIURL.URL.String()
+			globalConf["wechat_api_url"] = v.WeChatAPIURL.String()
 		}
 		if v.VictorOpsAPIURL != nil {
-			globalConf["victorops_api_url"] = v.VictorOpsAPIURL.URL.String()
+			globalConf["victorops_api_url"] = v.VictorOpsAPIURL.String()
 		}
 
 		if v.TelegramAPIURL != nil {
-			globalConf["telegram_api_url"] = v.TelegramAPIURL.URL.String()
+			globalConf["telegram_api_url"] = v.TelegramAPIURL.String()
 		}
 
 		globalConf["opsgenie_api_key"] = v.OpsGenieAPIKey
