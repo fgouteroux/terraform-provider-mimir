@@ -3,6 +3,7 @@ package mimir
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -52,6 +53,39 @@ func testAccCheckMimirRuleGroupExists(n string, name string, client *apiClient) 
 	}
 }
 
+func testAccCheckMimirNamespaceExists(n string, name string, client *apiClient) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			keys := make([]string, 0, len(s.RootModule().Resources))
+			for k := range s.RootModule().Resources {
+				keys = append(keys, k)
+			}
+			return fmt.Errorf("mimir object not found in terraform state: %s. Found: %s", n, strings.Join(keys, ", "))
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("mimir object name %s not set in terraform", name)
+		}
+
+		orgID := rs.Primary.Attributes["org_id"]
+		namespace := rs.Primary.Attributes["namespace"]
+
+		/* Make a throw-away API object to read from the API */
+		headers := make(map[string]string)
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
+		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+		_, err := client.sendRequest("ruler", "GET", path, "", headers)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 	// retrieve the connection established in Provider configuration
 	client := testAccProvider.Meta().(*apiClient)
@@ -59,7 +93,7 @@ func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 	// loop through the resources in state, verifying each widget
 	// is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "mimir_rule_group_recording" {
+		if !strings.HasPrefix(rs.Type, "mimir_rule_group") {
 			continue
 		}
 
@@ -76,7 +110,7 @@ func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 
 		// If the error is equivalent to 404 not found, the widget is destroyed.
 		// Otherwise return the error
-		if !strings.Contains(err.Error(), "group does not exist") {
+		if !strings.Contains(err.Error(), "response code '404'") {
 			return err
 		}
 	}
@@ -84,6 +118,44 @@ func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 	return nil
 }
 
+func testAccCheckMimirRuleDestroy(s *terraform.State) error {
+	// retrieve the connection established in Provider configuration
+	client := testAccProvider.Meta().(*apiClient)
+
+	// loop through the resources in state, verifying each is destroyed
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "mimir_rules" {
+			continue
+		}
+
+		orgID := rs.Primary.Attributes["org_id"]
+		namespace := rs.Primary.Attributes["namespace"]
+
+		headers := make(map[string]string)
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
+
+		// Parse managed_groups from state attributes
+		// Terraform stores list items as: managed_groups.0, managed_groups.1, etc.
+		managedGroupsCount, _ := strconv.Atoi(rs.Primary.Attributes["managed_groups.#"])
+
+		for i := 0; i < managedGroupsCount; i++ {
+			groupName := rs.Primary.Attributes[fmt.Sprintf("managed_groups.%d", i)]
+
+			path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, groupName)
+			_, err := client.sendRequest("ruler", "GET", path, "", headers)
+
+			// If the error is equivalent to 404 not found, the group is destroyed.
+			// Otherwise return the error
+			if err != nil && !strings.Contains(err.Error(), "response code '404'") {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
 func setupClient() *apiClientOpt {
 	headers := make(map[string]string)
 	headers["X-Scope-OrgID"] = mimirOrgID

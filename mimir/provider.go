@@ -176,6 +176,7 @@ func Provider(version string) func() *schema.Provider {
 				"mimir_alertmanager_config":  resourcemimirAlertmanagerConfig(),
 				"mimir_rule_group_alerting":  resourcemimirRuleGroupAlerting(),
 				"mimir_rule_group_recording": resourcemimirRuleGroupRecording(),
+				"mimir_rules":                resourceMimirRules(),
 			},
 		}
 		p.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
