@@ -251,6 +251,8 @@ func TestAccResourceAlertmanagerConfig_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.1.weekdays.0.end", "6"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.1.times.0.start_time", "12:00"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.1.times.0.end_time", "14:00"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.location", "Europe/Paris"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.1.location", "Europe/Paris"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_by.0", "..."),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_wait", "30s"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "route.0.group_interval", "5m"),
@@ -566,6 +568,7 @@ const testAccResourceAlertmanagerConfig_time_interval_update = `
             start_time = "03:30"
             end_time   = "09:30"
           }
+          location = "Europe/Paris"
         }
         time_intervals {
           weekdays {
@@ -576,6 +579,7 @@ const testAccResourceAlertmanagerConfig_time_interval_update = `
             start_time = "12:00"
             end_time   = "14:00"
           }
+          location = "Europe/Paris"
         }
       }
       route {
