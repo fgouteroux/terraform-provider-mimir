@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/prometheus/common/model"
 	"gopkg.in/yaml.v3"
 )
 
@@ -305,7 +306,7 @@ func validateRuleGroupsContent(ruleGroups RuleGroups) error {
 
 		// Validate interval if specified
 		if group.Interval != "" {
-			if _, err := time.ParseDuration(group.Interval); err != nil {
+			if _, err := model.ParseDuration(group.Interval); err != nil {
 				return fmt.Errorf("group %d (%s): invalid interval '%s': %v", i, group.Name, group.Interval, err)
 			}
 		}
@@ -352,7 +353,7 @@ func validateRule(rule Rule, groupIndex, ruleIndex int, groupName string) error 
 
 		// Validate 'for' duration if specified
 		if rule.For != "" {
-			if _, err := time.ParseDuration(rule.For); err != nil {
+			if _, err := model.ParseDuration(rule.For); err != nil {
 				return fmt.Errorf("group %d (%s), rule %d: invalid 'for' duration '%s': %v", groupIndex, groupName, ruleIndex, rule.For, err)
 			}
 		}

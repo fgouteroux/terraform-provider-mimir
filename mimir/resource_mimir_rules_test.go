@@ -8,6 +8,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+func TestValidateRuleGroupsContent_AllowsPrometheusDurations(t *testing.T) {
+	ruleGroups := RuleGroups{
+		Groups: []RuleGroup{
+			{
+				Name:     "alert_group",
+				Interval: "1m",
+				Rules: []Rule{
+					{
+						Alert: "HighErrorRate",
+						Expr:  `rate(http_requests_total{status=~"5.."}[5m]) > 0`,
+						For:   "1d",
+					},
+				},
+			},
+		},
+	}
+
+	if err := validateRuleGroupsContent(ruleGroups); err != nil {
+		t.Fatalf("expected Prometheus-style durations to be valid, got: %v", err)
+	}
+}
+
 func TestAccResourceMimirRules_Basic(t *testing.T) {
 	// Init client
 	client, err := NewAPIClient(setupClient())
