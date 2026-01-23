@@ -409,9 +409,9 @@ func flattenAlertingRules(v []alertingRule) []map[string]interface{} {
 func validateAlertingRuleName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
-	if !groupRuleNameRegexp.MatchString(value) {
+	if !alertNameRegexp.MatchString(value) {
 		errors = append(errors, fmt.Errorf(
-			"\"%s\": Invalid Alerting Rule Name %q. Must match the regex %s", k, value, groupRuleNameRegexp))
+			"\"%s\": Invalid Alerting Rule Name %q. Must match the regex %s", k, value, alertNameRegexp))
 	}
 
 	return

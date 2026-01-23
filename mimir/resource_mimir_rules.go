@@ -347,8 +347,8 @@ func validateRule(rule Rule, groupIndex, ruleIndex int, groupName string) error 
 	// Alerting rule specific validation
 	if hasAlert {
 		// Validate alert name
-		if !groupRuleNameRegexp.MatchString(rule.Alert) {
-			return fmt.Errorf("group %d (%s), rule %d: invalid alert name '%s'. Must match the regex %s", groupIndex, groupName, ruleIndex, rule.Alert, groupRuleNameRegexp)
+		if !alertNameRegexp.MatchString(rule.Alert) {
+			return fmt.Errorf("group %d (%s), rule %d: invalid alert name '%s'. Must match the regex %s", groupIndex, groupName, ruleIndex, rule.Alert, alertNameRegexp)
 		}
 
 		// Validate 'for' duration if specified

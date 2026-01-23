@@ -13,6 +13,7 @@ import (
 
 var (
 	groupRuleNameRegexp = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-_.]*$`)
+	alertNameRegexp     = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-_.:]*$`)
 	labelNameRegexp     = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 	metricNameRegexp    = regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
 	validTime           = "^((([01][0-9])|(2[0-3])):[0-5][0-9])$|(^24:00$)"
