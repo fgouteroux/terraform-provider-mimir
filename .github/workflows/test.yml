@@ -58,12 +58,10 @@ jobs:
         os:
           - ubuntu-latest
         terraform:
-          - '0.12.*'
           - '1.5.*'
         mimir-version:
-          - '2.15.3'
-          - '2.16.1'
-          - '2.17.1'
+          - '2.17.4'
+          - '3.0.2'
     steps:
 
     - name: Setup Go
