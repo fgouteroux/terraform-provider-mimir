@@ -122,6 +122,84 @@ func TestAccResourceMimirRules_ContentFile(t *testing.T) {
 	})
 }
 
+// TestAccResourceMimirRules_ContentFileUpdate tests that modifying the content of a file
+// referenced by content_file is properly detected (fixes GitHub issue #63)
+func TestAccResourceMimirRules_ContentFileUpdate(t *testing.T) {
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Create temporary YAML file
+	tmpfile, err := os.CreateTemp("", "rules-update-*.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	initialContent := `groups:
+  - name: file_based_alerts
+    interval: 1m
+    rules:
+      - alert: TestAlert
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+`
+	if err := os.WriteFile(tmpfile.Name(), []byte(initialContent), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	updatedContent := `groups:
+  - name: file_based_alerts
+    interval: 1m
+    rules:
+      - alert: TestAlert
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+      - alert: NewAlert
+        expr: memory_usage > 90
+        for: 3m
+        labels:
+          severity: critical
+`
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceMimirRules_contentFile(tmpfile.Name()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirNamespaceExists("mimir_rules.rules_file", "file_based_alerts", client),
+					resource.TestCheckResourceAttr("mimir_rules.rules_file", "total_rules", "1"),
+					resource.TestCheckResourceAttr("mimir_rules.rules_file", "rule_names.0", "TestAlert"),
+				),
+			},
+			{
+				// Update the file content (same path, different content)
+				PreConfig: func() {
+					if err := os.WriteFile(tmpfile.Name(), []byte(updatedContent), 0600); err != nil {
+						t.Fatal(err)
+					}
+				},
+				Config: testAccResourceMimirRules_contentFile(tmpfile.Name()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirNamespaceExists("mimir_rules.rules_file", "file_based_alerts", client),
+					resource.TestCheckResourceAttr("mimir_rules.rules_file", "total_rules", "2"),
+					resource.TestCheckResourceAttr("mimir_rules.rules_file", "rule_names.0", "TestAlert"),
+					resource.TestCheckResourceAttr("mimir_rules.rules_file", "rule_names.1", "NewAlert"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceMimirRules_OnlyGroups(t *testing.T) {
 	// Init client
 	client, err := NewAPIClient(setupClient())
