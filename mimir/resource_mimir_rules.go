@@ -187,72 +187,86 @@ func resourceMimirRules() *schema.Resource {
 				return err
 			}
 
-			// Calculate managed groups during plan phase for better diff output
-			if diff.HasChange("content") || diff.HasChange("content_file") || diff.HasChange("only_groups") || diff.HasChange("ignore_groups") || diff.Id() == "" {
-				// Parse the configuration to determine what will be managed
-				var ruleGroups RuleGroups
-				var err error
+			// Parse the configuration to determine what will be managed
+			var ruleGroups RuleGroups
+			var err error
+			var fileContent []byte
 
-				if content := diff.Get("content").(string); content != "" {
-					err = yaml.Unmarshal([]byte(content), &ruleGroups)
-				} else if contentFile := diff.Get("content_file").(string); contentFile != "" {
-					data, readErr := os.ReadFile(contentFile)
-					if readErr == nil {
-						err = yaml.Unmarshal(data, &ruleGroups)
+			if content := diff.Get("content").(string); content != "" {
+				err = yaml.Unmarshal([]byte(content), &ruleGroups)
+			} else if contentFile := diff.Get("content_file").(string); contentFile != "" {
+				fileContent, err = os.ReadFile(contentFile)
+				if err == nil {
+					err = yaml.Unmarshal(fileContent, &ruleGroups)
+				}
+			}
+
+			if err != nil || len(ruleGroups.Groups) == 0 {
+				return nil
+			}
+
+			// Determine which groups will be managed
+			allGroupNames := make([]string, len(ruleGroups.Groups))
+			for i, group := range ruleGroups.Groups {
+				allGroupNames[i] = group.Name
+			}
+
+			var managedGroups []string
+			if onlyGroups := diff.Get("only_groups").(*schema.Set); onlyGroups != nil && onlyGroups.Len() > 0 {
+				for _, name := range onlyGroups.List() {
+					groupName := name.(string)
+					if contains(allGroupNames, groupName) {
+						managedGroups = append(managedGroups, groupName)
 					}
 				}
-
-				if err == nil && len(ruleGroups.Groups) > 0 {
-					// Determine which groups will be managed
-					allGroupNames := make([]string, len(ruleGroups.Groups))
-					for i, group := range ruleGroups.Groups {
-						allGroupNames[i] = group.Name
-					}
-
-					var managedGroups []string
-					if onlyGroups := diff.Get("only_groups").(*schema.Set); onlyGroups != nil && onlyGroups.Len() > 0 {
-						for _, name := range onlyGroups.List() {
-							groupName := name.(string)
-							if contains(allGroupNames, groupName) {
-								managedGroups = append(managedGroups, groupName)
-							}
-						}
-					} else if ignoreGroups := diff.Get("ignore_groups").(*schema.Set); ignoreGroups != nil && ignoreGroups.Len() > 0 {
-						var ignored []string
-						for _, name := range ignoreGroups.List() {
-							ignored = append(ignored, name.(string))
-						}
-						for _, groupName := range allGroupNames {
-							if !contains(ignored, groupName) {
-								managedGroups = append(managedGroups, groupName)
-							}
-						}
-					} else {
-						managedGroups = allGroupNames
-					}
-
-					// Set the computed fields so they appear in the plan
-					diff.SetNew("managed_groups", managedGroups)
-					diff.SetNew("groups_count", len(managedGroups))
-
-					// Calculate total rules and collect rule names
-					totalRules := 0
-					var ruleNames []string
-					for _, group := range ruleGroups.Groups {
-						if contains(managedGroups, group.Name) {
-							totalRules += len(group.Rules)
-							for _, rule := range group.Rules {
-								if rule.Alert != "" {
-									ruleNames = append(ruleNames, rule.Alert)
-								} else if rule.Record != "" {
-									ruleNames = append(ruleNames, rule.Record)
-								}
-							}
-						}
-					}
-					diff.SetNew("total_rules", totalRules)
-					diff.SetNew("rule_names", ruleNames)
+			} else if ignoreGroups := diff.Get("ignore_groups").(*schema.Set); ignoreGroups != nil && ignoreGroups.Len() > 0 {
+				var ignored []string
+				for _, name := range ignoreGroups.List() {
+					ignored = append(ignored, name.(string))
 				}
+				for _, groupName := range allGroupNames {
+					if !contains(ignored, groupName) {
+						managedGroups = append(managedGroups, groupName)
+					}
+				}
+			} else {
+				managedGroups = allGroupNames
+			}
+
+			// Calculate new content hash
+			newContentHash := calculateContentHash(ruleGroups, managedGroups)
+			oldContentHash := diff.Get("content_hash").(string)
+
+			// Check if content has changed (either directly or via file modification)
+			contentChanged := diff.HasChange("content") || diff.HasChange("only_groups") || diff.HasChange("ignore_groups") || diff.Id() == ""
+			if !contentChanged && diff.Get("content_file").(string) != "" {
+				// For content_file, compare hashes to detect file content changes
+				contentChanged = newContentHash != oldContentHash
+			}
+
+			if contentChanged {
+				// Set the computed fields so they appear in the plan
+				diff.SetNew("managed_groups", managedGroups)
+				diff.SetNew("groups_count", len(managedGroups))
+				diff.SetNew("content_hash", newContentHash)
+
+				// Calculate total rules and collect rule names
+				totalRules := 0
+				var ruleNames []string
+				for _, group := range ruleGroups.Groups {
+					if contains(managedGroups, group.Name) {
+						totalRules += len(group.Rules)
+						for _, rule := range group.Rules {
+							if rule.Alert != "" {
+								ruleNames = append(ruleNames, rule.Alert)
+							} else if rule.Record != "" {
+								ruleNames = append(ruleNames, rule.Record)
+							}
+						}
+					}
+				}
+				diff.SetNew("total_rules", totalRules)
+				diff.SetNew("rule_names", ruleNames)
 			}
 
 			return nil
@@ -673,6 +687,7 @@ func setComputedFields(d *schema.ResourceData, ruleGroups RuleGroups, managedGro
 
 	// Calculate total rules and other stats
 	var totalRules int
+	var ruleNames []string
 	var groupDetails []map[string]interface{}
 
 	for _, group := range ruleGroups.Groups {
@@ -686,8 +701,10 @@ func setComputedFields(d *schema.ResourceData, ruleGroups RuleGroups, managedGro
 		for _, rule := range group.Rules {
 			if rule.Alert != "" {
 				alertingCount++
+				ruleNames = append(ruleNames, rule.Alert)
 			} else if rule.Record != "" {
 				recordingCount++
+				ruleNames = append(ruleNames, rule.Record)
 			}
 		}
 
@@ -704,6 +721,7 @@ func setComputedFields(d *schema.ResourceData, ruleGroups RuleGroups, managedGro
 	}
 
 	d.Set("total_rules", totalRules)
+	d.Set("rule_names", ruleNames)
 	d.Set("groups", groupDetails)
 
 	// Calculate content hash
