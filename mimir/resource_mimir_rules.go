@@ -429,6 +429,12 @@ func resourceMimirRulesCreate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(fmt.Errorf("no rule groups selected for management"))
 	}
 
+	// Set the resource ID early so that Terraform marks this resource as tainted
+	// on partial failure (rather than treating it as never created). This ensures
+	// that a subsequent apply will destroy the partial state before recreating.
+	resourceID := fmt.Sprintf("%s/%s", orgID, namespace)
+	d.SetId(resourceID)
+
 	// Create rule groups via API
 	var createdGroups []string
 	for _, group := range ruleGroups.Groups {
@@ -437,10 +443,9 @@ func resourceMimirRulesCreate(ctx context.Context, d *schema.ResourceData, m int
 		}
 
 		if err := createRuleGroup(client, namespace, orgID, group); err != nil {
-			// Clean up any groups that were already created
-			for _, createdGroup := range createdGroups {
-				deleteRuleGroup(client, namespace, orgID, createdGroup)
-			}
+			// Record which groups were actually created so Delete can clean them
+			// up when Terraform destroys the tainted resource on the next apply.
+			d.Set("managed_groups", createdGroups)
 			return diag.FromErr(fmt.Errorf("failed to create rule group '%s': %w", group.Name, err))
 		}
 		createdGroups = append(createdGroups, group.Name)
@@ -453,10 +458,6 @@ func resourceMimirRulesCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	// Set computed fields
 	setComputedFields(d, ruleGroups, managedGroups)
-
-	// Generate resource ID
-	resourceID := fmt.Sprintf("%s/%s", orgID, namespace)
-	d.SetId(resourceID)
 
 	return resourceMimirRulesRead(ctx, d, m)
 }
@@ -552,6 +553,15 @@ func resourceMimirRulesUpdate(ctx context.Context, d *schema.ResourceData, m int
 		}
 
 		if err := createRuleGroup(client, namespace, orgID, group); err != nil {
+			// Restore the old computed fields so that the state reflects the
+			// actual Mimir state. Without this, Terraform SDK v2 may persist the
+			// planned new values (e.g. content_hash) into the state even though
+			// the update was rejected, causing a subsequent plan to appear clean
+			// despite the change never being applied.
+			oldHash, _ := d.GetChange("content_hash")
+			d.Set("content_hash", oldHash)
+			oldManagedGroupsRaw, _ := d.GetChange("managed_groups")
+			d.Set("managed_groups", oldManagedGroupsRaw)
 			return diag.FromErr(fmt.Errorf("failed to create/update rule group '%s': %w", group.Name, err))
 		}
 	}
