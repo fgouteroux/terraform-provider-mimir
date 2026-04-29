@@ -345,6 +345,9 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		if raw, ok := data["msteams_configs"]; ok {
 			cfg.MsteamsConfigs = expandMsteamsConfig(raw.([]interface{}))
 		}
+		if raw, ok := data["msteamsv2_configs"]; ok {
+			cfg.Msteamsv2Configs = expandMsteamsv2Config(raw.([]interface{}))
+		}
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -373,6 +376,7 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 		cfg["victorops_configs"] = flattenVictorOpsConfig(v.VictorOpsConfigs)
 		cfg["sns_configs"] = flattenSnsConfig(v.SNSConfigs)
 		cfg["msteams_configs"] = flattenMsteamsConfig(v.MsteamsConfigs)
+		cfg["msteamsv2_configs"] = flattenMsteamsv2Config(v.Msteamsv2Configs)
 		receiverConf = append(receiverConf, cfg)
 	}
 	return receiverConf
@@ -1555,6 +1559,56 @@ func flattenMsteamsConfig(v []*msteamsConfig) []interface{} {
 		cfg["webhook_url"] = v.WebhookURL
 		cfg["title"] = v.Title
 		cfg["summary"] = v.Summary
+		cfg["text"] = v.Text
+
+		msteamsConf = append(msteamsConf, cfg)
+	}
+	return msteamsConf
+}
+
+func expandMsteamsv2Config(v []interface{}) []*msteamsv2Config {
+	var msteamsConf []*msteamsv2Config
+
+	for _, v := range v {
+		cfg := &msteamsv2Config{}
+		data := v.(map[string]interface{})
+		if raw, ok := data["send_resolved"]; ok {
+			cfg.VSendResolved = new(bool)
+			*cfg.VSendResolved = raw.(bool)
+		}
+		if raw, ok := data["http_config"]; ok {
+			cfg.HTTPConfig = expandHTTPConfig(raw)
+		}
+
+		if raw, ok := data["webhook_url"]; ok {
+			cfg.WebhookURL = raw.(string)
+		}
+		if raw, ok := data["title"]; ok {
+			cfg.Title = raw.(string)
+		}
+		if raw, ok := data["text"]; ok {
+			cfg.Text = raw.(string)
+		}
+		msteamsConf = append(msteamsConf, cfg)
+	}
+	return msteamsConf
+}
+
+func flattenMsteamsv2Config(v []*msteamsv2Config) []interface{} {
+	var msteamsConf []interface{}
+
+	if v == nil {
+		return msteamsConf
+	}
+
+	for _, v := range v {
+		cfg := make(map[string]interface{})
+		cfg["send_resolved"] = v.VSendResolved
+		if v.HTTPConfig != nil {
+			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
+		}
+		cfg["webhook_url"] = v.WebhookURL
+		cfg["title"] = v.Title
 		cfg["text"] = v.Text
 
 		msteamsConf = append(msteamsConf, cfg)
