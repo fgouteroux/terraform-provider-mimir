@@ -19,7 +19,7 @@ func resourcemimirAlertmanagerConfig() *schema.Resource {
 		UpdateContext: resourcemimirAlertmanagerConfigUpdate,
 		DeleteContext: resourcemimirAlertmanagerConfigDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourcemimirAlertmanagerConfigImport,
 		},
 		Schema: resourceMimirAlertmanagerConfigSchemaV1(),
 	}
@@ -62,7 +62,11 @@ func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(client.headers["X-Scope-OrgID"])
+	if orgID != "" {
+		d.SetId(orgID)
+	} else {
+		d.SetId(client.headers["X-Scope-OrgID"])
+	}
 
 	// Retry read as mimir api could return a 404 status code caused by the event change notification propagation.
 	// Add delay of <alertmanagerReadDelayAfterChange> * time.Second) between each retry with a <alertmanagerReadRetryAfterChange> max retries.
@@ -252,4 +256,11 @@ func alertmanagerEmptyConfigCheck(d *schema.ResourceData, data string) (diag.Dia
 		isEmpty = true
 	}
 	return diags, isEmpty
+}
+
+func resourcemimirAlertmanagerConfigImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	if err := d.Set("org_id", d.Id()); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
