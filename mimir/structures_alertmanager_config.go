@@ -1923,7 +1923,7 @@ func expandWeekdayRange(v []interface{}) []timeinterval.WeekdayRange {
 		var cfg timeinterval.WeekdayRange
 		data := v.(map[string]interface{})
 
-		if raw, ok := data["begin"]; ok {
+		if raw, ok := data[beginKey]; ok {
 			cfg.Begin = raw.(int)
 		}
 		if raw, ok := data["end"]; ok {
@@ -1944,7 +1944,7 @@ func flattenWeekdayRange(v []timeinterval.WeekdayRange) []interface{} {
 
 	for _, v := range v {
 		cfg := make(map[string]interface{})
-		cfg["begin"] = v.Begin
+		cfg[beginKey] = v.Begin
 		cfg["end"] = v.End
 		inclusiveRangeConf = append(inclusiveRangeConf, cfg)
 	}
@@ -1958,7 +1958,7 @@ func expandDayOfMonthRange(v []interface{}) []timeinterval.DayOfMonthRange {
 		var cfg timeinterval.DayOfMonthRange
 		data := v.(map[string]interface{})
 
-		if raw, ok := data["begin"]; ok {
+		if raw, ok := data[beginKey]; ok {
 			cfg.Begin = raw.(int)
 		}
 		if raw, ok := data["end"]; ok {
@@ -1979,7 +1979,7 @@ func flattenDayOfMonthRange(v []timeinterval.DayOfMonthRange) []interface{} {
 
 	for _, v := range v {
 		cfg := make(map[string]interface{})
-		cfg["begin"] = v.Begin
+		cfg[beginKey] = v.Begin
 		cfg["end"] = v.End
 		inclusiveRangeConf = append(inclusiveRangeConf, cfg)
 	}
@@ -1993,7 +1993,7 @@ func expandMonthRange(v []interface{}) []timeinterval.MonthRange {
 		var cfg timeinterval.MonthRange
 		data := v.(map[string]interface{})
 
-		if raw, ok := data["begin"]; ok {
+		if raw, ok := data[beginKey]; ok {
 			cfg.Begin = raw.(int)
 		}
 		if raw, ok := data["end"]; ok {
@@ -2014,7 +2014,7 @@ func flattenMonthRange(v []timeinterval.MonthRange) []interface{} {
 
 	for _, v := range v {
 		cfg := make(map[string]interface{})
-		cfg["begin"] = v.Begin
+		cfg[beginKey] = v.Begin
 		cfg["end"] = v.End
 		inclusiveRangeConf = append(inclusiveRangeConf, cfg)
 	}
@@ -2028,7 +2028,7 @@ func expandYearRange(v []interface{}) []timeinterval.YearRange {
 		var cfg timeinterval.YearRange
 		data := v.(map[string]interface{})
 
-		if raw, ok := data["begin"]; ok {
+		if raw, ok := data[beginKey]; ok {
 			cfg.Begin = raw.(int)
 		}
 		if raw, ok := data["end"]; ok {
@@ -2049,7 +2049,7 @@ func flattenYearRange(v []timeinterval.YearRange) []interface{} {
 
 	for _, v := range v {
 		cfg := make(map[string]interface{})
-		cfg["begin"] = v.Begin
+		cfg[beginKey] = v.Begin
 		cfg["end"] = v.End
 		inclusiveRangeConf = append(inclusiveRangeConf, cfg)
 	}

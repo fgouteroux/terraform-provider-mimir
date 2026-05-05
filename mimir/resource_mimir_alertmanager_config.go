@@ -206,7 +206,7 @@ func alertmanagerConfigRead(meta interface{}, orgID string) (string, error) {
 }
 
 func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, path string) (string, error) {
-	headers := map[string]string{"Content-Type": "application/yaml"}
+	headers := map[string]string{"Content-Type": contentTypeYAML}
 	orgID := d.Get("org_id").(string)
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID

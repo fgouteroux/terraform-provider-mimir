@@ -15,11 +15,11 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 		ReadContext: dataSourcemimirRuleGroupRecordingRead,
 
 		Schema: map[string]*schema.Schema{
-			"org_id": {
+			orgIDKey: {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Optional:    true,
-				Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+				Description: orgIDDescription,
 			},
 			"namespace": {
 				Type:        schema.TypeString,
@@ -88,7 +88,7 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 	client := meta.(*apiClient)
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	orgID := d.Get(orgIDKey).(string)
 
 	id := fmt.Sprintf("%s/%s", namespace, name)
 

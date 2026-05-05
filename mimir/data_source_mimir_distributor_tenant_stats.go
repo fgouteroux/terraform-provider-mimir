@@ -25,11 +25,11 @@ func dataSourcemimirDistributorTenantStats() *schema.Resource {
 		ReadContext: dataSourcemimirDistributorTenantStatsRead,
 
 		Schema: map[string]*schema.Schema{
-			"org_id": {
+			orgIDKey: {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Optional:    true,
-				Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+				Description: orgIDDescription,
 			},
 			"user": {
 				Type:        schema.TypeString,
@@ -74,7 +74,7 @@ func dataSourcemimirDistributorTenantStats() *schema.Resource {
 func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 	user := d.Get("user").(string)
-	orgID := d.Get("org_id").(string)
+	orgID := d.Get(orgIDKey).(string)
 
 	headers := map[string]string{"Accept": "json"}
 	if orgID != "" {

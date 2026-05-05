@@ -35,24 +35,24 @@ type globalConfig struct {
 
 	HTTPConfig *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 
-	SMTPFrom         string          `yaml:"smtp_from,omitempty" json:"smtp_from,omitempty"`
-	SMTPHello        string          `yaml:"smtp_hello,omitempty" json:"smtp_hello,omitempty"`
-	SMTPSmarthost    config.HostPort `yaml:"smtp_smarthost,omitempty" json:"smtp_smarthost,omitempty"`
-	SMTPAuthUsername string          `yaml:"smtp_auth_username,omitempty" json:"smtp_auth_username,omitempty"`
-	SMTPAuthPassword string          `yaml:"smtp_auth_password,omitempty" json:"smtp_auth_password,omitempty"`
-	SMTPAuthSecret   string          `yaml:"smtp_auth_secret,omitempty" json:"smtp_auth_secret,omitempty"`
-	SMTPAuthIdentity string          `yaml:"smtp_auth_identity,omitempty" json:"smtp_auth_identity,omitempty"`
-	SMTPRequireTLS   *bool           `yaml:"smtp_require_tls,omitempty" json:"smtp_require_tls,omitempty"`
+	SMTPFrom         string           `yaml:"smtp_from,omitempty" json:"smtp_from,omitempty"`
+	SMTPHello        string           `yaml:"smtp_hello,omitempty" json:"smtp_hello,omitempty"`
+	SMTPSmarthost    config.HostPort  `yaml:"smtp_smarthost,omitempty" json:"smtp_smarthost,omitempty"`
+	SMTPAuthUsername string           `yaml:"smtp_auth_username,omitempty" json:"smtp_auth_username,omitempty"`
+	SMTPAuthPassword string           `yaml:"smtp_auth_password,omitempty" json:"smtp_auth_password,omitempty"`
+	SMTPAuthSecret   string           `yaml:"smtp_auth_secret,omitempty" json:"smtp_auth_secret,omitempty"`
+	SMTPAuthIdentity string           `yaml:"smtp_auth_identity,omitempty" json:"smtp_auth_identity,omitempty"`
+	SMTPRequireTLS   *bool            `yaml:"smtp_require_tls,omitempty" json:"smtp_require_tls,omitempty"`
 	SlackAPIURL      *amcommoncfg.URL `yaml:"slack_api_url,omitempty" json:"slack_api_url,omitempty"`
 	PagerdutyURL     *amcommoncfg.URL `yaml:"pagerduty_url,omitempty" json:"pagerduty_url,omitempty"`
 	OpsGenieAPIURL   *amcommoncfg.URL `yaml:"opsgenie_api_url,omitempty" json:"opsgenie_api_url,omitempty"`
-	OpsGenieAPIKey   string          `yaml:"opsgenie_api_key,omitempty" json:"opsgenie_api_key,omitempty"`
+	OpsGenieAPIKey   string           `yaml:"opsgenie_api_key,omitempty" json:"opsgenie_api_key,omitempty"`
 	WebexAPIURL      *amcommoncfg.URL `yaml:"webex_api_url,omitempty" json:"webex_api_url,omitempty"`
 	WeChatAPIURL     *amcommoncfg.URL `yaml:"wechat_api_url,omitempty" json:"wechat_api_url,omitempty"`
-	WeChatAPISecret  string          `yaml:"wechat_api_secret,omitempty" json:"wechat_api_secret,omitempty"`
-	WeChatAPICorpID  string          `yaml:"wechat_api_corp_id,omitempty" json:"wechat_api_corp_id,omitempty"`
+	WeChatAPISecret  string           `yaml:"wechat_api_secret,omitempty" json:"wechat_api_secret,omitempty"`
+	WeChatAPICorpID  string           `yaml:"wechat_api_corp_id,omitempty" json:"wechat_api_corp_id,omitempty"`
 	VictorOpsAPIURL  *amcommoncfg.URL `yaml:"victorops_api_url,omitempty" json:"victorops_api_url,omitempty"`
-	VictorOpsAPIKey  string          `yaml:"victorops_api_key,omitempty" json:"victorops_api_key,omitempty"`
+	VictorOpsAPIKey  string           `yaml:"victorops_api_key,omitempty" json:"victorops_api_key,omitempty"`
 	TelegramAPIURL   *amcommoncfg.URL `yaml:"telegram_api_url,omitempty" json:"telegram_api_url,omitempty"`
 }
 

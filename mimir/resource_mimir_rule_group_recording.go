@@ -22,13 +22,13 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
-			"org_id": {
+			orgIDKey: {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Optional:    true,
-				Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+				Description: orgIDDescription,
 			},
-			"namespace": {
+			namespaceKey: {
 				Type:        schema.TypeString,
 				Description: "Recording Rule group namespace",
 				ForceNew:    true,
@@ -42,7 +42,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateGroupRuleName,
 			},
-			"interval": {
+			intervalKey: {
 				Type:         schema.TypeString,
 				Description:  "Recording Rule group interval",
 				Optional:     true,
@@ -104,8 +104,8 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 	name := d.Get("name").(string)
-	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	namespace := d.Get(namespaceKey).(string)
+	orgID := d.Get(orgIDKey).(string)
 
 	if !overwriteRuleGroupConfig {
 		ruleGroupConfigExists := true
@@ -133,7 +133,7 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 
 	rules := &recordingRuleGroup{
 		Name:            name,
-		Interval:        d.Get("interval").(string),
+		Interval:        d.Get(intervalKey).(string),
 		EvaluationDelay: d.Get("evaluation_delay").(string),
 		QueryOffset:     d.Get("query_offset").(string),
 		SourceTenants:   expandStringArray(d.Get("source_tenants").([]interface{})),
@@ -145,7 +145,7 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	// 	rules.QueryOffset = d.Get("query_offset").(string)
 	// }
 	data, _ := yaml.Marshal(rules)
-	headers := map[string]string{"Content-Type": "application/yaml"}
+	headers := map[string]string{contentTypeHeader: contentTypeYAML}
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID
 	}
@@ -226,11 +226,11 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("org_id", orgID)
+	err = d.Set(orgIDKey, orgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("namespace", namespace)
+	err = d.Set(namespaceKey, namespace)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -238,7 +238,7 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("interval", data.Interval)
+	err = d.Set(intervalKey, data.Interval)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -261,15 +261,15 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 }
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", "interval", "query_offset", "evaluation_delay", "source_tenants") {
+	if d.HasChanges("rule", intervalKey, "query_offset", "evaluation_delay", "source_tenants") {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
-		namespace := d.Get("namespace").(string)
-		orgID := d.Get("org_id").(string)
+		namespace := d.Get(namespaceKey).(string)
+		orgID := d.Get(orgIDKey).(string)
 
 		rules := &recordingRuleGroup{
 			Name:          name,
-			Interval:      d.Get("interval").(string),
+			Interval:      d.Get(intervalKey).(string),
 			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 			Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
 		}
@@ -279,7 +279,7 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 			rules.QueryOffset = d.Get("query_offset").(string)
 		}
 		data, _ := yaml.Marshal(rules)
-		headers := map[string]string{"Content-Type": "application/yaml"}
+		headers := map[string]string{contentTypeHeader: contentTypeYAML}
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
 		}
@@ -300,8 +300,8 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 	name := d.Get("name").(string)
-	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	namespace := d.Get(namespaceKey).(string)
+	orgID := d.Get(orgIDKey).(string)
 
 	headers := make(map[string]string)
 	if orgID != "" {

@@ -64,7 +64,7 @@ func resourceMimirRules() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"namespace": {
+			namespaceKey: {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
@@ -72,11 +72,11 @@ func resourceMimirRules() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(1, 100),
 			},
 
-			"org_id": {
+			orgIDKey: {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Optional:    true,
-				Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+				Description: orgIDDescription,
 			},
 
 			// Content input methods (mutually exclusive)
@@ -157,7 +157,7 @@ func resourceMimirRules() *schema.Resource {
 							Computed:    true,
 							Description: "Rule group name",
 						},
-						"interval": {
+						intervalKey: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "Evaluation interval",
@@ -417,8 +417,8 @@ func resourceMimirRulesCreate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	namespace := d.Get(namespaceKey).(string)
+	orgID := d.Get(orgIDKey).(string)
 	if orgID == "" {
 		orgID = client.headers["X-Scope-OrgID"]
 	}
@@ -465,8 +465,8 @@ func resourceMimirRulesCreate(ctx context.Context, d *schema.ResourceData, m int
 func resourceMimirRulesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiClient)
 
-	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	namespace := d.Get(namespaceKey).(string)
+	orgID := d.Get(orgIDKey).(string)
 	if orgID == "" {
 		orgID = client.headers["X-Scope-OrgID"]
 	}
@@ -514,8 +514,8 @@ func resourceMimirRulesRead(ctx context.Context, d *schema.ResourceData, m inter
 func resourceMimirRulesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiClient)
 
-	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	namespace := d.Get(namespaceKey).(string)
+	orgID := d.Get(orgIDKey).(string)
 	if orgID == "" {
 		orgID = client.headers["X-Scope-OrgID"]
 	}
@@ -580,8 +580,8 @@ func resourceMimirRulesUpdate(ctx context.Context, d *schema.ResourceData, m int
 func resourceMimirRulesDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiClient)
 
-	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	namespace := d.Get(namespaceKey).(string)
+	orgID := d.Get(orgIDKey).(string)
 	if orgID == "" {
 		orgID = client.headers["X-Scope-OrgID"]
 	}
@@ -619,8 +619,8 @@ func resourceMimirRulesImport(ctx context.Context, d *schema.ResourceData, m int
 	orgID := parts[0]
 	namespace := parts[1]
 
-	d.Set("org_id", orgID)
-	d.Set("namespace", namespace)
+	d.Set(orgIDKey, orgID)
+	d.Set(namespaceKey, namespace)
 
 	// Note: For import, the user will need to provide content/content_file afterward
 	// We can't automatically detect the YAML content from the API
@@ -722,7 +722,7 @@ func setComputedFields(d *schema.ResourceData, ruleGroups RuleGroups, managedGro
 
 		groupDetail := map[string]interface{}{
 			"name":                  group.Name,
-			"interval":              group.Interval,
+			intervalKey:             group.Interval,
 			"rules_count":           len(group.Rules),
 			"alerting_rules_count":  alertingCount,
 			"recording_rules_count": recordingCount,
@@ -755,7 +755,7 @@ func calculateContentHash(ruleGroups RuleGroups, managedGroups []string) string 
 }
 
 func createRuleGroup(client *apiClient, namespace, orgID string, group RuleGroup) error {
-	headers := map[string]string{"Content-Type": "application/yaml"}
+	headers := map[string]string{contentTypeHeader: contentTypeYAML}
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID
 	}
