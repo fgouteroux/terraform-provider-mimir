@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/prometheus/alertmanager/config"
+	amcommoncfg "github.com/prometheus/alertmanager/config/common"
 	"github.com/prometheus/alertmanager/timeinterval"
 	"github.com/prometheus/common/model"
 )
@@ -182,12 +183,12 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 
 		pagerdutyURL, _ := url.Parse(cfg["pagerduty_url"].(string))
 		if pagerdutyURL.String() != "" {
-			globalConf.PagerdutyURL = &config.URL{URL: pagerdutyURL}
+			globalConf.PagerdutyURL = &amcommoncfg.URL{URL: pagerdutyURL}
 		}
 
 		slackAPIURL, _ := url.Parse(cfg["slack_api_url"].(string))
 		if slackAPIURL.String() != "" {
-			globalConf.SlackAPIURL = &config.URL{URL: slackAPIURL}
+			globalConf.SlackAPIURL = &amcommoncfg.URL{URL: slackAPIURL}
 		}
 
 		globalConf.SMTPFrom = cfg["smtp_from"].(string)
@@ -208,30 +209,30 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		globalConf.OpsGenieAPIKey = cfg["opsgenie_api_key"].(string)
 		opsGenieAPIURL, _ := url.Parse(cfg["opsgenie_api_url"].(string))
 		if opsGenieAPIURL.String() != "" {
-			globalConf.OpsGenieAPIURL = &config.URL{URL: opsGenieAPIURL}
+			globalConf.OpsGenieAPIURL = &amcommoncfg.URL{URL: opsGenieAPIURL}
 		}
 
 		webexAPIURL, _ := url.Parse(cfg["webex_api_url"].(string))
 		if webexAPIURL.String() != "" {
-			globalConf.WebexAPIURL = &config.URL{URL: webexAPIURL}
+			globalConf.WebexAPIURL = &amcommoncfg.URL{URL: webexAPIURL}
 		}
 
 		globalConf.WeChatAPISecret = cfg["wechat_api_secret"].(string)
 		globalConf.WeChatAPICorpID = cfg["wechat_api_corp_id"].(string)
 		weChatAPIURL, _ := url.Parse(cfg["wechat_api_url"].(string))
 		if weChatAPIURL.String() != "" {
-			globalConf.WeChatAPIURL = &config.URL{URL: weChatAPIURL}
+			globalConf.WeChatAPIURL = &amcommoncfg.URL{URL: weChatAPIURL}
 		}
 
 		globalConf.VictorOpsAPIKey = cfg["victorops_api_key"].(string)
 		victorOpsAPIURL, _ := url.Parse(cfg["victorops_api_url"].(string))
 		if victorOpsAPIURL.String() != "" {
-			globalConf.VictorOpsAPIURL = &config.URL{URL: victorOpsAPIURL}
+			globalConf.VictorOpsAPIURL = &amcommoncfg.URL{URL: victorOpsAPIURL}
 		}
 
 		telegramAPIURL, _ := url.Parse(cfg["telegram_api_url"].(string))
 		if telegramAPIURL.String() != "" {
-			globalConf.TelegramAPIURL = &config.URL{URL: telegramAPIURL}
+			globalConf.TelegramAPIURL = &amcommoncfg.URL{URL: telegramAPIURL}
 		}
 	}
 	return globalConf
