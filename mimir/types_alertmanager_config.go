@@ -89,6 +89,7 @@ type receiver struct {
 	SNSConfigs       []*snsConfig       `yaml:"sns_configs,omitempty" json:"sns_configs,omitempty"`
 	TelegramConfigs  []*telegramConfig  `yaml:"telegram_configs,omitempty" json:"telegram_configs,omitempty"`
 	MsteamsConfigs   []*msteamsConfig   `yaml:"msteams_configs,omitempty" json:"msteams_configs,omitempty"`
+	Msteamsv2Configs []*msteamsv2Config `yaml:"msteamsv2_configs,omitempty" json:"msteamsv2_configs,omitempty"`
 }
 
 type webhookConfig struct {
@@ -194,6 +195,14 @@ type msteamsConfig struct {
 	WebhookURL    string            `yaml:"webhook_url,omitempty" json:"webhook_url,omitempty"`
 	Title         string            `yaml:"title,omitempty" json:"title,omitempty"`
 	Summary       string            `yaml:"summary,omitempty" json:"summary,omitempty"`
+	Text          string            `yaml:"text,omitempty" json:"text,omitempty"`
+	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
+}
+
+type msteamsv2Config struct {
+	VSendResolved *bool             `yaml:"send_resolved,omitempty" json:"send_resolved,omitempty"`
+	WebhookURL    string            `yaml:"webhook_url,omitempty" json:"webhook_url,omitempty"`
+	Title         string            `yaml:"title,omitempty" json:"title,omitempty"`
 	Text          string            `yaml:"text,omitempty" json:"text,omitempty"`
 	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 }
