@@ -1386,6 +1386,7 @@ func TestAccResourceAlertmanagerConfig_TelegramReceiver(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.name", "telegram"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.bot_token", "abcdef:123456"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.chat_id", "-1000000000000"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.message_thread_id", "100"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.message", "test message"),
 				),
 			},
@@ -1425,6 +1426,7 @@ const testAccResourceAlertmanagerConfig_TelegramReceiver = `
         telegram_configs {
           bot_token = "abcdef:123456"
           chat_id = -1000000000000
+          message_thread_id = 100
           message = "test message"
         }
       }

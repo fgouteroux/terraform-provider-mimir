@@ -568,6 +568,9 @@ func expandTelegramConfig(v []interface{}) []*telegramConfig {
 		if raw, ok := data["chat_id"]; ok {
 			cfg.ChatID = int64(raw.(int))
 		}
+		if raw, ok := data["message_thread_id"]; ok {
+			cfg.MessageThreadID = int64(raw.(int))
+		}
 		if raw, ok := data["message"]; ok {
 			cfg.Message = raw.(string)
 		}
@@ -599,6 +602,7 @@ func flattenTelegramConfig(v []*telegramConfig) []interface{} {
 		cfg["api_url"] = v.APIUrl
 		cfg["bot_token"] = v.BotToken
 		cfg["chat_id"] = v.ChatID
+		cfg["message_thread_id"] = v.MessageThreadID
 		cfg["message"] = v.Message
 		cfg["disable_notifications"] = v.DisableNotifications
 		cfg["parse_mode"] = v.ParseMode

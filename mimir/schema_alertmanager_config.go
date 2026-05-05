@@ -1129,6 +1129,11 @@ func telegramConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "ID of the chat where to send the messages.",
 		},
+		"message_thread_id": {
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Description: "ID of the message thread where to send the messages.",
+		},
 		messageKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
