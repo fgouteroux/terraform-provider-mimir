@@ -22,18 +22,18 @@ jobs:
     steps:
 
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v6
       with:
-        go-version: '1.23'
+        go-version: '1.25'
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
 
     - name: Run linters
-      uses: golangci/golangci-lint-action@v7
+      uses: golangci/golangci-lint-action@v9
       with:
-        version: v2.1.6
+        version: v2.12.1
         args: --timeout 10m
 
     - name: Generate
@@ -60,21 +60,21 @@ jobs:
         terraform:
           - '1.5.*'
         mimir-version:
-          - '2.17.4'
-          - '3.0.2'
+          - '2.17.10'
+          - '3.0.6'
     steps:
 
     - name: Setup Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v6
       with:
-        go-version: '1.23'
+        go-version: '1.25'
         check-latest: true
 
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
 
     - name: Setup Terraform ${{ matrix.terraform }}
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v4
       with:
         terraform_version: ${{ matrix.terraform }}
         terraform_wrapper: false

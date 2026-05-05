@@ -22,13 +22,13 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
-			"org_id": {
+			orgIDKey: {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Optional:    true,
-				Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+				Description: orgIDDescription,
 			},
-			"namespace": {
+			namespaceKey: {
 				Type:        schema.TypeString,
 				Description: "Alerting Rule group namespace",
 				ForceNew:    true,
@@ -42,7 +42,7 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateGroupRuleName,
 			},
-			"interval": {
+			intervalKey: {
 				Type:         schema.TypeString,
 				Description:  "Alerting Rule group interval",
 				Optional:     true,
@@ -110,8 +110,8 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 	name := d.Get("name").(string)
-	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	namespace := d.Get(namespaceKey).(string)
+	orgID := d.Get(orgIDKey).(string)
 
 	if !overwriteRuleGroupConfig {
 		ruleGroupConfigExists := true
@@ -139,12 +139,12 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 
 	rules := &alertingRuleGroup{
 		Name:          name,
-		Interval:      d.Get("interval").(string),
+		Interval:      d.Get(intervalKey).(string),
 		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 		Rules:         expandAlertingRules(d.Get("rule").([]interface{})),
 	}
 	data, _ := yaml.Marshal(rules)
-	headers := map[string]string{"Content-Type": "application/yaml"}
+	headers := map[string]string{contentTypeHeader: contentTypeYAML}
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID
 	}
@@ -225,11 +225,11 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("org_id", orgID)
+	err = d.Set(orgIDKey, orgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("namespace", namespace)
+	err = d.Set(namespaceKey, namespace)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -237,7 +237,7 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("interval", data.Interval)
+	err = d.Set(intervalKey, data.Interval)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -250,20 +250,20 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 }
 
 func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", "interval", "source_tenants") {
+	if d.HasChanges("rule", intervalKey, "source_tenants") {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
-		namespace := d.Get("namespace").(string)
-		orgID := d.Get("org_id").(string)
+		namespace := d.Get(namespaceKey).(string)
+		orgID := d.Get(orgIDKey).(string)
 
 		rules := &alertingRuleGroup{
 			Name:          name,
-			Interval:      d.Get("interval").(string),
+			Interval:      d.Get(intervalKey).(string),
 			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 			Rules:         expandAlertingRules(d.Get("rule").([]interface{})),
 		}
 		data, _ := yaml.Marshal(rules)
-		headers := map[string]string{"Content-Type": "application/yaml"}
+		headers := map[string]string{contentTypeHeader: contentTypeYAML}
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
 		}
@@ -285,8 +285,8 @@ func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.Resourc
 func resourcemimirRuleGroupAlertingDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 	name := d.Get("name").(string)
-	namespace := d.Get("namespace").(string)
-	orgID := d.Get("org_id").(string)
+	namespace := d.Get(namespaceKey).(string)
+	orgID := d.Get(orgIDKey).(string)
 
 	headers := make(map[string]string)
 	if orgID != "" {

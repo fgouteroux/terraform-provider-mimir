@@ -56,7 +56,7 @@ func childRouteSchema(level int) map[string]*schema.Schema {
 			ValidateFunc: validateDuration,
 			StateFunc:    formatDuration,
 		},
-		"receiver": {
+		receiverKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Name of the receiver to send the notification.",
@@ -124,7 +124,7 @@ func childRouteDatasourceSchema(level int) map[string]*schema.Schema {
 			Computed:    true,
 			Description: "How long to wait before sending a notification again if it has already been sent successfully for an alert.",
 		},
-		"receiver": {
+		receiverKey: {
 			Type:        schema.TypeString,
 			Computed:    true,
 			Description: "Name of the receiver to send the notification.",
@@ -311,11 +311,11 @@ func httpConfigFields() map[string]*schema.Schema {
 
 func emailConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
 		"to": {
 			Type:        schema.TypeString,
@@ -395,18 +395,18 @@ func emailConfigFields() map[string]*schema.Schema {
 
 func msteamsConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The incoming webhook URL.",
 		},
-		"title": {
+		titleKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Message title template.",
@@ -421,32 +421,32 @@ func msteamsConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Message body template.",
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 	}
 }
 
 func msteamsv2ConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The incoming webhook URL.",
 		},
-		"title": {
+		titleKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Message title template.",
@@ -456,25 +456,25 @@ func msteamsv2ConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Message body template.",
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 	}
 }
 
 func pagerdutyConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
 		"service_key": {
 			Type:        schema.TypeString,
@@ -534,11 +534,11 @@ func pagerdutyConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "A cluster or grouping of sources.",
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:        schema.TypeList,
 			Optional:    true,
 			MaxItems:    1,
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
@@ -586,11 +586,11 @@ func pagerdutyConfigFields() map[string]*schema.Schema {
 
 func weChatConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
 		"api_secret": {
 			Type:        schema.TypeString,
@@ -598,7 +598,7 @@ func weChatConfigFields() map[string]*schema.Schema {
 			Sensitive:   true,
 			Description: "The API key to use when talking to the WeChat API.",
 		},
-		"api_url": {
+		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The WeChat API URL.",
@@ -624,7 +624,7 @@ func weChatConfigFields() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"message": {
+		messageKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "API request data as defined by the WeChat API.",
@@ -634,25 +634,25 @@ func weChatConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Type of the message type, supported values are `text` and `markdown`.",
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 	}
 }
 
 func webhookConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
 		"url": {
 			Type:        schema.TypeString,
@@ -664,27 +664,27 @@ func webhookConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "The maximum number of alerts to include in a single webhook message. Alerts above this threshold are truncated. When leaving this at its default value of 0, all alerts are included.",
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 	}
 }
 
 func webexConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
-		"api_url": {
+		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The Webex Teams API URL.",
@@ -694,74 +694,74 @@ func webexConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "ID of the Webex Teams room where to send the messages.",
 		},
-		"message": {
+		messageKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Message template.",
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 	}
 }
 
 func discordConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The webhook URL.",
 		},
-		"title": {
+		titleKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Notification title.",
 		},
-		"message": {
+		messageKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Notification message.",
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 	}
 }
 
 func pushoverConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 		"user_key": {
 			Type:        schema.TypeString,
@@ -773,12 +773,12 @@ func pushoverConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "The registered application's API token.",
 		},
-		"title": {
+		titleKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Notification title.",
 		},
-		"message": {
+		messageKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Notification message.",
@@ -824,20 +824,20 @@ func pushoverConfigFields() map[string]*schema.Schema {
 
 func opsgenieConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 		"details": {
 			Type:        schema.TypeMap,
@@ -851,12 +851,12 @@ func opsgenieConfigFields() map[string]*schema.Schema {
 			Sensitive:   true,
 			Description: "The API key to use when talking to the OpsGenie API.",
 		},
-		"api_url": {
+		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The host to send OpsGenie API requests to.",
 		},
-		"message": {
+		messageKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Alert text limited to 130 characters.",
@@ -932,22 +932,22 @@ func opsgenieConfigFields() map[string]*schema.Schema {
 
 func slackConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
-		"api_url": {
+		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The Slack webhook URL. Defaults to global settings if none are set here.",
@@ -965,7 +965,7 @@ func slackConfigFields() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"title": {
+		titleKey: {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
@@ -1029,7 +1029,7 @@ func slackConfigFields() map[string]*schema.Schema {
 			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"title": {
+					titleKey: {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
@@ -1084,7 +1084,7 @@ func slackConfigFields() map[string]*schema.Schema {
 									Type:     schema.TypeString,
 									Optional: true,
 								},
-								"title": {
+								titleKey: {
 									Type:     schema.TypeString,
 									Optional: true,
 								},
@@ -1107,13 +1107,13 @@ func slackConfigFields() map[string]*schema.Schema {
 
 func telegramConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
-		"api_url": {
+		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The Telegram API URL. If not specified, default API URL will be used.",
@@ -1129,7 +1129,7 @@ func telegramConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "ID of the chat where to send the messages.",
 		},
-		"message": {
+		messageKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Message template",
@@ -1145,34 +1145,34 @@ func telegramConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Parse mode for telegram message, supported values are MarkdownV2, Markdown, HTML and empty string for plain text.",
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 	}
 }
 
 func victorOpsConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 		"custom_fields": {
 			Type:     schema.TypeMap,
@@ -1185,7 +1185,7 @@ func victorOpsConfigFields() map[string]*schema.Schema {
 			Sensitive:   true,
 			Description: "The API key to use when talking to the VictorOps API.",
 		},
-		"api_url": {
+		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The VictorOps API URL.",
@@ -1220,20 +1220,20 @@ func victorOpsConfigFields() map[string]*schema.Schema {
 
 func snsConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"send_resolved": {
+		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Whether to notify about resolved alerts.",
+			Description: sendResolvedDescr,
 		},
-		"http_config": {
+		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: httpConfigFields(),
 			},
-			Description: "The HTTP client's configuration.",
+			Description: httpConfigDescr,
 		},
 		"attributes": {
 			Type:        schema.TypeMap,
@@ -1241,7 +1241,7 @@ func snsConfigFields() map[string]*schema.Schema {
 			Description: "SNS message attributes.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 		},
-		"api_url": {
+		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The SNS API URL. If not specified, the SNS API URL from the SNS SDK will be used.",
@@ -1266,7 +1266,7 @@ func snsConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Subject line when the message is delivered to email endpoints.",
 		},
-		"message": {
+		messageKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The message content of the SNS notification.",
@@ -1311,11 +1311,11 @@ func snsConfigFields() map[string]*schema.Schema {
 
 func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"org_id": {
+		orgIDKey: {
 			Type:        schema.TypeString,
 			ForceNew:    true,
 			Optional:    true,
-			Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+			Description: orgIDDescription,
 		},
 		"global": {
 			Type:     schema.TypeList,
@@ -1331,7 +1331,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						ValidateFunc: validateDuration,
 						StateFunc:    formatDuration,
 					},
-					"http_config": {
+					httpConfigKey: {
 						Type:        schema.TypeList,
 						Optional:    true,
 						MaxItems:    1,
@@ -1505,7 +1505,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "A list of numerical days of the week, where the week begins on Sunday (0) and ends on Saturday (6).",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"begin": {
+											beginKey: {
 												Type:     schema.TypeInt,
 												Optional: true,
 											},
@@ -1522,7 +1522,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "A list of numerical days in the month. Days begin at 1. Negative values are also accepted which begin at the end of the month.",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"begin": {
+											beginKey: {
 												Type:     schema.TypeInt,
 												Optional: true,
 											},
@@ -1539,7 +1539,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "A list of calendar months identified by number, where January = 1.",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"begin": {
+											beginKey: {
 												Type:     schema.TypeInt,
 												Optional: true,
 											},
@@ -1556,7 +1556,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "A numerical list of years.",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"begin": {
+											beginKey: {
 												Type:     schema.TypeInt,
 												Optional: true,
 											},
@@ -1579,7 +1579,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 				},
 			},
 		},
-		"receiver": {
+		receiverKey: {
 			Type:        schema.TypeList,
 			Required:    true,
 			Description: "A list of notification receivers.",
@@ -1725,7 +1725,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						ValidateFunc: validateDuration,
 						StateFunc:    formatDuration,
 					},
-					"receiver": {
+					receiverKey: {
 						Type:        schema.TypeString,
 						Required:    true,
 						Description: "Name of the receiver to send the notification.",
@@ -1757,11 +1757,11 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 
 func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"org_id": {
+		orgIDKey: {
 			Type:        schema.TypeString,
 			ForceNew:    true,
 			Optional:    true,
-			Description: "The Organization ID. If not set, the Org ID defined in the provider block will be used.",
+			Description: orgIDDescription,
 		},
 		"name": {
 			Type:        schema.TypeString,
@@ -1779,7 +1779,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Optional:    true,
 						Default:     "5m",
 					},
-					"http_config": {
+					httpConfigKey: {
 						Type:        schema.TypeList,
 						Computed:    true,
 						Description: "The default HTTP client configuration",
@@ -1948,7 +1948,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "A list of numerical days of the week, where the week begins on Sunday (0) and ends on Saturday (6).",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"begin": {
+											beginKey: {
 												Type:     schema.TypeInt,
 												Computed: true,
 											},
@@ -1965,7 +1965,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "A list of numerical days in the month. Days begin at 1. Negative values are also accepted which begin at the end of the month.",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"begin": {
+											beginKey: {
 												Type:     schema.TypeInt,
 												Computed: true,
 											},
@@ -1982,7 +1982,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "A list of calendar months identified by number, where January = 1.",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"begin": {
+											beginKey: {
 												Type:     schema.TypeInt,
 												Computed: true,
 											},
@@ -1999,7 +1999,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "A numerical list of years.",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"begin": {
+											beginKey: {
 												Type:     schema.TypeInt,
 												Computed: true,
 											},
@@ -2022,7 +2022,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 				},
 			},
 		},
-		"receiver": {
+		receiverKey: {
 			Type:        schema.TypeList,
 			Computed:    true,
 			Description: "A list of notification receivers.",
@@ -2161,7 +2161,7 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Computed:    true,
 						Description: "How long to wait before sending a notification again if it has already been sent successfully for an alert.",
 					},
-					"receiver": {
+					receiverKey: {
 						Type:        schema.TypeString,
 						Computed:    true,
 						Description: "Name of the receiver to send the notification.",
