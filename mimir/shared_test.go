@@ -86,6 +86,37 @@ func testAccCheckMimirNamespaceExists(n string, name string, client *apiClient) 
 	}
 }
 
+// testAccCheckMimirRuleGroupGone verifies that a specific rule group within a
+// namespace has actually been removed from Mimir (returns 404). Use this in
+// Update tests that remove a group from the YAML to guard against the
+// regression where Update silently keeps orphaned groups alive in Mimir while
+// dropping them from Terraform state.
+func testAccCheckMimirRuleGroupGone(n string, groupName string, client *apiClient) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("mimir object not found in terraform state: %s", n)
+		}
+
+		orgID := rs.Primary.Attributes["org_id"]
+		namespace := rs.Primary.Attributes["namespace"]
+
+		headers := make(map[string]string)
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
+		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, groupName)
+		_, err := client.sendRequest("ruler", "GET", path, "", headers)
+		if err == nil {
+			return fmt.Errorf("rule group %q in namespace %q still exists in Mimir; expected 404", groupName, namespace)
+		}
+		if !strings.Contains(err.Error(), "response code '404'") {
+			return fmt.Errorf("unexpected error checking rule group %q is gone: %w", groupName, err)
+		}
+		return nil
+	}
+}
+
 func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 	// retrieve the connection established in Provider configuration
 	client := testAccProvider.Meta().(*apiClient)
