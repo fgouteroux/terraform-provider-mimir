@@ -354,6 +354,13 @@ func TestAccResourceMimirRules_Update_RemoveGroup(t *testing.T) {
 				Config: testAccResourceMimirRules_removeGroup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMimirNamespaceExists("mimir_rules.rules_1", "alert_group_1", client),
+					// Regression guard: the removed group must actually be gone from
+					// Mimir, not merely dropped from Terraform state. Update used to
+					// read managed_groups via d.Get (which returns the new planned
+					// value after CustomizeDiff), so groupsToDelete was always empty
+					// and removed groups silently became orphaned/unmanaged rule
+					// groups in Mimir.
+					testAccCheckMimirRuleGroupGone("mimir_rules.rules_1", "record_group_1", client),
 					resource.TestCheckResourceAttr("mimir_rules.rules_1", "groups_count", "1"),
 					resource.TestCheckResourceAttr("mimir_rules.rules_1", "managed_groups.0", "alert_group_1"),
 				),

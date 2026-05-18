@@ -526,7 +526,14 @@ func resourceMimirRulesUpdate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	oldManagedGroups := d.Get("managed_groups").([]interface{})
+	// Read the previous managed_groups from prior state, NOT via d.Get,
+	// because CustomizeDiff has already populated d.Get("managed_groups") with
+	// the new planned value via diff.SetNew. Using d.Get here makes
+	// oldManagedGroups equal to newManagedGroups, so groupsToDelete is always
+	// empty and groups removed from the YAML are never deleted from Mimir
+	// (they become orphaned, "unmanaged" rule groups).
+	oldManagedGroupsRaw, _ := d.GetChange("managed_groups")
+	oldManagedGroups := oldManagedGroupsRaw.([]interface{})
 	newManagedGroups := determineGroupsToManage(newRuleGroups, d)
 
 	// Convert old managed groups to string slice
