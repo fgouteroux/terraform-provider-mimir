@@ -69,6 +69,13 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			labelsKey: {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				Description:  "Group-level labels added to all rules in the group. Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).",
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				ValidateFunc: validateLabels,
+			},
 			"rule": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -87,7 +94,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 							ValidateFunc: validatePromQLExpr,
 							StateFunc:    formatPromQLExpr,
 						},
-						"labels": {
+						labelsKey: {
 							Type:         schema.TypeMap,
 							Description:  "Labels to add or overwrite before storing the result.",
 							Optional:     true,
@@ -138,6 +145,9 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 		QueryOffset:     d.Get("query_offset").(string),
 		SourceTenants:   expandStringArray(d.Get("source_tenants").([]interface{})),
 		Rules:           expandRecordingRules(d.Get("rule").([]interface{})),
+	}
+	if v, ok := d.GetOk(labelsKey); ok {
+		rules.Labels = expandStringMap(v.(map[string]interface{}))
 	}
 	// if ed, ok := d.GetOk("evaluation_delay"); ok {
 	// 	rules.EvaluationDelay = ed.(string)
@@ -257,11 +267,15 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set(labelsKey, data.Labels)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	return diags
 }
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", intervalKey, "query_offset", "evaluation_delay", "source_tenants") {
+	if d.HasChanges("rule", intervalKey, "query_offset", "evaluation_delay", "source_tenants", labelsKey) {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get(namespaceKey).(string)
@@ -277,6 +291,9 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 			rules.EvaluationDelay = ed.(string)
 		} else {
 			rules.QueryOffset = d.Get("query_offset").(string)
+		}
+		if v, ok := d.GetOk(labelsKey); ok {
+			rules.Labels = expandStringMap(v.(map[string]interface{}))
 		}
 		data, _ := yaml.Marshal(rules)
 		headers := map[string]string{contentTypeHeader: contentTypeYAML}
@@ -360,7 +377,7 @@ func expandRecordingRules(v []interface{}) []recordingRule {
 			rule.Expr = formatPromQLExpr(raw)
 		}
 
-		if raw, ok := data["labels"]; ok {
+		if raw, ok := data[labelsKey]; ok {
 			if len(raw.(map[string]interface{})) > 0 {
 				rule.Labels = expandStringMap(raw.(map[string]interface{}))
 			}
@@ -385,7 +402,7 @@ func flattenRecordingRules(v []recordingRule) []map[string]interface{} {
 		rule["expr"] = formatPromQLExpr(v.Expr)
 
 		if v.Labels != nil {
-			rule["labels"] = v.Labels
+			rule[labelsKey] = v.Labels
 		}
 
 		rules = append(rules, rule)
@@ -412,10 +429,11 @@ type recordingRule struct {
 }
 
 type recordingRuleGroup struct {
-	Name            string          `yaml:"name"`
-	Interval        string          `yaml:"interval,omitempty"`
-	QueryOffset     string          `yaml:"query_offset,omitempty"`
-	EvaluationDelay string          `yaml:"evaluation_delay,omitempty"`
-	Rules           []recordingRule `yaml:"rules"`
-	SourceTenants   []string        `yaml:"source_tenants,omitempty"`
+	Name            string            `yaml:"name"`
+	Interval        string            `yaml:"interval,omitempty"`
+	QueryOffset     string            `yaml:"query_offset,omitempty"`
+	EvaluationDelay string            `yaml:"evaluation_delay,omitempty"`
+	Rules           []recordingRule   `yaml:"rules"`
+	SourceTenants   []string          `yaml:"source_tenants,omitempty"`
+	Labels          map[string]string `yaml:"labels,omitempty"`
 }

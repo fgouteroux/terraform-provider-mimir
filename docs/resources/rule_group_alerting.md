@@ -16,6 +16,10 @@ description: |-
 resource "mimir_rule_group_alerting" "test" {
   name      = "test1"
   namespace = "namespace1"
+  # Group-level labels are added to every rule in the group (requires Mimir >= 3.0.0).
+  labels = {
+    target_channel = "Storage"
+  }
   rule {
     alert       = "HighRequestLatency"
     expr        = "job:request_latency_seconds:mean5m{job=\"myjob\"} > 0.5"
@@ -41,6 +45,7 @@ resource "mimir_rule_group_alerting" "test" {
 ### Optional
 
 - `interval` (String) Alerting Rule group interval
+- `labels` (Map of String) Group-level labels added to all rules in the group. Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).
 - `namespace` (String) Alerting Rule group namespace
 - `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.

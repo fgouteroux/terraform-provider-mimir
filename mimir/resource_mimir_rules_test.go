@@ -6,7 +6,50 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"gopkg.in/yaml.v3"
 )
+
+// TestRuleGroupContentPreservesGroupLabels proves group-level labels survive the
+// parse -> marshal round-trip used by Create (POST body) and calculateContentHash
+// (drift) for the mimir_rules resource. Before the Labels field was added to
+// RuleGroup, a group-level `labels:` key was silently dropped (EDPIPIF-1516).
+func TestRuleGroupContentPreservesGroupLabels(t *testing.T) {
+	ruleGroups := RuleGroups{
+		Groups: []RuleGroup{
+			{
+				Name:   "harvest_alerts",
+				Labels: map[string]string{"target_channel": "Storage"},
+				Rules: []Rule{
+					{
+						Alert:  "Instancedown",
+						Expr:   "up == 0",
+						For:    "5m",
+						Labels: map[string]string{"severity": "critical"},
+					},
+				},
+			},
+		},
+	}
+
+	if err := validateRuleGroupsContent(ruleGroups); err != nil {
+		t.Fatalf("group-level labels should be valid, got: %v", err)
+	}
+
+	data, err := yaml.Marshal(ruleGroups)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var rt RuleGroups
+	if err := yaml.Unmarshal(data, &rt); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(rt.Groups) != 1 {
+		t.Fatalf("expected 1 group after round-trip, got %d", len(rt.Groups))
+	}
+	if got := rt.Groups[0].Labels["target_channel"]; got != "Storage" {
+		t.Fatalf("group-level label target_channel not preserved through round-trip; got %q\nyaml:\n%s", got, data)
+	}
+}
 
 func TestValidateRuleGroupsContent_AllowsPrometheusDurations(t *testing.T) {
 	ruleGroups := RuleGroups{
@@ -594,6 +637,58 @@ groups:
           severity: critical
         annotations:
           summary: "High memory usage detected"
+EOT
+}
+`
+
+// TestAccResourceMimirRules_GroupLabels covers group-level labels via the
+// combined mimir_rules (YAML content) resource (EDPIPIF-1516, original repro:
+// group harvest_alerts with target_channel: Storage). Group labels live inside
+// the content YAML, not Terraform state attributes, so they are asserted via the
+// ruler API with testAccCheckMimirRuleGroupHasLabel. Requires Mimir >= 3.0.0.
+func TestAccResourceMimirRules_GroupLabels(t *testing.T) {
+	skipBelowMimirVersion(t, "3.0.0")
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceMimirRules_groupLabels,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupHasLabel("mimir_rules.harvest", "harvest_alerts", "target_channel", "Storage", client),
+				),
+			},
+			{
+				// re-apply identical config: the post-apply plan must be empty (no drift).
+				Config: testAccResourceMimirRules_groupLabels,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupHasLabel("mimir_rules.harvest", "harvest_alerts", "target_channel", "Storage", client),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceMimirRules_groupLabels = `
+resource "mimir_rules" "harvest" {
+  namespace = "harvest"
+
+  content = <<-EOT
+groups:
+  - name: harvest_alerts
+    labels:
+      target_channel: Storage
+    rules:
+      - alert: Instancedown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
 EOT
 }
 `

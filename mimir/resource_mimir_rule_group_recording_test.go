@@ -459,3 +459,86 @@ const testAccResourceRuleGroupRecording_withOrgID = `
             }
     }
 `
+
+// TestAccResourceRuleGroupRecording_GroupLabels exercises group-level labels
+// (EDPIPIF-1516) on the recording resource: create without, add, then change.
+// Requires Mimir >= 3.0.0 to persist group-level labels.
+func TestAccResourceRuleGroupRecording_GroupLabels(t *testing.T) {
+	skipBelowMimirVersion(t, "3.0.0")
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupRecording_groupLabelsNone,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.labeled", "labeled_rec_group", client),
+					resource.TestCheckNoResourceAttr("mimir_rule_group_recording.labeled", "labels.target_channel"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupRecording_groupLabelsStorage,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.labeled", "labeled_rec_group", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.labeled", "labels.target_channel", "Storage"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupRecording_groupLabelsNetwork,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.labeled", "labels.target_channel", "Network"),
+				),
+			},
+			{
+				// remove the group labels entirely (proves full-replace on Update, state cleared on Read).
+				Config: testAccResourceRuleGroupRecording_groupLabelsNone,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.labeled", "labeled_rec_group", client),
+					resource.TestCheckNoResourceAttr("mimir_rule_group_recording.labeled", "labels.target_channel"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceRuleGroupRecording_groupLabelsNone = `
+	resource "mimir_rule_group_recording" "labeled" {
+		name      = "labeled_rec_group"
+		namespace = "namespace_labels"
+		rule {
+			record = "job:up:sum"
+			expr   = "sum(up)"
+		}
+	}
+`
+const testAccResourceRuleGroupRecording_groupLabelsStorage = `
+	resource "mimir_rule_group_recording" "labeled" {
+		name      = "labeled_rec_group"
+		namespace = "namespace_labels"
+		labels = {
+			target_channel = "Storage"
+		}
+		rule {
+			record = "job:up:sum"
+			expr   = "sum(up)"
+		}
+	}
+`
+const testAccResourceRuleGroupRecording_groupLabelsNetwork = `
+	resource "mimir_rule_group_recording" "labeled" {
+		name      = "labeled_rec_group"
+		namespace = "namespace_labels"
+		labels = {
+			target_channel = "Network"
+		}
+		rule {
+			record = "job:up:sum"
+			expr   = "sum(up)"
+		}
+	}
+`

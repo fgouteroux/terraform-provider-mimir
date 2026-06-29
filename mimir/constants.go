@@ -5,6 +5,7 @@ const (
 	orgIDDescription  = "The Organization ID. If not set, the Org ID defined in the provider block will be used."
 	namespaceKey      = "namespace"
 	intervalKey       = "interval"
+	labelsKey         = "labels"
 	contentTypeHeader = "Content-Type"
 	contentTypeYAML   = "application/yaml"
 

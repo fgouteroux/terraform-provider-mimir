@@ -18,6 +18,10 @@ resource "mimir_rule_group_recording" "test" {
   namespace    = "namespace1"
   interval     = "6h"
   query_offset = "5m"
+  # Group-level labels are added to every rule in the group (requires Mimir >= 3.0.0).
+  labels = {
+    team = "observability"
+  }
   rule {
     expr   = "sum by (job) (http_inprogress_requests)"
     record = "job:http_inprogress_requests:sum"
@@ -37,6 +41,7 @@ resource "mimir_rule_group_recording" "test" {
 
 - `evaluation_delay` (String, Deprecated) **Deprecated** The duration by which to delay the execution of the recording rule.
 - `interval` (String) Recording Rule group interval
+- `labels` (Map of String) Group-level labels added to all rules in the group. Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).
 - `namespace` (String) Recording Rule group namespace
 - `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 - `query_offset` (String) The duration by which to delay the execution of the recording rule.
