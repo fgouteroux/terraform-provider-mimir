@@ -28,6 +28,9 @@ type RuleGroup struct {
 	Rules           []Rule   `yaml:"rules"`
 	SourceTenants   []string `yaml:"source_tenants,omitempty"`
 	Limit           int      `yaml:"limit,omitempty"`
+	// Labels are group-level labels applied to all rules in the group.
+	// Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).
+	Labels map[string]string `yaml:"labels,omitempty"`
 }
 
 // Rule represents both alerting and recording rules
@@ -83,7 +86,7 @@ func resourceMimirRules() *schema.Resource {
 			"content": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Description:   "YAML content containing rule groups. Mutually exclusive with 'content_file'.",
+				Description:   "YAML content containing rule groups. Mutually exclusive with 'content_file'. Group-level `labels` are supported and require Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).",
 				ValidateFunc:  validateYAMLContent,
 				ConflictsWith: []string{"content_file"},
 			},
@@ -91,7 +94,7 @@ func resourceMimirRules() *schema.Resource {
 			"content_file": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Description:   "Path to YAML file containing rule groups. Mutually exclusive with 'content'.",
+				Description:   "Path to YAML file containing rule groups. Mutually exclusive with 'content'. Group-level `labels` in the file are supported and require Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).",
 				ValidateFunc:  validation.StringIsNotEmpty,
 				ConflictsWith: []string{"content"},
 			},

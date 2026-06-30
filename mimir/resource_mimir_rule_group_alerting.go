@@ -54,6 +54,13 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			labelsKey: {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				Description:  "Group-level labels added to all rules in the group. Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).",
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				ValidateFunc: validateLabels,
+			},
 			"rule": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -93,7 +100,7 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 							Elem:         &schema.Schema{Type: schema.TypeString},
 							ValidateFunc: validateAnnotations,
 						},
-						"labels": {
+						labelsKey: {
 							Type:         schema.TypeMap,
 							Description:  "Labels to add or overwrite for each alert.",
 							Optional:     true,
@@ -142,6 +149,9 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 		Interval:      d.Get(intervalKey).(string),
 		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 		Rules:         expandAlertingRules(d.Get("rule").([]interface{})),
+	}
+	if v, ok := d.GetOk(labelsKey); ok {
+		rules.Labels = expandStringMap(v.(map[string]interface{}))
 	}
 	data, _ := yaml.Marshal(rules)
 	headers := map[string]string{contentTypeHeader: contentTypeYAML}
@@ -245,12 +255,16 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set(labelsKey, data.Labels)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }
 
 func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", intervalKey, "source_tenants") {
+	if d.HasChanges("rule", intervalKey, "source_tenants", labelsKey) {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get(namespaceKey).(string)
@@ -261,6 +275,9 @@ func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.Resourc
 			Interval:      d.Get(intervalKey).(string),
 			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
 			Rules:         expandAlertingRules(d.Get("rule").([]interface{})),
+		}
+		if v, ok := d.GetOk(labelsKey); ok {
+			rules.Labels = expandStringMap(v.(map[string]interface{}))
 		}
 		data, _ := yaml.Marshal(rules)
 		headers := map[string]string{contentTypeHeader: contentTypeYAML}
@@ -357,7 +374,7 @@ func expandAlertingRules(v []interface{}) []alertingRule {
 			}
 		}
 
-		if raw, ok := data["labels"]; ok {
+		if raw, ok := data[labelsKey]; ok {
 			if len(raw.(map[string]interface{})) > 0 {
 				rule.Labels = expandStringMap(raw.(map[string]interface{}))
 			}
@@ -394,7 +411,7 @@ func flattenAlertingRules(v []alertingRule) []map[string]interface{} {
 			rule["keep_firing_for"] = v.KeepFiringFor
 		}
 		if v.Labels != nil {
-			rule["labels"] = v.Labels
+			rule[labelsKey] = v.Labels
 		}
 		if v.Annotations != nil {
 			rule["annotations"] = v.Annotations
@@ -427,8 +444,9 @@ type alertingRule struct {
 }
 
 type alertingRuleGroup struct {
-	Name          string         `yaml:"name"`
-	Interval      string         `yaml:"interval,omitempty"`
-	Rules         []alertingRule `yaml:"rules"`
-	SourceTenants []string       `yaml:"source_tenants,omitempty"`
+	Name          string            `yaml:"name"`
+	Interval      string            `yaml:"interval,omitempty"`
+	Rules         []alertingRule    `yaml:"rules"`
+	SourceTenants []string          `yaml:"source_tenants,omitempty"`
+	Labels        map[string]string `yaml:"labels,omitempty"`
 }

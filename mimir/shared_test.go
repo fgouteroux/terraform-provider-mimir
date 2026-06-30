@@ -5,10 +5,68 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"testing"
 
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"gopkg.in/yaml.v3"
 )
+
+// skipBelowMimirVersion skips a test when MIMIR_VERSION is unset, unparseable, or
+// below min. Unlike the older inline pattern (version.NewVersion(os.Getenv(...))
+// then .LessThan, which nil-panics on an empty MIMIR_VERSION and uses bare
+// `return` that go test reports as PASS), this guards the empty/unparseable case
+// and uses t.Skip so the gate produces a real `--- SKIP`.
+func skipBelowMimirVersion(t *testing.T, min string) {
+	t.Helper()
+	v := os.Getenv("MIMIR_VERSION")
+	if v == "" {
+		t.Skipf("MIMIR_VERSION not set; skipping test requiring Mimir >= %s", min)
+	}
+	cur, err := version.NewVersion(v)
+	if err != nil {
+		t.Skipf("MIMIR_VERSION %q unparseable; skipping test requiring Mimir >= %s", v, min)
+	}
+	minV, _ := version.NewVersion(min)
+	if cur.LessThan(minV) {
+		t.Skipf("Mimir %s < %s; skipping group-label persistence test", cur, minV)
+	}
+}
+
+// testAccCheckMimirRuleGroupHasLabel GETs a rule group from the ruler API and
+// asserts it carries a group-level label key=val. Used for mimir_rules, whose
+// group labels live inside the YAML content and are not Terraform state
+// attributes (so resource.TestCheckResourceAttr cannot see them).
+func testAccCheckMimirRuleGroupHasLabel(n, group, key, val string, client *apiClient) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("mimir object not found in terraform state: %s", n)
+		}
+		orgID := rs.Primary.Attributes["org_id"]
+		namespace := rs.Primary.Attributes["namespace"]
+		headers := make(map[string]string)
+		if orgID != "" {
+			headers["X-Scope-OrgID"] = orgID
+		}
+		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, group)
+		body, err := client.sendRequest("ruler", "GET", path, "", headers)
+		if err != nil {
+			return err
+		}
+		var grp struct {
+			Labels map[string]string `yaml:"labels"`
+		}
+		if err := yaml.Unmarshal([]byte(body), &grp); err != nil {
+			return fmt.Errorf("parsing rule group %q YAML: %w", group, err)
+		}
+		if got := grp.Labels[key]; got != val {
+			return fmt.Errorf("rule group %q label %q = %q, want %q (body: %s)", group, key, got, val, body)
+		}
+		return nil
+	}
+}
 
 func getSetEnv(key, fallback string) string {
 	value, exists := os.LookupEnv(key)

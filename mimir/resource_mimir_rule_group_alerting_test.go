@@ -472,3 +472,88 @@ const testAccResourceRuleGroupAlerting_withOrgID = `
             }
     }
 `
+
+// TestAccResourceRuleGroupAlerting_GroupLabels exercises group-level labels
+// (EDPIPIF-1516): create WITHOUT group labels, then ADD them (must trigger the
+// HasChanges("labels") gate + POST and round-trip on Read), then change the value.
+// Requires Mimir >= 3.0.0 to persist group-level labels.
+func TestAccResourceRuleGroupAlerting_GroupLabels(t *testing.T) {
+	skipBelowMimirVersion(t, "3.0.0")
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceRuleGroupAlerting_groupLabelsNone,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.labeled", "labeled_group", client),
+					resource.TestCheckNoResourceAttr("mimir_rule_group_alerting.labeled", "labels.target_channel"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupAlerting_groupLabelsStorage,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.labeled", "labeled_group", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.labeled", "labels.target_channel", "Storage"),
+				),
+			},
+			{
+				Config: testAccResourceRuleGroupAlerting_groupLabelsNetwork,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.labeled", "labels.target_channel", "Network"),
+				),
+			},
+			{
+				// remove the group labels entirely: HasChanges fires, POST replaces
+				// the group without labels, Read clears state (proves full-replace, not merge).
+				Config: testAccResourceRuleGroupAlerting_groupLabelsNone,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.labeled", "labeled_group", client),
+					resource.TestCheckNoResourceAttr("mimir_rule_group_alerting.labeled", "labels.target_channel"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceRuleGroupAlerting_groupLabelsNone = `
+	resource "mimir_rule_group_alerting" "labeled" {
+		name      = "labeled_group"
+		namespace = "namespace_labels"
+		rule {
+			alert = "Instancedown"
+			expr  = "up == 0"
+		}
+	}
+`
+const testAccResourceRuleGroupAlerting_groupLabelsStorage = `
+	resource "mimir_rule_group_alerting" "labeled" {
+		name      = "labeled_group"
+		namespace = "namespace_labels"
+		labels = {
+			target_channel = "Storage"
+		}
+		rule {
+			alert = "Instancedown"
+			expr  = "up == 0"
+		}
+	}
+`
+const testAccResourceRuleGroupAlerting_groupLabelsNetwork = `
+	resource "mimir_rule_group_alerting" "labeled" {
+		name      = "labeled_group"
+		namespace = "namespace_labels"
+		labels = {
+			target_channel = "Network"
+		}
+		rule {
+			alert = "Instancedown"
+			expr  = "up == 0"
+		}
+	}
+`

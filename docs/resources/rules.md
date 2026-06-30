@@ -4,10 +4,10 @@ page_title: "mimir_rules Resource - terraform-provider-mimir"
 subcategory: ""
 description: |-
   Manages multiple Grafana Mimir rule groups within a namespace.
-          This resource is designed to handle YAML files containing multiple rule groups,
-          such as those exported from mimirtool or monitoring mixins. Each rule group
-          is managed individually via the Mimir API, but they are tracked together as
-          a single Terraform resource for easier bulk management.
+  This resource is designed to handle YAML files containing multiple rule groups,
+  such as those exported from mimirtool or monitoring mixins. Each rule group
+  is managed individually via the Mimir API, but they are tracked together as
+  a single Terraform resource for easier bulk management.
 ---
 
 # mimir_rules (Resource)
@@ -29,8 +29,8 @@ Manages multiple Grafana Mimir rule groups within a namespace.
 
 ### Optional
 
-- `content` (String) YAML content containing rule groups. Mutually exclusive with 'content_file'.
-- `content_file` (String) Path to YAML file containing rule groups. Mutually exclusive with 'content'.
+- `content` (String) YAML content containing rule groups. Mutually exclusive with 'content_file'. Group-level `labels` are supported and require Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).
+- `content_file` (String) Path to YAML file containing rule groups. Mutually exclusive with 'content'. Group-level `labels` in the file are supported and require Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).
 - `ignore_groups` (Set of String) List of rule group names to ignore from the content. Useful when you want to manage most groups but exclude specific ones.
 - `only_groups` (Set of String) Explicit list of rule group names to manage. If not specified, all groups in the content will be managed. Use this to manage only specific groups from a larger YAML file.
 - `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
@@ -55,5 +55,3 @@ Read-Only:
 - `name` (String)
 - `recording_rules_count` (Number)
 - `rules_count` (Number)
-
-
