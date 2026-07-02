@@ -50,7 +50,7 @@ func testAccCheckMimirRuleGroupHasLabel(n, group, key, val string, client *apiCl
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
 		}
-		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, group)
+		path := rulesGroupPath(namespace, group)
 		body, err := client.sendRequest("ruler", "GET", path, "", headers)
 		if err != nil {
 			return err
@@ -101,7 +101,7 @@ func testAccCheckMimirRuleGroupExists(n string, name string, client *apiClient) 
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
 		}
-		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+		path := rulesGroupPath(namespace, name)
 		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 		if err != nil {
 			return err
@@ -134,7 +134,7 @@ func testAccCheckMimirNamespaceExists(n string, name string, client *apiClient) 
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
 		}
-		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+		path := rulesNamespacePath(namespace)
 		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 		if err != nil {
 			return err
@@ -163,7 +163,7 @@ func testAccCheckMimirRuleGroupGone(n string, groupName string, client *apiClien
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
 		}
-		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, groupName)
+		path := rulesGroupPath(namespace, groupName)
 		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 		if err == nil {
 			return fmt.Errorf("rule group %q in namespace %q still exists in Mimir; expected 404", groupName, namespace)
@@ -194,7 +194,7 @@ func testAccCheckMimirRuleGroupDestroy(s *terraform.State) error {
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
 		}
-		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+		path := rulesGroupPath(namespace, name)
 		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 
 		// If the error is equivalent to 404 not found, the widget is destroyed.
@@ -232,7 +232,7 @@ func testAccCheckMimirRuleDestroy(s *terraform.State) error {
 		for i := 0; i < managedGroupsCount; i++ {
 			groupName := rs.Primary.Attributes[fmt.Sprintf("managed_groups.%d", i)]
 
-			path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, groupName)
+			path := rulesGroupPath(namespace, groupName)
 			_, err := client.sendRequest("ruler", "GET", path, "", headers)
 
 			// If the error is equivalent to 404 not found, the group is destroyed.

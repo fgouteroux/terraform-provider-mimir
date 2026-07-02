@@ -23,17 +23,19 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			orgIDKey: {
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Optional:    true,
-				Description: orgIDDescription,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Optional:     true,
+				Description:  orgIDDescription,
+				ValidateFunc: validateOrgID,
 			},
 			namespaceKey: {
-				Type:        schema.TypeString,
-				Description: "Recording Rule group namespace",
-				ForceNew:    true,
-				Optional:    true,
-				Default:     "default",
+				Type:         schema.TypeString,
+				Description:  "Recording Rule group namespace",
+				ForceNew:     true,
+				Optional:     true,
+				Default:      defaultNamespace,
+				ValidateFunc: validateNamespace,
 			},
 			"name": {
 				Type:         schema.TypeString,
@@ -117,7 +119,7 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	if !overwriteRuleGroupConfig {
 		ruleGroupConfigExists := true
 
-		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+		path := rulesGroupPath(namespace, name)
 		headers := make(map[string]string)
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
@@ -160,18 +162,14 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 		headers["X-Scope-OrgID"] = orgID
 	}
 
-	path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+	path := rulesNamespacePath(namespace)
 	_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
 	baseMsg := fmt.Sprintf("Cannot create recording rule group '%s' (namespace: %s) -", name, namespace)
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if orgID != "" {
-		d.SetId(fmt.Sprintf("%s/%s/%s", orgID, namespace, name))
-	} else {
-		d.SetId(fmt.Sprintf("%s/%s", namespace, name))
-	}
+	d.SetId(buildRuleGroupID(orgID, namespace, name))
 
 	// Retry read as mimir api could return a 404 status code caused by the event change notification propagation.
 	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a <ruleGroupReadRetryAfterChange> max retries.
@@ -190,21 +188,11 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// use id as read is also called by import
-	idArr := strings.Split(d.Id(), "/")
-
-	var name, namespace, orgID string
-
-	switch len(idArr) {
-	case 2:
-		namespace = idArr[0]
-		name = idArr[1]
-	case 3:
-		orgID = idArr[0]
-		namespace = idArr[1]
-		name = idArr[2]
-	default:
-		return diag.FromErr(fmt.Errorf("invalid id format: expected 'namespace/name' or 'org_id/namespace/name', got '%s'", d.Id()))
+	// use id as read is also called by import; parseRuleGroupID unescapes and re-validates
+	// every segment so an import/legacy '/'-in-namespace cannot fabricate an X-Scope-OrgID.
+	orgID, namespace, name, err := parseRuleGroupID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	jobraw, err := ruleGroupRecordingRead(meta, name, namespace, orgID)
@@ -301,7 +289,7 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 			headers["X-Scope-OrgID"] = orgID
 		}
 
-		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+		path := rulesNamespacePath(namespace)
 		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
 		baseMsg := fmt.Sprintf("Cannot update recording rule group '%s' (namespace: %s)  -", name, namespace)
 		err = handleHTTPError(err, baseMsg)
@@ -324,7 +312,7 @@ func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.Resour
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID
 	}
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	path := rulesGroupPath(namespace, name)
 	_, err := client.sendRequest("ruler", "DELETE", path, "", headers)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf(
@@ -356,7 +344,7 @@ func ruleGroupRecordingRead(meta interface{}, name, namespace, orgID string) (st
 		headers["X-Scope-OrgID"] = orgID
 	}
 	client := meta.(*apiClient)
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	path := rulesGroupPath(namespace, name)
 	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
 	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' (namespace: %s) -", name, namespace)
 	return jobraw, handleHTTPError(err, baseMsg)
