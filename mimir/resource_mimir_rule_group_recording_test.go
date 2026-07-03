@@ -37,7 +37,7 @@ func TestAccResourceRuleGroupRecording_expectValidationError(t *testing.T) {
 
 const testAccResourceRuleGroupRecording_expectNameValidationError = `
 	resource "mimir_rule_group_recording" "record_1" {
-		name = "record_1-@error"
+		name = "invalid/name"
 		namespace = "namespace_1"
 		rule {
 			record = "test1_info"

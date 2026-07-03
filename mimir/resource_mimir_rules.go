@@ -72,14 +72,15 @@ func resourceMimirRules() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				Description:  "The namespace for the rule groups",
-				ValidateFunc: validation.StringLenBetween(1, 100),
+				ValidateFunc: validation.All(validation.StringLenBetween(1, 100), validateNamespace),
 			},
 
 			orgIDKey: {
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Optional:    true,
-				Description: orgIDDescription,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Optional:     true,
+				Description:  orgIDDescription,
+				ValidateFunc: validateOrgID,
 			},
 
 			// Content input methods (mutually exclusive)
@@ -312,8 +313,8 @@ func validateRuleGroupsContent(ruleGroups RuleGroups) error {
 			return fmt.Errorf("group %d: name is required", i)
 		}
 
-		if !groupRuleNameRegexp.MatchString(group.Name) {
-			return fmt.Errorf("invalid Group Rule Name %s. Must match the regex %s", group.Name, groupRuleNameRegexp)
+		if !validRuleName(group.Name) {
+			return fmt.Errorf("invalid Group Rule Name %q: must be non-empty, not whitespace-only, not \".\" or \"..\", and contain no control characters or '/'", group.Name)
 		}
 
 		if groupNames[group.Name] {
@@ -364,8 +365,8 @@ func validateRule(rule Rule, groupIndex, ruleIndex int, groupName string) error 
 	// Alerting rule specific validation
 	if hasAlert {
 		// Validate alert name
-		if !alertNameRegexp.MatchString(rule.Alert) {
-			return fmt.Errorf("group %d (%s), rule %d: invalid alert name '%s'. Must match the regex %s", groupIndex, groupName, ruleIndex, rule.Alert, alertNameRegexp)
+		if !validRuleName(rule.Alert) {
+			return fmt.Errorf("group %d (%s), rule %d: invalid alert name %q: must be non-empty, not whitespace-only, not \".\" or \"..\", and contain no control characters or '/'", groupIndex, groupName, ruleIndex, rule.Alert)
 		}
 
 		// Validate 'for' duration if specified
@@ -490,7 +491,7 @@ func resourceMimirRulesRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	var existingGroups []string
 	for _, groupName := range managedGroups {
-		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, groupName)
+		path := rulesGroupPath(namespace, groupName)
 		_, err := client.sendRequest("ruler", "GET", path, "", headers)
 		if err != nil {
 			if strings.Contains(err.Error(), "does not exist") {
@@ -628,6 +629,16 @@ func resourceMimirRulesImport(ctx context.Context, d *schema.ResourceData, m int
 
 	orgID := parts[0]
 	namespace := parts[1]
+
+	// ValidateFunc does not run on values an importer sets via d.Set, so re-validate here:
+	// reject control chars / '/' / dot-segments before they reach the ruler path or the
+	// X-Scope-OrgID header. (The strict 2-part split already blocks a '/'-fabrication.)
+	if !validOrgID(orgID) {
+		return nil, fmt.Errorf("import ID %q: org_id must contain no control characters", d.Id())
+	}
+	if !validNamespace(namespace) {
+		return nil, fmt.Errorf("import ID %q: namespace %q must not be \".\"/\"..\" and must contain no control characters or '/'", d.Id(), namespace)
+	}
 
 	d.Set(orgIDKey, orgID)
 	d.Set(namespaceKey, namespace)
@@ -776,7 +787,7 @@ func createRuleGroup(client *apiClient, namespace, orgID string, group RuleGroup
 		return fmt.Errorf("failed to marshal rule group to YAML: %w", err)
 	}
 
-	path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+	path := rulesNamespacePath(namespace)
 	_, err = client.sendRequest("ruler", "POST", path, string(yamlData), headers)
 	return err
 }
@@ -787,7 +798,7 @@ func deleteRuleGroup(client *apiClient, namespace, orgID, groupName string) erro
 		headers["X-Scope-OrgID"] = orgID
 	}
 
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, groupName)
+	path := rulesGroupPath(namespace, groupName)
 	_, err := client.sendRequest("ruler", "DELETE", path, "", headers)
 	if err != nil && strings.Contains(err.Error(), "response code '404'") {
 		// Group already doesn't exist, consider this success

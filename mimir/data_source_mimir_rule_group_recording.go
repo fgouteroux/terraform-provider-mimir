@@ -16,17 +16,19 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			orgIDKey: {
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Optional:    true,
-				Description: orgIDDescription,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Optional:     true,
+				Description:  orgIDDescription,
+				ValidateFunc: validateOrgID,
 			},
 			"namespace": {
-				Type:        schema.TypeString,
-				Description: "Recording Rule group namespace",
-				ForceNew:    true,
-				Optional:    true,
-				Default:     "default",
+				Type:         schema.TypeString,
+				Description:  "Recording Rule group namespace",
+				ForceNew:     true,
+				Optional:     true,
+				Default:      defaultNamespace,
+				ValidateFunc: validateNamespace,
 			},
 			"name": {
 				Type:         schema.TypeString,
@@ -90,14 +92,13 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 	namespace := d.Get("namespace").(string)
 	orgID := d.Get(orgIDKey).(string)
 
-	id := fmt.Sprintf("%s/%s", namespace, name)
+	id := buildRuleGroupID(orgID, namespace, name)
 
 	headers := make(map[string]string)
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID
-		id = fmt.Sprintf("%s/%s/%s", orgID, namespace, name)
 	}
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	path := rulesGroupPath(namespace, name)
 	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
 
 	baseMsg := fmt.Sprintf("Cannot read recording rule group '%s' -", name)

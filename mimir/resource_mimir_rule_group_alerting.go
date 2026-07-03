@@ -23,17 +23,19 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			orgIDKey: {
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Optional:    true,
-				Description: orgIDDescription,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Optional:     true,
+				Description:  orgIDDescription,
+				ValidateFunc: validateOrgID,
 			},
 			namespaceKey: {
-				Type:        schema.TypeString,
-				Description: "Alerting Rule group namespace",
-				ForceNew:    true,
-				Optional:    true,
-				Default:     "default",
+				Type:         schema.TypeString,
+				Description:  "Alerting Rule group namespace",
+				ForceNew:     true,
+				Optional:     true,
+				Default:      defaultNamespace,
+				ValidateFunc: validateNamespace,
 			},
 			"name": {
 				Type:         schema.TypeString,
@@ -123,7 +125,7 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 	if !overwriteRuleGroupConfig {
 		ruleGroupConfigExists := true
 
-		path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+		path := rulesGroupPath(namespace, name)
 		headers := make(map[string]string)
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
@@ -159,18 +161,14 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 		headers["X-Scope-OrgID"] = orgID
 	}
 
-	path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+	path := rulesNamespacePath(namespace)
 	_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
 	baseMsg := fmt.Sprintf("Cannot create alerting rule group '%s' (namespace: %s) -", name, namespace)
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if orgID != "" {
-		d.SetId(fmt.Sprintf("%s/%s/%s", orgID, namespace, name))
-	} else {
-		d.SetId(fmt.Sprintf("%s/%s", namespace, name))
-	}
+	d.SetId(buildRuleGroupID(orgID, namespace, name))
 
 	// Retry read as mimir api could return a 404 status code caused by the event change notification propagation.
 	// Add delay of <ruleGroupReadDelayAfterChange> * time.Second) between each retry with a <ruleGroupReadRetryAfterChange> max retries.
@@ -189,21 +187,11 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// use id as read is also called by import
-	idArr := strings.Split(d.Id(), "/")
-
-	var name, namespace, orgID string
-
-	switch len(idArr) {
-	case 2:
-		namespace = idArr[0]
-		name = idArr[1]
-	case 3:
-		orgID = idArr[0]
-		namespace = idArr[1]
-		name = idArr[2]
-	default:
-		return diag.FromErr(fmt.Errorf("invalid id format: expected 'namespace/name' or 'org_id/namespace/name', got '%s'", d.Id()))
+	// use id as read is also called by import; parseRuleGroupID unescapes and re-validates
+	// every segment so an import/legacy '/'-in-namespace cannot fabricate an X-Scope-OrgID.
+	orgID, namespace, name, err := parseRuleGroupID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	jobraw, err := ruleGroupAlertingRead(meta, name, namespace, orgID)
@@ -285,7 +273,7 @@ func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.Resourc
 			headers["X-Scope-OrgID"] = orgID
 		}
 
-		path := fmt.Sprintf("/config/v1/rules/%s", namespace)
+		path := rulesNamespacePath(namespace)
 		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
 		baseMsg := fmt.Sprintf("Cannot update alerting rule group '%s' (namespace: %s) -", name, namespace)
 
@@ -309,7 +297,7 @@ func resourcemimirRuleGroupAlertingDelete(ctx context.Context, d *schema.Resourc
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID
 	}
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	path := rulesGroupPath(namespace, name)
 	_, err := client.sendRequest("ruler", "DELETE", path, "", headers)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf(
@@ -341,7 +329,7 @@ func ruleGroupAlertingRead(meta interface{}, name, namespace, orgID string) (str
 		headers["X-Scope-OrgID"] = orgID
 	}
 	client := meta.(*apiClient)
-	path := fmt.Sprintf("/config/v1/rules/%s/%s", namespace, name)
+	path := rulesGroupPath(namespace, name)
 	jobraw, err := client.sendRequest("ruler", "GET", path, "", headers)
 	baseMsg := fmt.Sprintf("Cannot read alerting rule group '%s' (namespace: %s) -", name, namespace)
 	return jobraw, handleHTTPError(err, baseMsg)
@@ -426,9 +414,9 @@ func flattenAlertingRules(v []alertingRule) []map[string]interface{} {
 func validateAlertingRuleName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
-	if !alertNameRegexp.MatchString(value) {
+	if !validRuleName(value) {
 		errors = append(errors, fmt.Errorf(
-			"\"%s\": Invalid Alerting Rule Name %q. Must match the regex %s", k, value, alertNameRegexp))
+			"\"%s\": Invalid Alerting Rule Name %q: must be non-empty, not whitespace-only, not \".\" or \"..\", and contain no control characters or '/'", k, value))
 	}
 
 	return

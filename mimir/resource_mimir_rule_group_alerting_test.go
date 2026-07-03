@@ -45,7 +45,7 @@ func TestAccResourceRuleGroupAlerting_expectValidationError(t *testing.T) {
 
 const testAccResourceRuleGroupAlerting_expectNameValidationError = `
     resource "mimir_rule_group_alerting" "alert_1" {
-        name = "alert-@error" 
+        name = "invalid/name"
         namespace = "namespace_1"
         rule {
             alert = "test1_alert"
@@ -59,7 +59,7 @@ const testAccResourceRuleGroupAlerting_expectRuleNameValidationError = `
         name = "alert_1"
         namespace = "namespace_1"
         rule {
-            alert = "test1 alert"
+            alert = "invalid/alert"
             expr   = "test1_metric"
         }
     }
