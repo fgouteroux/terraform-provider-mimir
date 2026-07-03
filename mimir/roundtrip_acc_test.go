@@ -310,3 +310,44 @@ resource "mimir_rule_group_recording" "rt" {
   }
 }
 `
+
+// Pins the upstream rulefmt scope of the braces "common-mistake check" (prometheus#15851):
+// it applies to RECORD names only, so alert and group names containing braces are valid and
+// must round-trip. (Record names with braces are rejected by this provider's own strict
+// metric-name validation, matching the server.)
+func TestAccResourceRuleGroupAlerting_BracesNameRoundTrip(t *testing.T) {
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirRuleGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRoundTrip_bracesName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.braces", "Braces {Group}", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.braces", "name", "Braces {Group}"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.braces", "rule.0.alert", `alert{env="prod"}`),
+				),
+			},
+			{
+				Config:   testAccRoundTrip_bracesName,
+				PlanOnly: true, // re-apply is a clean no-op
+			},
+		},
+	})
+}
+
+const testAccRoundTrip_bracesName = `
+resource "mimir_rule_group_alerting" "braces" {
+  name      = "Braces {Group}"
+  namespace = "namespace_braces"
+  rule {
+    alert = "alert{env=\"prod\"}"
+    expr  = "up"
+  }
+}
+`
