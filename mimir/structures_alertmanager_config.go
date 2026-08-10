@@ -23,6 +23,7 @@ func expandHTTPConfigOAuth2(v interface{}) *oauth2 {
 		oauth2Conf.TokenURL = cfg["token_url"].(string)
 		oauth2Conf.Scopes = expandStringArray(cfg["scopes"].([]interface{}))
 		oauth2Conf.EndpointParams = expandStringMap(cfg["endpoint_params"].(map[string]interface{}))
+		oauth2Conf.TLSConfig = expandTLSConfig(cfg["tls_config"])
 	}
 	return oauth2Conf
 }
@@ -35,6 +36,9 @@ func flattenHTTPConfigOAuth2(v *oauth2) []interface{} {
 		oauth2Conf["token_url"] = v.TokenURL
 		oauth2Conf["scopes"] = v.Scopes
 		oauth2Conf["endpoint_params"] = v.EndpointParams
+		if v.TLSConfig != nil {
+			oauth2Conf["tls_config"] = flattenTLSConfig(v.TLSConfig)
+		}
 	}
 	return []interface{}{oauth2Conf}
 }
@@ -935,7 +939,7 @@ func expandWeChatConfig(v []interface{}) []*weChatConfig {
 		if raw, ok := data["api_secret"]; ok {
 			cfg.APISecret = raw.(string)
 		}
-		if raw, ok := data["api_url_url"]; ok {
+		if raw, ok := data[apiURLKey]; ok {
 			cfg.APIURL = raw.(string)
 		}
 		if raw, ok := data["corp_id"]; ok {
