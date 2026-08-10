@@ -52,8 +52,13 @@ type apiClient struct {
 // Make a new api client for RESTful calls
 func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 	/* Remove any trailing slashes since we will append
-	   to this URL with our own root-prefixed location */
+	   to this URL with our own root-prefixed location. Every per-component
+	   override is concatenated with a root-prefixed path the same way, so they
+	   all need the same treatment or the request URL grows a double slash. */
 	opt.uri = strings.TrimSuffix(opt.uri, "/")
+	opt.rulerURI = strings.TrimSuffix(opt.rulerURI, "/")
+	opt.alertmanagerURI = strings.TrimSuffix(opt.alertmanagerURI, "/")
+	opt.distributorURI = strings.TrimSuffix(opt.distributorURI, "/")
 
 	// Setup HTTPS client
 	tlsConfig := &tls.Config{}
@@ -90,7 +95,9 @@ func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 			}
 		}
 		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
+		if !caCertPool.AppendCertsFromPEM(caCert) {
+			return nil, fmt.Errorf("no valid PEM certificate found in the provided ca")
+		}
 		tlsConfig.RootCAs = caCertPool
 	}
 
@@ -159,7 +166,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	if client.token != "" {
@@ -188,7 +195,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	if client.debug {
 		reqDump, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
-			log.Fatal(err)
+			return "", err
 		}
 
 		log.Printf("REQUEST:\n%s", string(reqDump))
@@ -206,7 +213,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	if client.debug {
 		respDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
-			log.Fatal(err)
+			return "", err
 		}
 
 		log.Printf("RESPONSE:\n%s", string(respDump))
