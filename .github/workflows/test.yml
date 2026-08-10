@@ -36,6 +36,13 @@ jobs:
         version: v2.12.1
         args: --timeout 10m
 
+    # tfplugindocs reads the provider schema through the Terraform CLI. Without
+    # this step it downloads its own copy on every run.
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v4
+      with:
+        terraform_wrapper: false
+
     - name: Generate
       run: make generate
 
