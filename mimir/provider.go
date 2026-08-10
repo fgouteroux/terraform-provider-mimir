@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/prometheus/common/model"
 )
 
 var (
@@ -223,8 +224,13 @@ func providerConfigure(version string, p *schema.Provider, d *schema.ResourceDat
 	overwriteRuleGroupConfig = d.Get("overwrite_rule_group_config").(bool)
 	ruleGroupReadDelayAfterChange = d.Get("rule_group_read_delay_after_change").(string)
 	alertmanagerReadDelayAfterChange = d.Get("alertmanager_read_delay_after_change").(string)
-	ruleGroupReadDelayAfterChangeDuration, _ = time.ParseDuration(d.Get("rule_group_read_delay_after_change").(string))
-	alertmanagerReadDelayAfterChangeDuration, _ = time.ParseDuration(d.Get("alertmanager_read_delay_after_change").(string))
+	// Parse with model.ParseDuration, the same parser the ValidateFunc uses:
+	// time.ParseDuration rejects the "1d"/"1w" forms that validation accepts, and
+	// the error was discarded, so such a value silently became a zero delay.
+	ruleGroupReadDelay, _ := model.ParseDuration(d.Get("rule_group_read_delay_after_change").(string))
+	ruleGroupReadDelayAfterChangeDuration = time.Duration(ruleGroupReadDelay)
+	alertmanagerReadDelay, _ := model.ParseDuration(d.Get("alertmanager_read_delay_after_change").(string))
+	alertmanagerReadDelayAfterChangeDuration = time.Duration(alertmanagerReadDelay)
 	ruleGroupReadRetryAfterChange = d.Get("rule_group_read_retry_after_change").(int)
 	alertmanagerReadRetryAfterChange = d.Get("alertmanager_read_retry_after_change").(int)
 

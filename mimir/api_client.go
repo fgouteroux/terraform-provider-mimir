@@ -13,6 +13,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -198,7 +199,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 			return "", err
 		}
 
-		log.Printf("REQUEST:\n%s", string(reqDump))
+		log.Printf("REQUEST:\n%s", redactCredentials(string(reqDump)))
 	}
 
 	resp, err := client.httpClient.Do(req)
@@ -216,7 +217,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 			return "", err
 		}
 
-		log.Printf("RESPONSE:\n%s", string(respDump))
+		log.Printf("RESPONSE:\n%s", redactCredentials(string(respDump)))
 	}
 
 	bodyBytes, err2 := io.ReadAll(resp.Body)
@@ -232,4 +233,14 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 
 	return body, nil
+}
+
+// credentialHeaderRegexp matches the header lines that carry a credential in an
+// httputil dump. Debug mode dumps whole requests, so without this the bearer
+// token or the basic-auth pair lands in the Terraform log, which routinely ends
+// up in CI output.
+var credentialHeaderRegexp = regexp.MustCompile(`(?im)^(Authorization|Proxy-Authorization|X-Amz-Security-Token):.*$`)
+
+func redactCredentials(dump string) string {
+	return credentialHeaderRegexp.ReplaceAllString(dump, "$1: <redacted>")
 }
