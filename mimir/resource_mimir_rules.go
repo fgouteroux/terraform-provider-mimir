@@ -574,8 +574,24 @@ func resourceMimirRulesUpdate(ctx context.Context, d *schema.ResourceData, m int
 		oldGroups = append(oldGroups, g.(string))
 	}
 
-	// Determine what needs to be done
-	groupsToDelete := difference(oldGroups, newManagedGroups)
+	// Determine what needs to be done. A group that left the managed set but is
+	// still declared in the configuration was merely excluded from management
+	// (only_groups / ignore_groups), not removed: deleting it would destroy a
+	// rule group the configuration still describes. This also contains the blast
+	// radius of an import, which necessarily seeds managed_groups with every
+	// group the namespace holds.
+	stillDeclared := make(map[string]struct{}, len(newRuleGroups.Groups))
+	for _, group := range newRuleGroups.Groups {
+		stillDeclared[group.Name] = struct{}{}
+	}
+
+	var groupsToDelete []string
+	for _, groupName := range difference(oldGroups, newManagedGroups) {
+		if _, declared := stillDeclared[groupName]; declared {
+			continue
+		}
+		groupsToDelete = append(groupsToDelete, groupName)
+	}
 	groupsToCreateOrUpdate := newManagedGroups
 
 	// Delete removed groups

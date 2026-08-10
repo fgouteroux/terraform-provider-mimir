@@ -114,3 +114,57 @@ func TestOutOfBandDeletionIsPlanned(t *testing.T) {
 		t.Errorf("expected content_hash in the plan, got %v", diff.Attributes)
 	}
 }
+
+// TestExcludedGroupIsNotDeleted covers the blast radius of an import. The
+// importer necessarily seeds content — and therefore managed_groups — with every
+// group the namespace holds, so narrowing the configuration afterwards used to
+// make Update delete the groups it excluded. A group still declared in the
+// configuration but excluded from management must be left alone in Mimir.
+func TestExcludedGroupIsNotDeleted(t *testing.T) {
+	content := "groups:\n" +
+		"  - name: a\n    rules:\n      - record: r\n        expr: up\n" +
+		"  - name: shared\n    rules:\n      - record: s\n        expr: up\n"
+
+	var deleted []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodDelete {
+			parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+			deleted = append(deleted, parts[len(parts)-1])
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	client, err := NewAPIClient(&apiClientOpt{uri: srv.URL, headers: map[string]string{}, timeout: 5})
+	if err != nil {
+		t.Fatalf("NewAPIClient: %v", err)
+	}
+
+	res := resourceMimirRules()
+	// Prior state: the import claimed both groups. New configuration keeps the
+	// same content but manages only "a".
+	state := &terraform.InstanceState{
+		ID: "ns",
+		Attributes: map[string]string{
+			namespaceKey:       "ns",
+			contentKey:         content,
+			"managed_groups.#": "2",
+			"managed_groups.0": "a",
+			"managed_groups.1": "shared",
+			"only_groups.#":    "0",
+		},
+	}
+	d := res.Data(state)
+	_ = d.Set(contentKey, content)
+	_ = d.Set("only_groups", []interface{}{"a"})
+
+	if diags := resourceMimirRulesUpdate(context.Background(), d, client); diags.HasError() {
+		t.Fatalf("update: %v", diags)
+	}
+
+	for _, name := range deleted {
+		if name == "shared" {
+			t.Errorf("group %q is still declared in the configuration but was deleted from Mimir", name)
+		}
+	}
+}
