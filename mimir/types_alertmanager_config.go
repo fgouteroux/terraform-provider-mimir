@@ -54,6 +54,7 @@ type globalConfig struct {
 	VictorOpsAPIURL  *amcommoncfg.URL `yaml:"victorops_api_url,omitempty" json:"victorops_api_url,omitempty"`
 	VictorOpsAPIKey  string           `yaml:"victorops_api_key,omitempty" json:"victorops_api_key,omitempty"`
 	TelegramAPIURL   *amcommoncfg.URL `yaml:"telegram_api_url,omitempty" json:"telegram_api_url,omitempty"`
+	SMTPTLSConfig    *tlsConfig       `yaml:"smtp_tls_config,omitempty" json:"smtp_tls_config,omitempty"`
 }
 
 type route struct {
@@ -98,6 +99,7 @@ type webhookConfig struct {
 	URL           string            `yaml:"url,omitempty" json:"url,omitempty"`
 	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 	MaxAlerts     int32             `yaml:"max_alerts,omitempty" json:"max_alerts,omitempty"`
+	Timeout       time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 }
 
 type webexConfig struct {
@@ -132,6 +134,7 @@ type pagerdutyConfig struct {
 	Class         string            `yaml:"class,omitempty" json:"class,omitempty"`
 	Component     string            `yaml:"component,omitempty" json:"component,omitempty"`
 	Group         string            `yaml:"group,omitempty" json:"group,omitempty"`
+	Source        string            `yaml:"source,omitempty" json:"source,omitempty"`
 }
 
 type opsgenieConfig struct {
@@ -318,6 +321,8 @@ type pushoverConfig struct {
 	Retry         time.Duration     `yaml:"retry,omitempty" json:"retry,omitempty"`
 	Expire        time.Duration     `yaml:"expire,omitempty" json:"expire,omitempty"`
 	HTML          bool              `yaml:"html,omitempty" json:"html,omitempty"`
+	Device        string            `yaml:"device,omitempty" json:"device,omitempty"`
+	TTL           time.Duration     `yaml:"ttl,omitempty" json:"ttl,omitempty"`
 }
 
 type snsConfig struct {

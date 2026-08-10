@@ -204,6 +204,7 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		globalConf.SMTPAuthIdentity = cfg["smtp_auth_identity"].(string)
 		globalConf.SMTPRequireTLS = new(bool)
 		*globalConf.SMTPRequireTLS = cfg["smtp_require_tls"].(bool)
+		globalConf.SMTPTLSConfig = expandTLSConfig(cfg["smtp_tls_config"])
 		globalConf.HTTPConfig = expandHTTPConfig(cfg["http_config"])
 
 		globalConf.OpsGenieAPIKey = cfg["opsgenie_api_key"].(string)
@@ -291,6 +292,10 @@ func flattenGlobalConfig(v *globalConfig) []interface{} {
 
 		if v.SMTPRequireTLS != nil {
 			globalConf["smtp_require_tls"] = v.SMTPRequireTLS
+		}
+
+		if v.SMTPTLSConfig != nil {
+			globalConf["smtp_tls_config"] = flattenTLSConfig(v.SMTPTLSConfig)
 		}
 	}
 
@@ -757,6 +762,10 @@ func expandWebhookConfig(v []interface{}) []*webhookConfig {
 		if raw, ok := data["max_alerts"]; ok {
 			cfg.MaxAlerts = int32(raw.(int))
 		}
+		if raw, ok := data[timeoutKey]; ok {
+			timeout, _ := model.ParseDuration(raw.(string))
+			cfg.Timeout = time.Duration(timeout)
+		}
 		webhookConf = append(webhookConf, cfg)
 	}
 	return webhookConf
@@ -777,6 +786,9 @@ func flattenWebhookConfig(v []*webhookConfig) []interface{} {
 		}
 		cfg["url"] = v.URL
 		cfg["max_alerts"] = v.MaxAlerts
+		if v.Timeout != 0 {
+			cfg[timeoutKey] = v.Timeout.String()
+		}
 		webhookConf = append(webhookConf, cfg)
 	}
 	return webhookConf
@@ -1390,6 +1402,9 @@ func expandPagerdutyConfig(v []interface{}) []*pagerdutyConfig {
 		if raw, ok := data["group"]; ok {
 			cfg.Group = raw.(string)
 		}
+		if raw, ok := data["source"]; ok {
+			cfg.Source = raw.(string)
+		}
 		if raw, ok := data["details"]; ok {
 			cfg.Details = expandStringMap(raw.(map[string]interface{}))
 		}
@@ -1421,6 +1436,7 @@ func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
 		cfg["class"] = v.Class
 		cfg["component"] = v.Component
 		cfg["group"] = v.Group
+		cfg["source"] = v.Source
 		cfg["details"] = v.Details
 		cfg["images"] = flattenPagerdutyConfigImages(v.Images)
 		cfg["links"] = flattenPagerdutyConfigLinks(v.Links)
@@ -1478,6 +1494,13 @@ func expandPushoverConfig(v []interface{}) []*pushoverConfig {
 		if raw, ok := data["html"]; ok {
 			cfg.HTML = raw.(bool)
 		}
+		if raw, ok := data["device"]; ok {
+			cfg.Device = raw.(string)
+		}
+		if raw, ok := data["ttl"]; ok {
+			ttl, _ := model.ParseDuration(raw.(string))
+			cfg.TTL = time.Duration(ttl)
+		}
 		pushoverConf = append(pushoverConf, cfg)
 	}
 	return pushoverConf
@@ -1507,6 +1530,10 @@ func flattenPushoverConfig(v []*pushoverConfig) []interface{} {
 		cfg["retry"] = v.Retry.String()
 		cfg["expire"] = v.Expire.String()
 		cfg["html"] = v.HTML
+		cfg["device"] = v.Device
+		if v.TTL != 0 {
+			cfg["ttl"] = v.TTL.String()
+		}
 
 		pushoverConf = append(pushoverConf, cfg)
 	}

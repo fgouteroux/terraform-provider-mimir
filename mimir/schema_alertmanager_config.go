@@ -508,6 +508,11 @@ func pagerdutyConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "A description of the incident.",
 		},
+		"source": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The unique location of the affected system.",
+		},
 		"details": {
 			Type:        schema.TypeMap,
 			Optional:    true,
@@ -664,6 +669,13 @@ func webhookConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "The maximum number of alerts to include in a single webhook message. Alerts above this threshold are truncated. When leaving this at its default value of 0, all alerts are included.",
 		},
+		timeoutKey: {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "The maximum time allowed to invoke the webhook. When left unset, the notification timeout applies.",
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
 		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
@@ -811,6 +823,18 @@ func pushoverConfigFields() map[string]*schema.Schema {
 			Type:         schema.TypeString,
 			Optional:     true,
 			Description:  "How long your notification will continue to be retried for, unless the user acknowledges the notification.",
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
+		"device": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The name of one of your devices to send the notification to. When left unset, the notification is sent to all devices.",
+		},
+		"ttl": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "How long the notification will live on the user's device before being automatically deleted.",
 			ValidateFunc: validateDuration,
 			StateFunc:    formatDuration,
 		},
@@ -1431,6 +1455,15 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Default:     false,
 						Description: "The default SMTP TLS requirement.",
 					},
+					"smtp_tls_config": {
+						Type:        schema.TypeList,
+						Optional:    true,
+						MaxItems:    1,
+						Description: "The default SMTP TLS configuration.",
+						Elem: &schema.Resource{
+							Schema: tlsConfigFields(),
+						},
+					},
 				},
 			},
 		},
@@ -1877,6 +1910,14 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Computed:    true,
 						Default:     nil,
 						Description: "The default SMTP TLS requirement.",
+					},
+					"smtp_tls_config": {
+						Type:        schema.TypeList,
+						Computed:    true,
+						Description: "The default SMTP TLS configuration.",
+						Elem: &schema.Resource{
+							Schema: tlsConfigFields(),
+						},
 					},
 				},
 			},
