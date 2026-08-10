@@ -116,6 +116,9 @@ type discordConfig struct {
 	WebhookURL    string            `yaml:"webhook_url,omitempty" json:"webhook_url,omitempty"`
 	Title         string            `yaml:"title,omitempty" json:"title,omitempty"`
 	Message       string            `yaml:"message,omitempty" json:"message,omitempty"`
+	Content       string            `yaml:"content,omitempty" json:"content,omitempty"`
+	Username      string            `yaml:"username,omitempty" json:"username,omitempty"`
+	AvatarURL     string            `yaml:"avatar_url,omitempty" json:"avatar_url,omitempty"`
 }
 
 type pagerdutyConfig struct {
@@ -323,6 +326,7 @@ type pushoverConfig struct {
 	HTML          bool              `yaml:"html,omitempty" json:"html,omitempty"`
 	Device        string            `yaml:"device,omitempty" json:"device,omitempty"`
 	TTL           time.Duration     `yaml:"ttl,omitempty" json:"ttl,omitempty"`
+	Monospace     bool              `yaml:"monospace,omitempty" json:"monospace,omitempty"`
 }
 
 type snsConfig struct {
@@ -347,6 +351,7 @@ type telegramConfig struct {
 	Message              string            `yaml:"message,omitempty" json:"message,omitempty"`
 	DisableNotifications bool              `yaml:"disable_notifications,omitempty" json:"disable_notifications,omitempty"`
 	ParseMode            string            `yaml:"parse_mode,omitempty" json:"parse_mode,omitempty"`
+	MessageThreadID      int               `yaml:"message_thread_id,omitempty" json:"message_thread_id,omitempty"`
 }
 
 type sigV4Config struct {

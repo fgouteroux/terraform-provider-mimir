@@ -746,6 +746,21 @@ func discordConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Notification message.",
 		},
+		"content": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Message content template." + mimirMin31Descr,
+		},
+		"username": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Username to display the message as, overriding the webhook's own name." + mimirMin31Descr,
+		},
+		"avatar_url": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Avatar to display the message with, overriding the webhook's own avatar." + mimirMin31Descr,
+		},
 		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
@@ -837,6 +852,11 @@ func pushoverConfigFields() map[string]*schema.Schema {
 			Description:  "How long the notification will live on the user's device before being automatically deleted.",
 			ValidateFunc: validateDuration,
 			StateFunc:    formatDuration,
+		},
+		"monospace": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Whether the notification message is rendered in a monospace font." + mimirMin31Descr,
 		},
 		"html": {
 			Type:     schema.TypeBool,
@@ -1168,6 +1188,11 @@ func telegramConfigFields() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Parse mode for telegram message, supported values are MarkdownV2, Markdown, HTML and empty string for plain text.",
+		},
+		"message_thread_id": {
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Description: "ID of the message thread where to send the messages." + mimirMin31Descr,
 		},
 		httpConfigKey: {
 			Type:     schema.TypeList,

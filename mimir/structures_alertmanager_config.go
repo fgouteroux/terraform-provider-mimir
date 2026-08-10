@@ -582,6 +582,9 @@ func expandTelegramConfig(v []interface{}) []*telegramConfig {
 		if raw, ok := data["parse_mode"]; ok {
 			cfg.ParseMode = raw.(string)
 		}
+		if raw, ok := data["message_thread_id"]; ok {
+			cfg.MessageThreadID = raw.(int)
+		}
 
 		telegramConf = append(telegramConf, cfg)
 	}
@@ -607,6 +610,7 @@ func flattenTelegramConfig(v []*telegramConfig) []interface{} {
 		cfg["message"] = v.Message
 		cfg["disable_notifications"] = v.DisableNotifications
 		cfg["parse_mode"] = v.ParseMode
+		cfg["message_thread_id"] = v.MessageThreadID
 		telegramConf = append(telegramConf, cfg)
 	}
 	return telegramConf
@@ -864,6 +868,15 @@ func expandDiscordConfig(v []interface{}) []*discordConfig {
 		if raw, ok := data["message"]; ok {
 			cfg.Message = raw.(string)
 		}
+		if raw, ok := data["content"]; ok {
+			cfg.Content = raw.(string)
+		}
+		if raw, ok := data["username"]; ok {
+			cfg.Username = raw.(string)
+		}
+		if raw, ok := data["avatar_url"]; ok {
+			cfg.AvatarURL = raw.(string)
+		}
 		discordConf = append(discordConf, cfg)
 	}
 	return discordConf
@@ -885,6 +898,9 @@ func flattenDiscordConfig(v []*discordConfig) []interface{} {
 		cfg["webhook_url"] = v.WebhookURL
 		cfg["title"] = v.Title
 		cfg["message"] = v.Message
+		cfg["content"] = v.Content
+		cfg["username"] = v.Username
+		cfg["avatar_url"] = v.AvatarURL
 		discordConf = append(discordConf, cfg)
 	}
 	return discordConf
@@ -1501,6 +1517,9 @@ func expandPushoverConfig(v []interface{}) []*pushoverConfig {
 			ttl, _ := model.ParseDuration(raw.(string))
 			cfg.TTL = time.Duration(ttl)
 		}
+		if raw, ok := data["monospace"]; ok {
+			cfg.Monospace = raw.(bool)
+		}
 		pushoverConf = append(pushoverConf, cfg)
 	}
 	return pushoverConf
@@ -1534,6 +1553,7 @@ func flattenPushoverConfig(v []*pushoverConfig) []interface{} {
 		if v.TTL != 0 {
 			cfg["ttl"] = v.TTL.String()
 		}
+		cfg["monospace"] = v.Monospace
 
 		pushoverConf = append(pushoverConf, cfg)
 	}
