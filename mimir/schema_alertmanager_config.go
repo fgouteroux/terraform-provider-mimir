@@ -513,6 +513,13 @@ func pagerdutyConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "The unique location of the affected system.",
 		},
+		timeoutKey: {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "The maximum time allowed to invoke PagerDuty. When left unset, the notification timeout applies." + mimirMin31Descr,
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
 		"details": {
 			Type:        schema.TypeMap,
 			Optional:    true,
@@ -995,6 +1002,29 @@ func slackConfigFields() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The Slack webhook URL. Defaults to global settings if none are set here.",
+		},
+		"app_token": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Sensitive:   true,
+			Description: "The Slack app token, used to send notifications through the Slack API instead of a webhook. Defaults to global settings if none are set here." + mimirMin31Descr,
+		},
+		"app_url": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The Slack API URL used with `app_token`. Defaults to global settings if none are set here." + mimirMin31Descr,
+		},
+		"message_text": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The message text sent alongside the attachment when notifying through the Slack API." + mimirMin31Descr,
+		},
+		timeoutKey: {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "The maximum time allowed to invoke Slack. When left unset, the notification timeout applies." + mimirMin31Descr,
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
 		},
 		"channel": {
 			Type:        schema.TypeString,

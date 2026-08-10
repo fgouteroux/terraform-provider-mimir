@@ -138,6 +138,7 @@ type pagerdutyConfig struct {
 	Component     string            `yaml:"component,omitempty" json:"component,omitempty"`
 	Group         string            `yaml:"group,omitempty" json:"group,omitempty"`
 	Source        string            `yaml:"source,omitempty" json:"source,omitempty"`
+	Timeout       time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 }
 
 type opsgenieConfig struct {
@@ -176,6 +177,10 @@ type slackConfig struct {
 	VSendResolved *bool             `yaml:"send_resolved,omitempty" json:"send_resolved,omitempty"`
 	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 	APIURL        string            `yaml:"api_url,omitempty" json:"api_url,omitempty"`
+	AppToken      string            `yaml:"app_token,omitempty" json:"app_token,omitempty"`
+	AppURL        string            `yaml:"app_url,omitempty" json:"app_url,omitempty"`
+	MessageText   string            `yaml:"message_text,omitempty" json:"message_text,omitempty"`
+	Timeout       time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 	Channel       string            `yaml:"channel,omitempty" json:"channel,omitempty"`
 	Username      string            `yaml:"username,omitempty" json:"username,omitempty"`
 	Color         string            `yaml:"color,omitempty" json:"color,omitempty"`

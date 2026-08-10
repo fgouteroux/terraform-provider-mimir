@@ -1201,6 +1201,19 @@ func expandSlackConfig(v []interface{}) []*slackConfig {
 		if raw, ok := data["api_url"]; ok {
 			cfg.APIURL = raw.(string)
 		}
+		if raw, ok := data["app_token"]; ok {
+			cfg.AppToken = raw.(string)
+		}
+		if raw, ok := data["app_url"]; ok {
+			cfg.AppURL = raw.(string)
+		}
+		if raw, ok := data["message_text"]; ok {
+			cfg.MessageText = raw.(string)
+		}
+		if raw, ok := data[timeoutKey]; ok {
+			timeout, _ := model.ParseDuration(raw.(string))
+			cfg.Timeout = time.Duration(timeout)
+		}
 		if raw, ok := data["channel"]; ok {
 			cfg.Channel = raw.(string)
 		}
@@ -1274,6 +1287,12 @@ func flattenSlackConfig(v []*slackConfig) []interface{} {
 			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
 		}
 		cfg["api_url"] = v.APIURL
+		cfg["app_token"] = v.AppToken
+		cfg["app_url"] = v.AppURL
+		cfg["message_text"] = v.MessageText
+		if v.Timeout != 0 {
+			cfg[timeoutKey] = v.Timeout.String()
+		}
 		cfg["channel"] = v.Channel
 		cfg["username"] = v.Username
 		cfg["color"] = v.Color
@@ -1421,6 +1440,10 @@ func expandPagerdutyConfig(v []interface{}) []*pagerdutyConfig {
 		if raw, ok := data["source"]; ok {
 			cfg.Source = raw.(string)
 		}
+		if raw, ok := data[timeoutKey]; ok {
+			timeout, _ := model.ParseDuration(raw.(string))
+			cfg.Timeout = time.Duration(timeout)
+		}
 		if raw, ok := data["details"]; ok {
 			cfg.Details = expandStringMap(raw.(map[string]interface{}))
 		}
@@ -1453,6 +1476,9 @@ func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
 		cfg["component"] = v.Component
 		cfg["group"] = v.Group
 		cfg["source"] = v.Source
+		if v.Timeout != 0 {
+			cfg[timeoutKey] = v.Timeout.String()
+		}
 		cfg["details"] = v.Details
 		cfg["images"] = flattenPagerdutyConfigImages(v.Images)
 		cfg["links"] = flattenPagerdutyConfigLinks(v.Links)
