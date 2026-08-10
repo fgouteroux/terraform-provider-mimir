@@ -1544,6 +1544,7 @@ func TestAccResourceAlertmanagerConfig_Mimir31ReceiverFields(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.name", "cluster-down"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.content", "content template"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.avatar_url", "https://example.com/avatar.png"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.tls_config.0.server_name", "mail.example.com"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.force_implicit_tls", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.threading.0.enabled", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pagerduty_configs.0.timeout", "15s"),
@@ -1621,6 +1622,9 @@ const testAccResourceAlertmanagerConfig_Mimir31ReceiverFields = `
         }
         email_configs {
           to = "ops@example.com"
+          tls_config {
+            server_name = "mail.example.com"
+          }
           force_implicit_tls = true
           threading {
             enabled = true
