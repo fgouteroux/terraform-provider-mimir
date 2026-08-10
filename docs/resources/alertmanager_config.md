@@ -211,7 +211,7 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) Whether to thread notifications for the same alert.
-- `thread_by_date` (String) Template rendering a date, used to start a new thread once the rendered value changes.
+- `thread_by_date` (String) How often a new thread is started, either `none` to keep one thread per alert or `daily` to start one per day. Required when `enabled` is set.
 
 
 <a id="nestedblock--receiver--email_configs--tls_config"></a>

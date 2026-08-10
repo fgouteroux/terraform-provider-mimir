@@ -146,7 +146,7 @@ func TestExpandAlertmanagerConfigEmitsSetKeys(t *testing.T) {
 			EmailConfigs: expandEmailConfig(with(emailConfigFields(), map[string]interface{}{
 				"to":                 "ops@example.com",
 				"force_implicit_tls": true,
-				"threading":          []interface{}{map[string]interface{}{"enabled": true, "thread_by_date": "{{ .CommonLabels.date }}"}},
+				"threading":          []interface{}{map[string]interface{}{"enabled": true, "thread_by_date": "daily"}},
 			})),
 			PagerdutyConfigs: expandPagerdutyConfig(with(pagerdutyConfigFields(), map[string]interface{}{
 				"source":  "mimir",
@@ -191,7 +191,7 @@ func TestExpandAlertmanagerConfigEmitsSetKeys(t *testing.T) {
 		"message_text: text template",
 		"force_implicit_tls: true",
 		"threading:",
-		"thread_by_date: '{{ .CommonLabels.date }}'",
+		"thread_by_date: daily",
 		"smtp_tls_config:",
 		"server_name: smtp.example.com",
 		"smtp_force_implicit_tls: true",

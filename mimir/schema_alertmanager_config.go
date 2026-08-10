@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func getChildRouteSchemaLevel() int {
@@ -408,9 +409,10 @@ func emailConfigFields() map[string]*schema.Schema {
 						Description: "Whether to thread notifications for the same alert.",
 					},
 					"thread_by_date": {
-						Type:        schema.TypeString,
-						Optional:    true,
-						Description: "Template rendering a date, used to start a new thread once the rendered value changes.",
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validation.StringInSlice([]string{"none", "daily"}, false),
+						Description:  "How often a new thread is started, either `none` to keep one thread per alert or `daily` to start one per day. Required when `enabled` is set.",
 					},
 				},
 			},

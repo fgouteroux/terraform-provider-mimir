@@ -1639,7 +1639,7 @@ const testAccResourceAlertmanagerConfig_Mimir31ReceiverFields = `
           force_implicit_tls = true
           threading {
             enabled = true
-            thread_by_date = "{{ .CommonLabels.alertname }}"
+            thread_by_date = "daily"
           }
         }
         pagerduty_configs {
