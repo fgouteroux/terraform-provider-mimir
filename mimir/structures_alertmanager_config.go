@@ -191,6 +191,12 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 			globalConf.SlackAPIURL = &amcommoncfg.URL{URL: slackAPIURL}
 		}
 
+		globalConf.SlackAppToken = cfg["slack_app_token"].(string)
+		slackAppURL, _ := url.Parse(cfg["slack_app_url"].(string))
+		if slackAppURL.String() != "" {
+			globalConf.SlackAppURL = &amcommoncfg.URL{URL: slackAppURL}
+		}
+
 		globalConf.SMTPFrom = cfg["smtp_from"].(string)
 		globalConf.SMTPHello = cfg["smtp_hello"].(string)
 
@@ -205,6 +211,7 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		globalConf.SMTPRequireTLS = new(bool)
 		*globalConf.SMTPRequireTLS = cfg["smtp_require_tls"].(bool)
 		globalConf.SMTPTLSConfig = expandTLSConfig(cfg["smtp_tls_config"])
+		globalConf.SMTPForceImplicitTLS = cfg["smtp_force_implicit_tls"].(bool)
 		globalConf.HTTPConfig = expandHTTPConfig(cfg["http_config"])
 
 		globalConf.OpsGenieAPIKey = cfg["opsgenie_api_key"].(string)
@@ -235,6 +242,7 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		if telegramAPIURL.String() != "" {
 			globalConf.TelegramAPIURL = &amcommoncfg.URL{URL: telegramAPIURL}
 		}
+		globalConf.TelegramBotToken = cfg["telegram_bot_token"].(string)
 	}
 	return globalConf
 }
@@ -297,6 +305,13 @@ func flattenGlobalConfig(v *globalConfig) []interface{} {
 		if v.SMTPTLSConfig != nil {
 			globalConf["smtp_tls_config"] = flattenTLSConfig(v.SMTPTLSConfig)
 		}
+		globalConf["smtp_force_implicit_tls"] = v.SMTPForceImplicitTLS
+
+		globalConf["slack_app_token"] = v.SlackAppToken
+		if v.SlackAppURL != nil {
+			globalConf["slack_app_url"] = v.SlackAppURL.String()
+		}
+		globalConf["telegram_bot_token"] = v.TelegramBotToken
 	}
 
 	return []interface{}{globalConf}
@@ -1881,6 +1896,9 @@ func expandInhibitRuleConfig(v []interface{}) []*inhibitRule {
 		cfg := &inhibitRule{}
 		data := v.(map[string]interface{})
 
+		if raw, ok := data["name"]; ok {
+			cfg.Name = raw.(string)
+		}
 		if raw, ok := data["source_matchers"]; ok {
 			cfg.SourceMatchers = expandStringArray(raw.([]interface{}))
 		}
@@ -1904,6 +1922,7 @@ func flattenInhibitRuleConfig(v []*inhibitRule) []interface{} {
 
 	for _, v := range v {
 		cfg := make(map[string]interface{})
+		cfg["name"] = v.Name
 		cfg["source_matchers"] = v.SourceMatchers
 		cfg["target_matchers"] = v.TargetMatchers
 		cfg["equal"] = v.Equal

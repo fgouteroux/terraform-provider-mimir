@@ -55,6 +55,13 @@ type globalConfig struct {
 	VictorOpsAPIKey  string           `yaml:"victorops_api_key,omitempty" json:"victorops_api_key,omitempty"`
 	TelegramAPIURL   *amcommoncfg.URL `yaml:"telegram_api_url,omitempty" json:"telegram_api_url,omitempty"`
 	SMTPTLSConfig    *tlsConfig       `yaml:"smtp_tls_config,omitempty" json:"smtp_tls_config,omitempty"`
+
+	SlackAppToken    string           `yaml:"slack_app_token,omitempty" json:"slack_app_token,omitempty"`
+	SlackAppURL      *amcommoncfg.URL `yaml:"slack_app_url,omitempty" json:"slack_app_url,omitempty"`
+	TelegramBotToken string           `yaml:"telegram_bot_token,omitempty" json:"telegram_bot_token,omitempty"`
+	// SMTPForceImplicitTLS is a plain bool for the same reason as
+	// emailConfig.ForceImplicitTLS.
+	SMTPForceImplicitTLS bool `yaml:"smtp_force_implicit_tls,omitempty" json:"smtp_force_implicit_tls,omitempty"`
 }
 
 type route struct {
@@ -71,6 +78,7 @@ type route struct {
 }
 
 type inhibitRule struct {
+	Name           string   `yaml:"name,omitempty" json:"name,omitempty"`
 	TargetMatchers []string `yaml:"target_matchers,omitempty" json:"target_matchers,omitempty"`
 	SourceMatchers []string `yaml:"source_matchers,omitempty" json:"source_matchers,omitempty"`
 	Equal          []string `yaml:"equal,omitempty" json:"equal,omitempty"`

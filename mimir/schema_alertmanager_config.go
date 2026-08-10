@@ -1544,6 +1544,28 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 							Schema: tlsConfigFields(),
 						},
 					},
+					"smtp_force_implicit_tls": {
+						Type:        schema.TypeBool,
+						Optional:    true,
+						Description: "Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS. When left unset, the connection type is derived from the smarthost port." + mimirMin31Descr,
+					},
+					"slack_app_token": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Sensitive:   true,
+						Description: "The default Slack app token, used to send notifications through the Slack API instead of a webhook." + mimirMin31Descr,
+					},
+					"slack_app_url": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "The default Slack API URL used with `slack_app_token`." + mimirMin31Descr,
+					},
+					"telegram_bot_token": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Sensitive:   true,
+						Description: "The default Telegram bot token." + mimirMin31Descr,
+					},
 				},
 			},
 		},
@@ -1553,6 +1575,11 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Description: "Mutes an alert (target) matching a set of matchers when an alert (source) exists that matches another set of matchers.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "An optional name for the inhibition rule." + mimirMin31Descr,
+					},
 					"source_matchers": {
 						Type:        schema.TypeList,
 						Optional:    true,
@@ -1999,6 +2026,28 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 							Schema: tlsConfigFields(),
 						},
 					},
+					"smtp_force_implicit_tls": {
+						Type:        schema.TypeBool,
+						Computed:    true,
+						Description: "Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS." + mimirMin31Descr,
+					},
+					"slack_app_token": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Sensitive:   true,
+						Description: "The default Slack app token, used to send notifications through the Slack API instead of a webhook." + mimirMin31Descr,
+					},
+					"slack_app_url": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The default Slack API URL used with `slack_app_token`." + mimirMin31Descr,
+					},
+					"telegram_bot_token": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Sensitive:   true,
+						Description: "The default Telegram bot token." + mimirMin31Descr,
+					},
 				},
 			},
 		},
@@ -2008,6 +2057,11 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Description: "Mutes an alert (target) matching a set of matchers when an alert (source) exists that matches another set of matchers.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "An optional name for the inhibition rule." + mimirMin31Descr,
+					},
 					"source_matchers": {
 						Type:        schema.TypeList,
 						Computed:    true,
