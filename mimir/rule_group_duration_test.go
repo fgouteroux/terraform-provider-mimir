@@ -13,7 +13,7 @@ func TestRuleGroupDurationsNormalizeState(t *testing.T) {
 	}
 
 	recording := resourcemimirRuleGroupRecording().Schema
-	for _, attr := range []string{intervalKey, "query_offset", "evaluation_delay"} {
+	for _, attr := range []string{intervalKey, queryOffsetKey, "evaluation_delay"} {
 		entry, declared := recording[attr]
 		if !declared {
 			t.Errorf("recording rule group has no %q attribute", attr)

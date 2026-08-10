@@ -22,6 +22,8 @@ const (
 	timeoutKey        = "timeout"
 	usernameKey       = "username"
 	contentKey        = "content"
+	sourceTenantsKey  = "source_tenants"
+	queryOffsetKey    = "query_offset"
 
 	// mimirMin31Descr flags attributes backed by an Alertmanager field that Mimir
 	// only vendors from 3.1.0 onwards. Mimir rejects a whole configuration when it

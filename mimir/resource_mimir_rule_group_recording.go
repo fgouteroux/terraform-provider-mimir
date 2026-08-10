@@ -51,7 +51,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				ValidateFunc: validateDuration,
 				StateFunc:    formatDuration,
 			},
-			"query_offset": {
+			queryOffsetKey: {
 				Type:          schema.TypeString,
 				Description:   "The duration by which to delay the execution of the recording rule.",
 				Optional:      true,
@@ -68,7 +68,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				ValidateFunc:  validateDuration,
 				StateFunc:     formatDuration,
 			},
-			"source_tenants": {
+			sourceTenantsKey: {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
@@ -318,6 +318,12 @@ func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.Resour
 	path := rulesGroupPath(namespace, name)
 	_, err := client.sendRequest("ruler", "DELETE", path, "", headers)
 	if err != nil {
+		// A group already gone is the desired end state, not a failure: without
+		// this the resource stays stuck in state and destroy can never complete.
+		if strings.Contains(err.Error(), "response code '404'") {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(fmt.Errorf(
 			"cannot delete recording rule group '%s' from %s: %v",
 			name,
