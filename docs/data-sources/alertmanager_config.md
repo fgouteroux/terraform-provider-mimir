@@ -1524,8 +1524,8 @@ Read-Only:
 
 Read-Only:
 
-- `end_minute` (Number)
-- `start_minute` (Number)
+- `end_time` (String)
+- `start_time` (String)
 
 
 <a id="nestedobjatt--time_interval--time_intervals--weekdays"></a>

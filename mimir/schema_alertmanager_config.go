@@ -2108,13 +2108,15 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									Description: "Ranges inclusive of the starting time and exclusive of the end time to make it easy to represent times that start/end on hour boundaries.",
 									Elem: &schema.Resource{
 										Schema: map[string]*schema.Schema{
-											"start_minute": {
-												Type:     schema.TypeInt,
-												Computed: true,
+											"start_time": {
+												Type:        schema.TypeString,
+												Computed:    true,
+												Description: "Start time in HH:MM format.",
 											},
-											"end_minute": {
-												Type:     schema.TypeInt,
-												Computed: true,
+											"end_time": {
+												Type:        schema.TypeString,
+												Computed:    true,
+												Description: "End time in HH:MM format.",
 											},
 										},
 									},

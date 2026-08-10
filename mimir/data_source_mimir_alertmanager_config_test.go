@@ -74,3 +74,33 @@ var testAccDataSourceAlertmanagerConfig_WithOrgID = fmt.Sprintf(`
 		name = "${mimir_alertmanager_config.another_tenant.id}"
 	}
 `, testAccResourceAlertmanagerConfig_WithOrgID)
+
+// TestAccDataSourceAlertmanagerConfig_TimeInterval reads back a configuration
+// carrying a time interval. The data source used to declare the time range as
+// start_minute/end_minute (integers) while the flatten code writes
+// start_time/end_time (HH:MM strings), so these attributes could never be
+// populated.
+func TestAccDataSourceAlertmanagerConfig_TimeInterval(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceAlertmanagerConfig_TimeInterval,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.mimir_alertmanager_config.mytenant", "time_interval.0.name", "offhours"),
+					resource.TestCheckResourceAttr("data.mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.times.0.start_time", "03:00"),
+					resource.TestCheckResourceAttr("data.mimir_alertmanager_config.mytenant", "time_interval.0.time_intervals.0.times.0.end_time", "09:00"),
+				),
+			},
+		},
+	})
+}
+
+var testAccDataSourceAlertmanagerConfig_TimeInterval = fmt.Sprintf(`
+	%s
+
+	data "mimir_alertmanager_config" "mytenant" {
+		name = "${mimir_alertmanager_config.mytenant.id}"
+	}
+`, testAccResourceAlertmanagerConfig_time_interval)
