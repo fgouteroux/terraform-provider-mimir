@@ -84,7 +84,7 @@ func resourceMimirRules() *schema.Resource {
 			},
 
 			// Content input methods (mutually exclusive)
-			"content": {
+			contentKey: {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Description:   "YAML content containing rule groups. Mutually exclusive with 'content_file'. Group-level `labels` are supported and require Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).",
@@ -217,11 +217,24 @@ func resourceMimirRules() *schema.Resource {
 
 			var managedGroups []string
 			if onlyGroups := diff.Get("only_groups").(*schema.Set); onlyGroups != nil && onlyGroups.Len() > 0 {
+				var unknown []string
 				for _, name := range onlyGroups.List() {
 					groupName := name.(string)
 					if contains(allGroupNames, groupName) {
 						managedGroups = append(managedGroups, groupName)
+					} else {
+						unknown = append(unknown, groupName)
 					}
+				}
+				// Reject names that match no group instead of silently managing
+				// fewer groups. Update derives the delete set from the managed
+				// groups recorded in state, so a set that silently shrinks to
+				// empty makes Update delete every group this resource owns and
+				// still report success.
+				if len(unknown) > 0 {
+					return fmt.Errorf(
+						"only_groups references rule group(s) %s which are not defined in the configuration (defined: %s)",
+						strings.Join(unknown, ", "), strings.Join(allGroupNames, ", "))
 				}
 			} else if ignoreGroups := diff.Get("ignore_groups").(*schema.Set); ignoreGroups != nil && ignoreGroups.Len() > 0 {
 				var ignored []string

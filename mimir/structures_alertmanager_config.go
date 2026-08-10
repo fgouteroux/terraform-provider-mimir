@@ -23,6 +23,7 @@ func expandHTTPConfigOAuth2(v interface{}) *oauth2 {
 		oauth2Conf.TokenURL = cfg["token_url"].(string)
 		oauth2Conf.Scopes = expandStringArray(cfg["scopes"].([]interface{}))
 		oauth2Conf.EndpointParams = expandStringMap(cfg["endpoint_params"].(map[string]interface{}))
+		oauth2Conf.TLSConfig = expandTLSConfig(cfg["tls_config"])
 	}
 	return oauth2Conf
 }
@@ -35,6 +36,9 @@ func flattenHTTPConfigOAuth2(v *oauth2) []interface{} {
 		oauth2Conf["token_url"] = v.TokenURL
 		oauth2Conf["scopes"] = v.Scopes
 		oauth2Conf["endpoint_params"] = v.EndpointParams
+		if v.TLSConfig != nil {
+			oauth2Conf["tls_config"] = flattenTLSConfig(v.TLSConfig)
+		}
 	}
 	return []interface{}{oauth2Conf}
 }
@@ -404,9 +408,14 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 }
 
 func expandSnsSigV4Config(v interface{}) *sigV4Config {
-	sigV4ConfigConf := &sigV4Config{}
+	// Allocate inside the guard, like every other nested block: a non-nil
+	// pointer defeats `yaml:"sigv4,omitempty"` and emits `sigv4: {}` for every
+	// sns_configs block, which then reads back as a one-element block the user
+	// never wrote.
+	var sigV4ConfigConf *sigV4Config
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
+		sigV4ConfigConf = &sigV4Config{}
 		cfg := data[0].(map[string]interface{})
 		sigV4ConfigConf.Region = cfg["region"].(string)
 		sigV4ConfigConf.AccessKey = cfg["access_key"].(string)
@@ -419,6 +428,9 @@ func expandSnsSigV4Config(v interface{}) *sigV4Config {
 
 func flattenSnsSigV4Config(v *sigV4Config) []interface{} {
 	sigV4ConfigConf := make(map[string]interface{})
+	if v == nil {
+		return nil
+	}
 	sigV4ConfigConf["region"] = v.Region
 	sigV4ConfigConf["access_key"] = v.AccessKey
 	sigV4ConfigConf["secret_key"] = v.SecretKey
@@ -483,7 +495,9 @@ func flattenSnsConfig(v []*snsConfig) []interface{} {
 		if v.HTTPConfig != nil {
 			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
 		}
-		cfg["sigv4"] = flattenSnsSigV4Config(v.Sigv4)
+		if v.Sigv4 != nil {
+			cfg["sigv4"] = flattenSnsSigV4Config(v.Sigv4)
+		}
 		cfg["api_url"] = v.APIUrl
 		cfg["topic_arn"] = v.TopicARN
 		cfg["phone_number"] = v.PhoneNumber
@@ -935,7 +949,7 @@ func expandWeChatConfig(v []interface{}) []*weChatConfig {
 		if raw, ok := data["api_secret"]; ok {
 			cfg.APISecret = raw.(string)
 		}
-		if raw, ok := data["api_url_url"]; ok {
+		if raw, ok := data[apiURLKey]; ok {
 			cfg.APIURL = raw.(string)
 		}
 		if raw, ok := data["corp_id"]; ok {
