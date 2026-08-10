@@ -1042,6 +1042,9 @@ func expandEmailConfig(v []interface{}) []*emailConfig {
 			cfg.RequireTLS = new(bool)
 			*cfg.RequireTLS = raw.(bool)
 		}
+		if raw, ok := data["tls_config"]; ok {
+			cfg.TLSConfig = expandTLSConfig(raw)
+		}
 		if raw, ok := data["force_implicit_tls"]; ok {
 			cfg.ForceImplicitTLS = raw.(bool)
 		}
@@ -1075,6 +1078,9 @@ func flattenEmailConfig(v []*emailConfig) []interface{} {
 		cfg["html"] = v.HTML
 		cfg["text"] = v.Text
 		cfg["require_tls"] = v.RequireTLS
+		if v.TLSConfig != nil {
+			cfg["tls_config"] = flattenTLSConfig(v.TLSConfig)
+		}
 		cfg["force_implicit_tls"] = v.ForceImplicitTLS
 		if v.Threading != nil {
 			cfg["threading"] = flattenThreadingConfig(v.Threading)

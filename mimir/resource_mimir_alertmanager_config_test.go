@@ -2,14 +2,11 @@ package mimir
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
-	"github.com/hashicorp/go-version"
 )
 
 func testAccCheckMimirAlertmanagerConfigExists(n string, client *apiClient) resource.TestCheckFunc {
@@ -1152,13 +1149,7 @@ func TestAccResourceAlertmanagerConfig_MsteamsReceiver(t *testing.T) {
 
 		--- FAIL: TestAccResourceAlertmanagerConfig_MsteamsReceiver (0.44s)
 	*/
-	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
-	minVersion, _ := version.NewVersion("2.12.0")
-
-	if currentVersion.LessThan(minVersion) {
-		fmt.Printf("Skipping alertmanager msteams receiver tests (current version '%s' is less than '%s')\n", currentVersion, minVersion)
-		return
-	}
+	skipBelowMimirVersion(t, "2.12.0")
 
 	// Init client
 	client, err := NewAPIClient(setupClient())
@@ -1261,13 +1252,7 @@ const testAccResourceAlertmanagerConfig_MsteamsReceiver_update = `
 
 func TestAccResourceAlertmanagerConfig_Msteamsv2Receiver(t *testing.T) {
 	// Skip this test if mimir version is older than 3.0.0 https://github.com/grafana/mimir/commit/633a7534c2981e570f3feb4da94c4c6f8fa450c6
-	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
-	minVersion, _ := version.NewVersion("3.0.0")
-
-	if currentVersion.LessThan(minVersion) {
-		fmt.Printf("Skipping alertmanager msteams receiver tests (current version '%s' is less than '%s')\n", currentVersion, minVersion)
-		return
-	}
+	skipBelowMimirVersion(t, "3.0.0")
 
 	// Init client
 	client, err := NewAPIClient(setupClient())
@@ -1559,6 +1544,7 @@ func TestAccResourceAlertmanagerConfig_Mimir31ReceiverFields(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.name", "cluster-down"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.content", "content template"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.avatar_url", "https://example.com/avatar.png"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.tls_config.0.server_name", "mail.example.com"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.force_implicit_tls", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.threading.0.enabled", "true"),
 					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pagerduty_configs.0.timeout", "15s"),
@@ -1636,6 +1622,9 @@ const testAccResourceAlertmanagerConfig_Mimir31ReceiverFields = `
         }
         email_configs {
           to = "ops@example.com"
+          tls_config {
+            server_name = "mail.example.com"
+          }
           force_implicit_tls = true
           threading {
             enabled = true
