@@ -11,28 +11,29 @@ func routeSchemaOf(s map[string]*schema.Schema) map[string]*schema.Schema {
 	return s["route"].Elem.(*schema.Resource).Schema
 }
 
-// TestRootRouteDeclaresEveryFlattenedKey pins that the root route block declares
-// every key flattenRouteConfig writes. It used to omit matchers,
-// mute_time_intervals and active_time_intervals even though both expand and
-// flatten handled them, so d.Set failed for any root route using one.
-func TestRootRouteDeclaresEveryFlattenedKey(t *testing.T) {
-	flattened := flattenRouteConfig(&route{
-		Receiver:            "team",
-		GroupByStr:          []string{"alertname"},
-		Matchers:            []string{"severity=critical"},
-		MuteTimeIntervals:   []string{"offhours"},
-		ActiveTimeIntervals: []string{"workhours"},
-	})
-	written := flattened[0].(map[string]interface{})
-
+// TestRootRouteRejectsChildOnlyAttributes pins that the root route block does
+// NOT declare matchers, mute_time_intervals or active_time_intervals. Alertmanager
+// refuses all three on the root route ("root route must not have any matchers",
+// config.go), so the server can never return them and declaring them as Optional
+// would let a configuration pass plan and then fail at apply with an opaque 400.
+// They belong to child_route only.
+func TestRootRouteRejectsChildOnlyAttributes(t *testing.T) {
 	for name, s := range map[string]map[string]*schema.Schema{
 		"resource":    routeSchemaOf(resourceMimirAlertmanagerConfigSchemaV1()),
 		"data source": routeSchemaOf(dataSourceMimirAlertmanagerConfigSchemaV1()),
 	} {
-		for key := range written {
-			if _, declared := s[key]; !declared {
-				t.Errorf("%s root route: flattenRouteConfig writes %q but the schema does not declare it; d.Set would fail", name, key)
+		for _, attr := range []string{"matchers", "mute_time_intervals", "active_time_intervals"} {
+			if _, declared := s[attr]; declared {
+				t.Errorf("%s root route declares %q, which Alertmanager rejects on the root route", name, attr)
 			}
+		}
+	}
+
+	// The same attributes must stay available on child routes.
+	child := childRouteSchema(1)
+	for _, attr := range []string{"matchers", "mute_time_intervals", "active_time_intervals"} {
+		if _, declared := child[attr]; !declared {
+			t.Errorf("child route no longer declares %q", attr)
 		}
 	}
 }

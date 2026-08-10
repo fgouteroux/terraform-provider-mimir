@@ -197,7 +197,7 @@ Optional:
 - `headers` (Map of String) Further headers email header key/value pairs. Overrides any headers previously set by the notification implementation.
 - `hello` (String) The hostname to identify to the SMTP server.
 - `html` (String) The HTML body of the email notification.
-- `require_tls` (Boolean) The SMTP TLS requirement.
+- `require_tls` (Boolean) The SMTP TLS requirement. Defaults to true, matching Alertmanager: set it to false explicitly for a relay that does not offer STARTTLS.
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `smarthost` (String) The SMTP host through which emails are sent.
 - `text` (String) The text body of the email notification.
@@ -1351,11 +1351,8 @@ Required:
 
 Optional:
 
-- `active_time_intervals` (List of String) Times when the route should be active. These must match the name of a time interval defined in the time_interval block.
 - `child_route` (Block List) (see [below for nested schema](#nestedblock--route--child_route))
 - `group_by` (List of String) The labels by which incoming alerts are grouped together.
-- `matchers` (List of String) A list of matchers that an alert has to fulfill to match the node.
-- `mute_time_intervals` (List of String) Times when the route should be muted. These must match the name of a time interval defined in the time_interval block.
 
 <a id="nestedblock--route--child_route"></a>
 ### Nested Schema for `route.child_route`
@@ -1428,7 +1425,7 @@ Optional:
 - `smtp_force_implicit_tls` (Boolean) Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS. When left unset, the connection type is derived from the smarthost port. Requires Mimir >= 3.1.0.
 - `smtp_from` (String) The default SMTP From header field.
 - `smtp_hello` (String) The default hostname to identify to the SMTP server.
-- `smtp_require_tls` (Boolean) The default SMTP TLS requirement.
+- `smtp_require_tls` (Boolean) The default SMTP TLS requirement. Defaults to true, matching Alertmanager: set it to false explicitly for a relay that does not offer STARTTLS.
 - `smtp_smarthost` (String) The default SMTP smarthost used for sending emails, including port number.
 - `smtp_tls_config` (Block List, Max: 1) The default SMTP TLS configuration. (see [below for nested schema](#nestedblock--global--smtp_tls_config))
 - `telegram_api_url` (String)
