@@ -249,7 +249,7 @@ func httpConfigFields() map[string]*schema.Schema {
 			Description: "Sets the `Authorization` header with the configured username and password.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"username": {
+					usernameKey: {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
@@ -783,7 +783,7 @@ func discordConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Message content template." + mimirMin31Descr,
 		},
-		"username": {
+		usernameKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Username to display the message as, overriding the webhook's own name." + mimirMin31Descr,
@@ -961,7 +961,7 @@ func opsgenieConfigFields() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
-					"username": {
+					usernameKey: {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
@@ -1056,7 +1056,7 @@ func slackConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "The channel or user to send notifications to.",
 		},
-		"username": {
+		usernameKey: {
 			Type:     schema.TypeString,
 			Optional: true,
 		},

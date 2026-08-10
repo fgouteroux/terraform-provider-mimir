@@ -122,6 +122,7 @@ func TestExpandAlertmanagerConfigEmitsSetKeys(t *testing.T) {
 	}
 
 	cfg := alertmanagerConfig{
+		//nolint:gosec // placeholder credentials, this test never reaches a network
 		Global: expandGlobalConfig(with(globalConfigFieldsForTest(), map[string]interface{}{
 			"smtp_force_implicit_tls": true,
 			"slack_app_token":         "xapp-1-token",
@@ -137,7 +138,7 @@ func TestExpandAlertmanagerConfigEmitsSetKeys(t *testing.T) {
 			})),
 			DiscordConfigs: expandDiscordConfig(with(discordConfigFields(), map[string]interface{}{
 				"content":    "content template",
-				"username":   "alertmanager",
+				usernameKey:  "alertmanager",
 				"avatar_url": "https://example.com/avatar.png",
 			})),
 			EmailConfigs: expandEmailConfig(with(emailConfigFields(), map[string]interface{}{
@@ -149,6 +150,7 @@ func TestExpandAlertmanagerConfigEmitsSetKeys(t *testing.T) {
 				"source":  "mimir",
 				"timeout": "15s",
 			})),
+			//nolint:gosec // placeholder credentials, this test never reaches a network
 			SlackConfigs: expandSlackConfig(with(slackConfigFields(), map[string]interface{}{
 				"app_token":    "xapp-1-token",
 				"app_url":      "https://slack.example.com/api",
