@@ -88,6 +88,7 @@ Optional:
 - `discord_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--discord_configs))
 - `email_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--email_configs))
 - `msteams_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--msteams_configs))
+- `msteamsv2_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs))
 - `opsgenie_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs))
 - `pagerduty_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--pagerduty_configs))
 - `pushover_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--pushover_configs))
@@ -104,10 +105,13 @@ Optional:
 
 Optional:
 
+- `avatar_url` (String) Avatar to display the message with, overriding the webhook's own avatar. Requires Mimir >= 3.1.0.
+- `content` (String) Message content template. Requires Mimir >= 3.1.0.
 - `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config))
 - `message` (String) Notification message.
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `title` (String) Notification title.
+- `username` (String) Username to display the message as, overriding the webhook's own name. Requires Mimir >= 3.1.0.
 - `webhook_url` (String) The webhook URL.
 
 <a id="nestedblock--receiver--discord_configs--http_config"></a>
@@ -188,6 +192,7 @@ Optional:
 - `auth_password` (String, Sensitive) SMTP authentication password.
 - `auth_secret` (String, Sensitive) SMTP authentication secret.
 - `auth_username` (String) SMTP authentication username.
+- `force_implicit_tls` (Boolean) Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS. When left unset, the connection type is derived from the smarthost port. Requires Mimir >= 3.1.0.
 - `from` (String) The sender's address.
 - `headers` (Map of String) Further headers email header key/value pairs. Overrides any headers previously set by the notification implementation.
 - `hello` (String) The hostname to identify to the SMTP server.
@@ -196,8 +201,18 @@ Optional:
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `smarthost` (String) The SMTP host through which emails are sent.
 - `text` (String) The text body of the email notification.
+- `threading` (Block List, Max: 1) Group notifications for the same alert into an email thread. Requires Mimir >= 3.1.0. (see [below for nested schema](#nestedblock--receiver--email_configs--threading))
 - `tls_config` (Block List, Max: 1) The SMTP TLS configuration. (see [below for nested schema](#nestedblock--receiver--email_configs--tls_config))
 - `to` (String) The email address to send notifications to.
+
+<a id="nestedblock--receiver--email_configs--threading"></a>
+### Nested Schema for `receiver.email_configs.threading`
+
+Optional:
+
+- `enabled` (Boolean) Whether to thread notifications for the same alert.
+- `thread_by_date` (String) Template rendering a date, used to start a new thread once the rendered value changes.
+
 
 <a id="nestedblock--receiver--email_configs--tls_config"></a>
 ### Nested Schema for `receiver.email_configs.tls_config`
@@ -281,6 +296,86 @@ Optional:
 
 <a id="nestedblock--receiver--msteams_configs--http_config--tls_config"></a>
 ### Nested Schema for `receiver.msteams_configs.http_config.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
+
+
+
+<a id="nestedblock--receiver--msteamsv2_configs"></a>
+### Nested Schema for `receiver.msteamsv2_configs`
+
+Optional:
+
+- `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config))
+- `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `text` (String) Message body template.
+- `title` (String) Message title template.
+- `webhook_url` (String) The incoming webhook URL.
+
+<a id="nestedblock--receiver--msteamsv2_configs--http_config"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config`
+
+Optional:
+
+- `authorization` (Block List, Max: 1) Set the `Authorization` header configuration. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--authorization))
+- `basic_auth` (Block List, Max: 1) Sets the `Authorization` header with the configured username and password. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--basic_auth))
+- `bearer_token` (String, Sensitive)
+- `enable_http2` (Boolean) Whether to enable HTTP2.
+- `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--oauth2))
+- `proxy_url` (String)
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--tls_config))
+
+<a id="nestedblock--receiver--msteamsv2_configs--http_config--authorization"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.authorization`
+
+Optional:
+
+- `credentials` (String, Sensitive) Sets the credentials.
+- `type` (String) Sets the authentication type.
+
+
+<a id="nestedblock--receiver--msteamsv2_configs--http_config--basic_auth"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.basic_auth`
+
+Optional:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedblock--receiver--msteamsv2_configs--http_config--oauth2"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.oauth2`
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `scopes` (List of String) Scopes for the token request.
+- `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--oauth2--tls_config))
+- `token_url` (String) The URL to fetch the token from.
+
+<a id="nestedblock--receiver--msteamsv2_configs--http_config--oauth2--tls_config"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.oauth2.tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
+
+
+<a id="nestedblock--receiver--msteamsv2_configs--http_config--tls_config"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.tls_config`
 
 Optional:
 
@@ -415,6 +510,8 @@ Optional:
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `service_key` (String, Sensitive) The PagerDuty integration key (when using PagerDuty integration type `Prometheus`).
 - `severity` (String) Severity of the incident.
+- `source` (String) The unique location of the affected system.
+- `timeout` (String) The maximum time allowed to invoke PagerDuty. When left unset, the notification timeout applies. Requires Mimir >= 3.1.0.
 - `url` (String) The URL to send API requests to
 
 <a id="nestedblock--receiver--pagerduty_configs--http_config"></a>
@@ -510,16 +607,19 @@ Optional:
 
 Optional:
 
+- `device` (String) The name of one of your devices to send the notification to. When left unset, the notification is sent to all devices.
 - `expire` (String) How long your notification will continue to be retried for, unless the user acknowledges the notification.
 - `html` (Boolean)
 - `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config))
 - `message` (String) Notification message.
+- `monospace` (Boolean) Whether the notification message is rendered in a monospace font. Requires Mimir >= 3.1.0.
 - `priority` (String)
 - `retry` (String) How often the Pushover servers will send the same notification to the user.
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `sound` (String)
 - `title` (String) Notification title.
 - `token` (String) The registered application's API token.
+- `ttl` (String) How long the notification will live on the user's device before being automatically deleted.
 - `url` (String) A supplementary URL shown alongside the message.
 - `url_title` (String)
 - `user_key` (String) The recipient user's user key.
@@ -600,6 +700,8 @@ Optional:
 
 - `actions` (Block List) (see [below for nested schema](#nestedblock--receiver--slack_configs--actions))
 - `api_url` (String) The Slack webhook URL. Defaults to global settings if none are set here.
+- `app_token` (String, Sensitive) The Slack app token, used to send notifications through the Slack API instead of a webhook. Defaults to global settings if none are set here. Requires Mimir >= 3.1.0.
+- `app_url` (String) The Slack API URL used with `app_token`. Defaults to global settings if none are set here. Requires Mimir >= 3.1.0.
 - `callback_id` (String)
 - `channel` (String) The channel or user to send notifications to.
 - `color` (String)
@@ -611,12 +713,14 @@ Optional:
 - `icon_url` (String)
 - `image_url` (String)
 - `link_names` (Boolean)
+- `message_text` (String) The message text sent alongside the attachment when notifying through the Slack API. Requires Mimir >= 3.1.0.
 - `mrkdwn_in` (List of String)
 - `pretext` (String)
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `short_fields` (Boolean)
 - `text` (String)
 - `thumb_url` (String)
+- `timeout` (String) The maximum time allowed to invoke Slack. When left unset, the notification timeout applies. Requires Mimir >= 3.1.0.
 - `title` (String)
 - `title_link` (String)
 - `username` (String)
@@ -833,6 +937,7 @@ Optional:
 - `disable_notifications` (Boolean) Disable telegram notifications
 - `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config))
 - `message` (String) Message template
+- `message_thread_id` (Number) ID of the message thread where to send the messages. Requires Mimir >= 3.1.0.
 - `parse_mode` (String) Parse mode for telegram message, supported values are MarkdownV2, Markdown, HTML and empty string for plain text.
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 
@@ -1078,6 +1183,7 @@ Optional:
 - `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config))
 - `max_alerts` (Number) The maximum number of alerts to include in a single webhook message. Alerts above this threshold are truncated. When leaving this at its default value of 0, all alerts are included.
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
+- `timeout` (String) The maximum time allowed to invoke the webhook. When left unset, the notification timeout applies.
 - `url` (String) The endpoint to send HTTP POST requests to.
 
 <a id="nestedblock--receiver--webhook_configs--http_config"></a>
@@ -1313,15 +1419,20 @@ Optional:
 - `pagerduty_url` (String)
 - `resolve_timeout` (String) The time after which an alert is declared resolved if it has not been updated.
 - `slack_api_url` (String, Sensitive)
+- `slack_app_token` (String, Sensitive) The default Slack app token, used to send notifications through the Slack API instead of a webhook. Requires Mimir >= 3.1.0.
+- `slack_app_url` (String) The default Slack API URL used with `slack_app_token`. Requires Mimir >= 3.1.0.
 - `smtp_auth_identity` (String) SMTP Auth using PLAIN.
 - `smtp_auth_password` (String, Sensitive) SMTP Auth using LOGIN and PLAIN.
 - `smtp_auth_secret` (String, Sensitive) SMTP Auth using CRAM-MD5.
 - `smtp_auth_username` (String) SMTP Auth using CRAM-MD5, LOGIN and PLAIN. If empty, Alertmanager doesn't authenticate to the SMTP server.
+- `smtp_force_implicit_tls` (Boolean) Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS. When left unset, the connection type is derived from the smarthost port. Requires Mimir >= 3.1.0.
 - `smtp_from` (String) The default SMTP From header field.
 - `smtp_hello` (String) The default hostname to identify to the SMTP server.
 - `smtp_require_tls` (Boolean) The default SMTP TLS requirement.
 - `smtp_smarthost` (String) The default SMTP smarthost used for sending emails, including port number.
+- `smtp_tls_config` (Block List, Max: 1) The default SMTP TLS configuration. (see [below for nested schema](#nestedblock--global--smtp_tls_config))
 - `telegram_api_url` (String)
+- `telegram_bot_token` (String, Sensitive) The default Telegram bot token. Requires Mimir >= 3.1.0.
 - `victorops_api_key` (String, Sensitive)
 - `victorops_api_url` (String)
 - `webex_api_url` (String)
@@ -1397,6 +1508,17 @@ Optional:
 
 
 
+<a id="nestedblock--global--smtp_tls_config"></a>
+### Nested Schema for `global.smtp_tls_config`
+
+Optional:
+
+- `insecure_skip_verify` (Boolean) Disable validation of the server certificate
+- `max_version` (String) Maximum acceptable TLS version.
+- `min_version` (String) Minimum acceptable TLS version
+- `server_name` (String) ServerName extension to indicate the name of the server.
+
+
 
 <a id="nestedblock--inhibit_rule"></a>
 ### Nested Schema for `inhibit_rule`
@@ -1404,6 +1526,7 @@ Optional:
 Optional:
 
 - `equal` (List of String) Labels that must have an equal value in the source and target alert for the inhibition to take effect.
+- `name` (String) An optional name for the inhibition rule. Requires Mimir >= 3.1.0.
 - `source_matchers` (List of String) A list of matchers for which one or more alerts have to exist for the inhibition to take effect.
 - `target_matchers` (List of String) A list of matchers that have to be fulfilled by the target alerts to be muted.
 
