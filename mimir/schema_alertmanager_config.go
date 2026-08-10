@@ -390,6 +390,31 @@ func emailConfigFields() map[string]*schema.Schema {
 				Schema: tlsConfigFields(),
 			},
 		},
+		"force_implicit_tls": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS. When left unset, the connection type is derived from the smarthost port." + mimirMin31Descr,
+		},
+		"threading": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			MaxItems:    1,
+			Description: "Group notifications for the same alert into an email thread." + mimirMin31Descr,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"enabled": {
+						Type:        schema.TypeBool,
+						Optional:    true,
+						Description: "Whether to thread notifications for the same alert.",
+					},
+					"thread_by_date": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "Template rendering a date, used to start a new thread once the rendered value changes.",
+					},
+				},
+			},
+		},
 	}
 }
 

@@ -313,6 +313,16 @@ type emailConfig struct {
 	Text          string            `yaml:"text,omitempty" json:"text,omitempty"`
 	RequireTLS    *bool             `yaml:"require_tls,omitempty" json:"require_tls,omitempty"`
 	TLSConfig     tlsConfig         `yaml:"tls_config,omitempty" json:"tls_config,omitempty"`
+	// ForceImplicitTLS is a plain bool rather than a pointer so that leaving it
+	// unset keeps the key out of the generated configuration: Mimir rejects the
+	// whole configuration when it carries a key it does not know about.
+	ForceImplicitTLS bool             `yaml:"force_implicit_tls,omitempty" json:"force_implicit_tls,omitempty"`
+	Threading        *threadingConfig `yaml:"threading,omitempty" json:"threading,omitempty"`
+}
+
+type threadingConfig struct {
+	Enabled      bool   `yaml:"enabled,omitempty" json:"enabled,omitempty"`
+	ThreadByDate string `yaml:"thread_by_date,omitempty" json:"thread_by_date,omitempty"`
 }
 
 type pushoverConfig struct {

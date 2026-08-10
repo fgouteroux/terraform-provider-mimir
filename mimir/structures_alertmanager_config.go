@@ -1029,6 +1029,12 @@ func expandEmailConfig(v []interface{}) []*emailConfig {
 			cfg.RequireTLS = new(bool)
 			*cfg.RequireTLS = raw.(bool)
 		}
+		if raw, ok := data["force_implicit_tls"]; ok {
+			cfg.ForceImplicitTLS = raw.(bool)
+		}
+		if raw, ok := data["threading"]; ok {
+			cfg.Threading = expandThreadingConfig(raw)
+		}
 		emailConf = append(emailConf, cfg)
 	}
 	return emailConf
@@ -1056,9 +1062,34 @@ func flattenEmailConfig(v []*emailConfig) []interface{} {
 		cfg["html"] = v.HTML
 		cfg["text"] = v.Text
 		cfg["require_tls"] = v.RequireTLS
+		cfg["force_implicit_tls"] = v.ForceImplicitTLS
+		if v.Threading != nil {
+			cfg["threading"] = flattenThreadingConfig(v.Threading)
+		}
 		emailConf = append(emailConf, cfg)
 	}
 	return emailConf
+}
+
+func expandThreadingConfig(v interface{}) *threadingConfig {
+	var threadingConf *threadingConfig
+	data := v.([]interface{})
+	if len(data) != 0 && data[0] != nil {
+		threadingConf = &threadingConfig{}
+		cfg := data[0].(map[string]interface{})
+		threadingConf.Enabled = cfg["enabled"].(bool)
+		threadingConf.ThreadByDate = cfg["thread_by_date"].(string)
+	}
+	return threadingConf
+}
+
+func flattenThreadingConfig(v *threadingConfig) []interface{} {
+	threadingConf := make(map[string]interface{})
+	if v != nil {
+		threadingConf["enabled"] = v.Enabled
+		threadingConf["thread_by_date"] = v.ThreadByDate
+	}
+	return []interface{}{threadingConf}
 }
 
 func expandSlackConfigConfirmationField(v interface{}) *slackConfirmationField {
