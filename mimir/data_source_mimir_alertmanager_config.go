@@ -63,7 +63,7 @@ func dataSourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.Resour
 			return diag.Errorf("error setting item: %v", err)
 		}
 	}
-	if err := d.Set("time_interval", flattenMuteTimeIntervalConfig(alertmanagerConf.MuteTimeIntervals)); err != nil {
+	if err := d.Set("time_interval", flattenMuteTimeIntervalConfig(allTimeIntervals(alertmanagerConf))); err != nil {
 		return diag.Errorf("error setting item: %v", err)
 	}
 	if err := d.Set("inhibit_rule", flattenInhibitRuleConfig(alertmanagerConf.InhibitRules)); err != nil {

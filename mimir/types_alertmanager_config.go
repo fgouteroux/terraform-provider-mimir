@@ -20,11 +20,16 @@ type alertmanagerUserConfig struct {
 // marshalling. See the following issue for details:
 // https://github.com/prometheus/alertmanager/issues/1985
 type alertmanagerConfig struct {
-	Global            *globalConfig       `yaml:"global,omitempty" json:"global,omitempty"`
-	Route             *route              `yaml:"route,omitempty" json:"route,omitempty"`
-	InhibitRules      []*inhibitRule      `yaml:"inhibit_rules,omitempty" json:"inhibit_rules,omitempty"`
-	Receivers         []*receiver         `yaml:"receivers,omitempty" json:"receivers,omitempty"`
+	Global       *globalConfig  `yaml:"global,omitempty" json:"global,omitempty"`
+	Route        *route         `yaml:"route,omitempty" json:"route,omitempty"`
+	InhibitRules []*inhibitRule `yaml:"inhibit_rules,omitempty" json:"inhibit_rules,omitempty"`
+	Receivers    []*receiver    `yaml:"receivers,omitempty" json:"receivers,omitempty"`
+	// MuteTimeIntervals is the deprecated spelling of TimeIntervals. It is kept
+	// for reading configurations that were not written by this provider;
+	// generated configurations always use TimeIntervals. Alertmanager resolves
+	// both keys against the same namespace.
 	MuteTimeIntervals []*muteTimeInterval `yaml:"mute_time_intervals,omitempty" json:"mute_time_intervals,omitempty"`
+	TimeIntervals     []*muteTimeInterval `yaml:"time_intervals,omitempty" json:"time_intervals,omitempty"`
 	Templates         []string            `yaml:"templates,omitempty" json:"templates,omitempty"`
 }
 

@@ -131,7 +131,7 @@ func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.Resource
 			return diag.Errorf("error setting item: %v", err)
 		}
 	}
-	if err := d.Set("time_interval", flattenMuteTimeIntervalConfig(alertmanagerConf.MuteTimeIntervals)); err != nil {
+	if err := d.Set("time_interval", flattenMuteTimeIntervalConfig(allTimeIntervals(alertmanagerConf))); err != nil {
 		return diag.Errorf("error setting item: %v", err)
 	}
 	if err := d.Set("inhibit_rule", flattenInhibitRuleConfig(alertmanagerConf.InhibitRules)); err != nil {
@@ -217,12 +217,12 @@ func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, p
 	}
 
 	alertmanagerConf := &alertmanagerConfig{
-		Global:            expandGlobalConfig(d.Get("global").([]interface{})),
-		MuteTimeIntervals: expandMuteTimeIntervalConfig(d.Get("time_interval").([]interface{})),
-		InhibitRules:      expandInhibitRuleConfig(d.Get("inhibit_rule").([]interface{})),
-		Receivers:         expandReceiverConfig(d.Get("receiver").([]interface{})),
-		Route:             expandRouteConfig(d.Get("route").([]interface{})),
-		Templates:         expandStringArray(d.Get("templates").([]interface{})),
+		Global:        expandGlobalConfig(d.Get("global").([]interface{})),
+		TimeIntervals: expandMuteTimeIntervalConfig(d.Get("time_interval").([]interface{})),
+		InhibitRules:  expandInhibitRuleConfig(d.Get("inhibit_rule").([]interface{})),
+		Receivers:     expandReceiverConfig(d.Get("receiver").([]interface{})),
+		Route:         expandRouteConfig(d.Get("route").([]interface{})),
+		Templates:     expandStringArray(d.Get("templates").([]interface{})),
 	}
 	alertmanagerConfBytes, _ := yaml.Marshal(&alertmanagerConf)
 
