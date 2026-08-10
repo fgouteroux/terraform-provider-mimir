@@ -112,7 +112,7 @@ Optional:
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `title` (String) Notification title.
 - `username` (String) Username to display the message as, overriding the webhook's own name. Requires Mimir >= 3.1.0.
-- `webhook_url` (String) The webhook URL.
+- `webhook_url` (String, Sensitive) The webhook URL.
 
 <a id="nestedblock--receiver--discord_configs--http_config"></a>
 ### Nested Schema for `receiver.discord_configs.http_config`
@@ -236,7 +236,7 @@ Optional:
 - `summary` (String) Message summary template.
 - `text` (String) Message body template.
 - `title` (String) Message title template.
-- `webhook_url` (String) The incoming webhook URL.
+- `webhook_url` (String, Sensitive) The incoming webhook URL.
 
 <a id="nestedblock--receiver--msteams_configs--http_config"></a>
 ### Nested Schema for `receiver.msteams_configs.http_config`
@@ -316,7 +316,7 @@ Optional:
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `text` (String) Message body template.
 - `title` (String) Message title template.
-- `webhook_url` (String) The incoming webhook URL.
+- `webhook_url` (String, Sensitive) The incoming webhook URL.
 
 <a id="nestedblock--receiver--msteamsv2_configs--http_config"></a>
 ### Nested Schema for `receiver.msteamsv2_configs.http_config`
@@ -615,11 +615,11 @@ Optional:
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `sound` (String)
 - `title` (String) Notification title.
-- `token` (String) The registered application's API token.
+- `token` (String, Sensitive) The registered application's API token.
 - `ttl` (String) How long the notification will live on the user's device before being automatically deleted.
 - `url` (String) A supplementary URL shown alongside the message.
 - `url_title` (String)
-- `user_key` (String) The recipient user's user key.
+- `user_key` (String, Sensitive) The recipient user's user key.
 
 <a id="nestedblock--receiver--pushover_configs--http_config"></a>
 ### Nested Schema for `receiver.pushover_configs.http_config`
@@ -696,7 +696,7 @@ Optional:
 Optional:
 
 - `actions` (Block List) (see [below for nested schema](#nestedblock--receiver--slack_configs--actions))
-- `api_url` (String) The Slack webhook URL. Defaults to global settings if none are set here.
+- `api_url` (String, Sensitive) The Slack webhook URL. Defaults to global settings if none are set here.
 - `app_token` (String, Sensitive) The Slack app token, used to send notifications through the Slack API instead of a webhook. Defaults to global settings if none are set here. Requires Mimir >= 3.1.0.
 - `app_url` (String) The Slack API URL used with `app_token`. Defaults to global settings if none are set here. Requires Mimir >= 3.1.0.
 - `callback_id` (String)

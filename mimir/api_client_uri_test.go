@@ -3,6 +3,8 @@ package mimir
 import (
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // TestNewAPIClientTrimsEveryURI covers the per-component overrides. Only `uri`
@@ -48,5 +50,40 @@ func TestNewAPIClientRejectsUnparseableCA(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "PEM") {
 		t.Errorf("error should mention the PEM bundle, got: %v", err)
+	}
+}
+
+// TestEmailRequiresTLSByDefault pins the SMTP default. require_tls used to
+// default to false and was always emitted, so the generated configuration
+// disabled STARTTLS even though upstream Alertmanager defaults it to true.
+func TestEmailRequiresTLSByDefault(t *testing.T) {
+	if got := emailConfigFields()["require_tls"].Default; got != true {
+		t.Errorf("email require_tls defaults to %v, want true", got)
+	}
+
+	global := resourceMimirAlertmanagerConfigSchemaV1()["global"].Elem.(*schema.Resource).Schema
+	if got := global["smtp_require_tls"].Default; got != true {
+		t.Errorf("global smtp_require_tls defaults to %v, want true", got)
+	}
+}
+
+// TestReceiverSecretsAreSensitive keeps credentials out of plan output.
+func TestReceiverSecretsAreSensitive(t *testing.T) {
+	for name, fields := range map[string]map[string]*schema.Schema{
+		"pushover":  pushoverConfigFields(),
+		"slack":     slackConfigFields(),
+		"discord":   discordConfigFields(),
+		"msteams":   msteamsConfigFields(),
+		"msteamsv2": msteamsv2ConfigFields(),
+	} {
+		for _, attr := range []string{"token", "user_key", apiURLKey, "webhook_url"} {
+			entry, declared := fields[attr]
+			if !declared {
+				continue
+			}
+			if !entry.Sensitive {
+				t.Errorf("%s %q is not marked Sensitive; the credential is printed in plan output", name, attr)
+			}
+		}
 	}
 }

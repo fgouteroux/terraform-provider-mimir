@@ -379,7 +379,7 @@ func emailConfigFields() map[string]*schema.Schema {
 		"require_tls": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Default:     false,
+			Default:     true,
 			Description: "The SMTP TLS requirement.",
 		},
 		"tls_config": {
@@ -431,6 +431,7 @@ func msteamsConfigFields() map[string]*schema.Schema {
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The incoming webhook URL.",
 		},
 		titleKey: {
@@ -471,6 +472,7 @@ func msteamsv2ConfigFields() map[string]*schema.Schema {
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The incoming webhook URL.",
 		},
 		titleKey: {
@@ -768,6 +770,7 @@ func discordConfigFields() map[string]*schema.Schema {
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The webhook URL.",
 		},
 		titleKey: {
@@ -827,11 +830,13 @@ func pushoverConfigFields() map[string]*schema.Schema {
 		"user_key": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The recipient user's user key.",
 		},
 		"token": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The registered application's API token.",
 		},
 		titleKey: {
@@ -1028,6 +1033,7 @@ func slackConfigFields() map[string]*schema.Schema {
 		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The Slack webhook URL. Defaults to global settings if none are set here.",
 		},
 		"app_token": {
@@ -1534,7 +1540,7 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"smtp_require_tls": {
 						Type:        schema.TypeBool,
 						Optional:    true,
-						Default:     false,
+						Default:     true,
 						Description: "The default SMTP TLS requirement.",
 					},
 					"smtp_tls_config": {
