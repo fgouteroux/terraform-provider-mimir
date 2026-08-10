@@ -46,4 +46,5 @@ Read-Only:
 - `annotations` (Map of String)
 - `expr` (String)
 - `for` (String)
+- `keep_firing_for` (String)
 - `labels` (Map of String)
