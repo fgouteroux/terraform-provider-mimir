@@ -35,6 +35,7 @@ func TestProxyLogGatedOnDebug(t *testing.T) {
 	log.SetOutput(&buf)
 	defer log.SetOutput(os.Stderr)
 
+	//nolint:gosec // placeholder credentials in a proxy URL, this test never dials it
 	if _, err := NewAPIClient(&apiClientOpt{
 		uri: "https://mimir.example.com", proxyURL: "http://user:pass@localhost:3128",
 		headers: map[string]string{}, timeout: 2, debug: false,

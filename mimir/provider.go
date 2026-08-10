@@ -2,6 +2,7 @@ package mimir
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -224,16 +225,39 @@ func providerConfigure(version string, p *schema.Provider, d *schema.ResourceDat
 	overwriteRuleGroupConfig = d.Get("overwrite_rule_group_config").(bool)
 	ruleGroupReadDelayAfterChange = d.Get("rule_group_read_delay_after_change").(string)
 	alertmanagerReadDelayAfterChange = d.Get("alertmanager_read_delay_after_change").(string)
-	// Parse with model.ParseDuration, the same parser the ValidateFunc uses:
-	// time.ParseDuration rejects the "1d"/"1w" forms that validation accepts, and
-	// the error was discarded, so such a value silently became a zero delay.
-	ruleGroupReadDelay, _ := model.ParseDuration(d.Get("rule_group_read_delay_after_change").(string))
-	ruleGroupReadDelayAfterChangeDuration = time.Duration(ruleGroupReadDelay)
-	alertmanagerReadDelay, _ := model.ParseDuration(d.Get("alertmanager_read_delay_after_change").(string))
-	alertmanagerReadDelayAfterChangeDuration = time.Duration(alertmanagerReadDelay)
+	var err error
+	ruleGroupReadDelayAfterChangeDuration, err = parseReadDelay(ruleGroupReadDelayAfterChange)
+	if err != nil {
+		return nil, diag.FromErr(fmt.Errorf("rule_group_read_delay_after_change: %w", err))
+	}
+	alertmanagerReadDelayAfterChangeDuration, err = parseReadDelay(alertmanagerReadDelayAfterChange)
+	if err != nil {
+		return nil, diag.FromErr(fmt.Errorf("alertmanager_read_delay_after_change: %w", err))
+	}
 	ruleGroupReadRetryAfterChange = d.Get("rule_group_read_retry_after_change").(int)
 	alertmanagerReadRetryAfterChange = d.Get("alertmanager_read_retry_after_change").(int)
 
 	client, err := NewAPIClient(opt)
 	return client, diag.FromErr(err)
+}
+
+// parseReadDelay accepts both duration syntaxes the provider has ever taken:
+// model.ParseDuration for the Prometheus forms ("1d", "1w") that the ValidateFunc
+// allows, and time.ParseDuration for the fractional forms ("1.5s") that
+// model.ParseDuration rejects and that worked before. A value reaching this
+// function from DefaultFunc/EnvDefaultFunc never went through the ValidateFunc,
+// so the error is returned rather than discarded: swallowing it turned an
+// unparseable delay into a silent zero.
+func parseReadDelay(value string) (time.Duration, error) {
+	if value == "" {
+		return 0, nil
+	}
+	if d, err := model.ParseDuration(value); err == nil {
+		return time.Duration(d), nil
+	}
+	d, err := time.ParseDuration(value)
+	if err != nil {
+		return 0, fmt.Errorf("invalid duration %q", value)
+	}
+	return d, nil
 }
