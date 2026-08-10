@@ -805,9 +805,7 @@ func flattenWebhookConfig(v []*webhookConfig) []interface{} {
 		}
 		cfg["url"] = v.URL
 		cfg["max_alerts"] = v.MaxAlerts
-		if v.Timeout != 0 {
-			cfg[timeoutKey] = v.Timeout.String()
-		}
+		cfg[timeoutKey] = flattenDuration(v.Timeout)
 		webhookConf = append(webhookConf, cfg)
 	}
 	return webhookConf
@@ -1336,9 +1334,7 @@ func flattenSlackConfig(v []*slackConfig) []interface{} {
 		cfg["app_token"] = v.AppToken
 		cfg["app_url"] = v.AppURL
 		cfg["message_text"] = v.MessageText
-		if v.Timeout != 0 {
-			cfg[timeoutKey] = v.Timeout.String()
-		}
+		cfg[timeoutKey] = flattenDuration(v.Timeout)
 		cfg["channel"] = v.Channel
 		cfg["username"] = v.Username
 		cfg["color"] = v.Color
@@ -1522,9 +1518,7 @@ func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
 		cfg["component"] = v.Component
 		cfg["group"] = v.Group
 		cfg["source"] = v.Source
-		if v.Timeout != 0 {
-			cfg[timeoutKey] = v.Timeout.String()
-		}
+		cfg[timeoutKey] = flattenDuration(v.Timeout)
 		cfg["details"] = v.Details
 		cfg["images"] = flattenPagerdutyConfigImages(v.Images)
 		cfg["links"] = flattenPagerdutyConfigLinks(v.Links)
@@ -1572,12 +1566,12 @@ func expandPushoverConfig(v []interface{}) []*pushoverConfig {
 			cfg.Priority = raw.(string)
 		}
 		if raw, ok := data["retry"]; ok {
-			retry, _ := time.ParseDuration(raw.(string))
-			cfg.Retry = retry
+			retry, _ := model.ParseDuration(raw.(string))
+			cfg.Retry = time.Duration(retry)
 		}
 		if raw, ok := data["expire"]; ok {
-			expire, _ := time.ParseDuration(raw.(string))
-			cfg.Expire = expire
+			expire, _ := model.ParseDuration(raw.(string))
+			cfg.Expire = time.Duration(expire)
 		}
 		if raw, ok := data["html"]; ok {
 			cfg.HTML = raw.(bool)
@@ -1618,13 +1612,11 @@ func flattenPushoverConfig(v []*pushoverConfig) []interface{} {
 		cfg["url_title"] = v.URLTitle
 		cfg["sound"] = v.Sound
 		cfg["priority"] = v.Priority
-		cfg["retry"] = v.Retry.String()
-		cfg["expire"] = v.Expire.String()
+		cfg["retry"] = flattenDuration(v.Retry)
+		cfg["expire"] = flattenDuration(v.Expire)
 		cfg["html"] = v.HTML
 		cfg["device"] = v.Device
-		if v.TTL != 0 {
-			cfg["ttl"] = v.TTL.String()
-		}
+		cfg["ttl"] = flattenDuration(v.TTL)
 		cfg["monospace"] = v.Monospace
 
 		pushoverConf = append(pushoverConf, cfg)

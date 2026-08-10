@@ -4,8 +4,10 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/prometheus/common/model"
 	"gopkg.in/yaml.v3"
 )
 
@@ -270,5 +272,23 @@ func TestAllTimeIntervals(t *testing.T) {
 	_ = allTimeIntervals(cfg)
 	if len(cfg.MuteTimeIntervals) != 1 {
 		t.Errorf("allTimeIntervals mutated MuteTimeIntervals: got %d entries, want 1", len(cfg.MuteTimeIntervals))
+	}
+}
+
+// TestFlattenDurationMatchesStateFunc pins the round-trip invariant behind the
+// pushover ttl acceptance failure: a duration written back to state by Read must
+// render exactly as formatDuration renders the configured value, or Terraform
+// reports a permanent diff. Rendering a time.Duration with its own String method
+// breaks this for any value with trailing zero sub-units or longer than a day.
+func TestFlattenDurationMatchesStateFunc(t *testing.T) {
+	for _, configured := range []string{"", "10s", "90s", "5m", "1h", "1h30m", "1d", "2w"} {
+		parsed, _ := model.ParseDuration(configured)
+
+		want := formatDuration(configured)
+		got := flattenDuration(time.Duration(parsed))
+
+		if got != want {
+			t.Errorf("configured %q: state written by Read is %q, config normalizes to %q", configured, got, want)
+		}
 	}
 }
