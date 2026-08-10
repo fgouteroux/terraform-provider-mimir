@@ -1499,3 +1499,163 @@ const testAccResourceAlertmanagerConfig_WithOrgID = `
       }
     }
 `
+
+// TestAccResourceAlertmanagerConfig_BaseReceiverFields covers the receiver
+// attributes present in every Mimir release this provider targets, so it runs
+// on every leg of the CI matrix.
+func TestAccResourceAlertmanagerConfig_BaseReceiverFields(t *testing.T) {
+	skipBelowMimirVersion(t, "2.16.0")
+
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAlertmanagerConfig_BaseReceiverFields,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.smtp_tls_config.0.server_name", "smtp.example.com"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.webhook_configs.0.timeout", "10s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pagerduty_configs.0.source", "mimir"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pushover_configs.0.device", "phone"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pushover_configs.0.ttl", "1h"),
+				),
+			},
+		},
+	})
+}
+
+// TestAccResourceAlertmanagerConfig_Mimir31ReceiverFields covers the receiver
+// attributes the vendored Alertmanager only grew in Mimir 3.1.0. It skips on
+// older legs of the CI matrix: those legs still exercise the compatibility
+// guarantee, since every other test there would fail if the provider leaked one
+// of these keys into a configuration Mimir cannot parse.
+func TestAccResourceAlertmanagerConfig_Mimir31ReceiverFields(t *testing.T) {
+	skipBelowMimirVersion(t, "3.1.0")
+
+	// Init client
+	client, err := NewAPIClient(setupClient())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAlertmanagerConfig_Mimir31ReceiverFields,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists("mimir_alertmanager_config.mytenant", client),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "global.0.smtp_force_implicit_tls", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "inhibit_rule.0.name", "cluster-down"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.content", "content template"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.discord_configs.0.avatar_url", "https://example.com/avatar.png"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.force_implicit_tls", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.email_configs.0.threading.0.enabled", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pagerduty_configs.0.timeout", "15s"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.pushover_configs.0.monospace", "true"),
+					resource.TestCheckResourceAttr("mimir_alertmanager_config.mytenant", "receiver.0.telegram_configs.0.message_thread_id", "42"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceAlertmanagerConfig_BaseReceiverFields = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      global {
+        smtp_smarthost = "smtp.example.com:587"
+        smtp_from = "alertmanager@example.com"
+        smtp_tls_config {
+          server_name = "smtp.example.com"
+        }
+      }
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "base-fields"
+      }
+      receiver {
+        name = "base-fields"
+        webhook_configs {
+          url = "http://localhost/webhook"
+          timeout = "10s"
+        }
+        pagerduty_configs {
+          routing_key = "secret"
+          source = "mimir"
+        }
+        pushover_configs {
+          user_key = "user"
+          token = "token"
+          device = "phone"
+          ttl = "1h"
+        }
+      }
+    }
+`
+
+const testAccResourceAlertmanagerConfig_Mimir31ReceiverFields = `
+    resource "mimir_alertmanager_config" "mytenant" {
+      global {
+        smtp_smarthost = "smtp.example.com:465"
+        smtp_from = "alertmanager@example.com"
+        smtp_force_implicit_tls = true
+      }
+      route {
+        group_by = ["..."]
+        group_wait = "30s"
+        group_interval = "5m"
+        repeat_interval = "1h"
+        receiver = "mimir31-fields"
+      }
+      inhibit_rule {
+        name = "cluster-down"
+        source_matchers = ["severity=critical"]
+        target_matchers = ["severity=warning"]
+        equal = ["cluster"]
+      }
+      receiver {
+        name = "mimir31-fields"
+        discord_configs {
+          webhook_url = "https://discord.com/api/webhooks/123456"
+          content = "content template"
+          username = "alertmanager"
+          avatar_url = "https://example.com/avatar.png"
+        }
+        email_configs {
+          to = "ops@example.com"
+          force_implicit_tls = true
+          threading {
+            enabled = true
+            thread_by_date = "{{ .CommonLabels.alertname }}"
+          }
+        }
+        pagerduty_configs {
+          routing_key = "secret"
+          timeout = "15s"
+        }
+        pushover_configs {
+          user_key = "user"
+          token = "token"
+          monospace = true
+        }
+        telegram_configs {
+          bot_token = "bot-token"
+          chat_id = 1234
+          message_thread_id = 42
+        }
+      }
+    }
+`
