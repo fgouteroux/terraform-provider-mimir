@@ -1,6 +1,9 @@
 package mimir
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"strings"
 	"testing"
 )
@@ -20,5 +23,37 @@ func TestRedactCredentialsHidesAuthorization(t *testing.T) {
 	}
 	if !strings.Contains(got, "X-Scope-OrgID: tenant") {
 		t.Errorf("redaction ate a non-credential header:\n%s", got)
+	}
+}
+
+// TestProxyLogGatedOnDebug pins that configuring a proxy stays silent unless
+// debug is on. The line used to be unconditional: it wrote to stderr on every
+// provider init, which GitHub Actions annotates as an error, and the proxy URL
+// can embed credentials.
+func TestProxyLogGatedOnDebug(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer log.SetOutput(os.Stderr)
+
+	if _, err := NewAPIClient(&apiClientOpt{
+		uri: "https://mimir.example.com", proxyURL: "http://user:pass@localhost:3128",
+		headers: map[string]string{}, timeout: 2, debug: false,
+	}); err != nil {
+		t.Fatalf("NewAPIClient: %v", err)
+	}
+
+	if strings.Contains(buf.String(), "Using proxy") {
+		t.Errorf("proxy logged with debug off:\n%s", buf.String())
+	}
+
+	buf.Reset()
+	if _, err := NewAPIClient(&apiClientOpt{
+		uri: "https://mimir.example.com", proxyURL: "http://localhost:3128",
+		headers: map[string]string{}, timeout: 2, debug: true,
+	}); err != nil {
+		t.Fatalf("NewAPIClient: %v", err)
+	}
+	if !strings.Contains(buf.String(), "Using proxy") {
+		t.Error("proxy not logged with debug on")
 	}
 }

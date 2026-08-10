@@ -108,7 +108,12 @@ func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 	}
 
 	if opt.proxyURL != "" {
-		log.Printf("api_client.go: Using proxy: %s\n", opt.proxyURL)
+		// Gated on debug like every other log in this file: this ran on every
+		// provider init with a proxy, wrote to stderr (which CI surfaces as an
+		// error annotation), and the URL can carry credentials.
+		if opt.debug {
+			log.Printf("api_client.go: Using proxy: %s\n", opt.proxyURL)
+		}
 		proxy, err := url.Parse(opt.proxyURL)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing proxy url: %s", err)
@@ -194,7 +199,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 
 	if client.debug {
-		reqDump, err := httputil.DumpRequestOut(req, true)
+		reqDump, err := httputil.DumpRequestOut(req, false)
 		if err != nil {
 			return "", err
 		}
@@ -212,7 +217,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 
 	if client.debug {
-		respDump, err := httputil.DumpResponse(resp, true)
+		respDump, err := httputil.DumpResponse(resp, false)
 		if err != nil {
 			return "", err
 		}
@@ -236,9 +241,10 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 }
 
 // credentialHeaderRegexp matches the header lines that carry a credential in an
-// httputil dump. Debug mode dumps whole requests, so without this the bearer
-// token or the basic-auth pair lands in the Terraform log, which routinely ends
-// up in CI output.
+// httputil dump. The dumps deliberately exclude bodies: an alertmanager
+// configuration body carries slack api_url, pushover token, smtp_auth_password
+// and the like, so dumping it would leak exactly what this redaction exists to
+// protect. Headers still need masking for the bearer token and basic-auth pair.
 var credentialHeaderRegexp = regexp.MustCompile(`(?im)^(Authorization|Proxy-Authorization|X-Amz-Security-Token):.*$`)
 
 func redactCredentials(dump string) string {
