@@ -1140,12 +1140,15 @@ func expandSlackConfigConfirmationField(v interface{}) *slackConfirmationField {
 }
 
 func flattenSlackConfigConfirmationField(v *slackConfirmationField) []interface{} {
-	slackConfirmationFieldConf := make(map[string]interface{})
-	if v != nil {
-		slackConfirmationFieldConf["text"] = v.Text
-		slackConfirmationFieldConf["title"] = v.Title
-		slackConfirmationFieldConf["ok_text"] = v.OkText
-		slackConfirmationFieldConf["dismiss_text"] = v.DismissText
+	if v == nil {
+		return nil
+	}
+
+	slackConfirmationFieldConf := map[string]interface{}{
+		"text":         v.Text,
+		"title":        v.Title,
+		"ok_text":      v.OkText,
+		"dismiss_text": v.DismissText,
 	}
 	return []interface{}{slackConfirmationFieldConf}
 }
@@ -1236,7 +1239,9 @@ func flattenSlackConfigActions(v []slackAction) []interface{} {
 		cfg["style"] = v.Style
 		cfg["name"] = v.Name
 		cfg["value"] = v.Value
-		cfg["confirm"] = flattenSlackConfigConfirmationField(v.ConfirmField)
+		if v.ConfirmField != nil {
+			cfg["confirm"] = flattenSlackConfigConfirmationField(v.ConfirmField)
+		}
 		slackActionConf = append(slackActionConf, cfg)
 	}
 	return slackActionConf
