@@ -191,6 +191,12 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 			globalConf.SlackAPIURL = &amcommoncfg.URL{URL: slackAPIURL}
 		}
 
+		globalConf.SlackAppToken = cfg["slack_app_token"].(string)
+		slackAppURL, _ := url.Parse(cfg["slack_app_url"].(string))
+		if slackAppURL.String() != "" {
+			globalConf.SlackAppURL = &amcommoncfg.URL{URL: slackAppURL}
+		}
+
 		globalConf.SMTPFrom = cfg["smtp_from"].(string)
 		globalConf.SMTPHello = cfg["smtp_hello"].(string)
 
@@ -204,6 +210,8 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		globalConf.SMTPAuthIdentity = cfg["smtp_auth_identity"].(string)
 		globalConf.SMTPRequireTLS = new(bool)
 		*globalConf.SMTPRequireTLS = cfg["smtp_require_tls"].(bool)
+		globalConf.SMTPTLSConfig = expandTLSConfig(cfg["smtp_tls_config"])
+		globalConf.SMTPForceImplicitTLS = cfg["smtp_force_implicit_tls"].(bool)
 		globalConf.HTTPConfig = expandHTTPConfig(cfg["http_config"])
 
 		globalConf.OpsGenieAPIKey = cfg["opsgenie_api_key"].(string)
@@ -234,6 +242,7 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		if telegramAPIURL.String() != "" {
 			globalConf.TelegramAPIURL = &amcommoncfg.URL{URL: telegramAPIURL}
 		}
+		globalConf.TelegramBotToken = cfg["telegram_bot_token"].(string)
 	}
 	return globalConf
 }
@@ -292,6 +301,17 @@ func flattenGlobalConfig(v *globalConfig) []interface{} {
 		if v.SMTPRequireTLS != nil {
 			globalConf["smtp_require_tls"] = v.SMTPRequireTLS
 		}
+
+		if v.SMTPTLSConfig != nil {
+			globalConf["smtp_tls_config"] = flattenTLSConfig(v.SMTPTLSConfig)
+		}
+		globalConf["smtp_force_implicit_tls"] = v.SMTPForceImplicitTLS
+
+		globalConf["slack_app_token"] = v.SlackAppToken
+		if v.SlackAppURL != nil {
+			globalConf["slack_app_url"] = v.SlackAppURL.String()
+		}
+		globalConf["telegram_bot_token"] = v.TelegramBotToken
 	}
 
 	return []interface{}{globalConf}
@@ -577,6 +597,9 @@ func expandTelegramConfig(v []interface{}) []*telegramConfig {
 		if raw, ok := data["parse_mode"]; ok {
 			cfg.ParseMode = raw.(string)
 		}
+		if raw, ok := data["message_thread_id"]; ok {
+			cfg.MessageThreadID = raw.(int)
+		}
 
 		telegramConf = append(telegramConf, cfg)
 	}
@@ -602,6 +625,7 @@ func flattenTelegramConfig(v []*telegramConfig) []interface{} {
 		cfg["message"] = v.Message
 		cfg["disable_notifications"] = v.DisableNotifications
 		cfg["parse_mode"] = v.ParseMode
+		cfg["message_thread_id"] = v.MessageThreadID
 		telegramConf = append(telegramConf, cfg)
 	}
 	return telegramConf
@@ -757,6 +781,10 @@ func expandWebhookConfig(v []interface{}) []*webhookConfig {
 		if raw, ok := data["max_alerts"]; ok {
 			cfg.MaxAlerts = int32(raw.(int))
 		}
+		if raw, ok := data[timeoutKey]; ok {
+			timeout, _ := model.ParseDuration(raw.(string))
+			cfg.Timeout = time.Duration(timeout)
+		}
 		webhookConf = append(webhookConf, cfg)
 	}
 	return webhookConf
@@ -777,6 +805,7 @@ func flattenWebhookConfig(v []*webhookConfig) []interface{} {
 		}
 		cfg["url"] = v.URL
 		cfg["max_alerts"] = v.MaxAlerts
+		cfg[timeoutKey] = flattenDuration(v.Timeout)
 		webhookConf = append(webhookConf, cfg)
 	}
 	return webhookConf
@@ -852,6 +881,15 @@ func expandDiscordConfig(v []interface{}) []*discordConfig {
 		if raw, ok := data["message"]; ok {
 			cfg.Message = raw.(string)
 		}
+		if raw, ok := data["content"]; ok {
+			cfg.Content = raw.(string)
+		}
+		if raw, ok := data["username"]; ok {
+			cfg.Username = raw.(string)
+		}
+		if raw, ok := data["avatar_url"]; ok {
+			cfg.AvatarURL = raw.(string)
+		}
 		discordConf = append(discordConf, cfg)
 	}
 	return discordConf
@@ -873,6 +911,9 @@ func flattenDiscordConfig(v []*discordConfig) []interface{} {
 		cfg["webhook_url"] = v.WebhookURL
 		cfg["title"] = v.Title
 		cfg["message"] = v.Message
+		cfg["content"] = v.Content
+		cfg["username"] = v.Username
+		cfg["avatar_url"] = v.AvatarURL
 		discordConf = append(discordConf, cfg)
 	}
 	return discordConf
@@ -1001,6 +1042,12 @@ func expandEmailConfig(v []interface{}) []*emailConfig {
 			cfg.RequireTLS = new(bool)
 			*cfg.RequireTLS = raw.(bool)
 		}
+		if raw, ok := data["force_implicit_tls"]; ok {
+			cfg.ForceImplicitTLS = raw.(bool)
+		}
+		if raw, ok := data["threading"]; ok {
+			cfg.Threading = expandThreadingConfig(raw)
+		}
 		emailConf = append(emailConf, cfg)
 	}
 	return emailConf
@@ -1028,9 +1075,34 @@ func flattenEmailConfig(v []*emailConfig) []interface{} {
 		cfg["html"] = v.HTML
 		cfg["text"] = v.Text
 		cfg["require_tls"] = v.RequireTLS
+		cfg["force_implicit_tls"] = v.ForceImplicitTLS
+		if v.Threading != nil {
+			cfg["threading"] = flattenThreadingConfig(v.Threading)
+		}
 		emailConf = append(emailConf, cfg)
 	}
 	return emailConf
+}
+
+func expandThreadingConfig(v interface{}) *threadingConfig {
+	var threadingConf *threadingConfig
+	data := v.([]interface{})
+	if len(data) != 0 && data[0] != nil {
+		threadingConf = &threadingConfig{}
+		cfg := data[0].(map[string]interface{})
+		threadingConf.Enabled = cfg["enabled"].(bool)
+		threadingConf.ThreadByDate = cfg["thread_by_date"].(string)
+	}
+	return threadingConf
+}
+
+func flattenThreadingConfig(v *threadingConfig) []interface{} {
+	threadingConf := make(map[string]interface{})
+	if v != nil {
+		threadingConf["enabled"] = v.Enabled
+		threadingConf["thread_by_date"] = v.ThreadByDate
+	}
+	return []interface{}{threadingConf}
 }
 
 func expandSlackConfigConfirmationField(v interface{}) *slackConfirmationField {
@@ -1173,6 +1245,19 @@ func expandSlackConfig(v []interface{}) []*slackConfig {
 		if raw, ok := data["api_url"]; ok {
 			cfg.APIURL = raw.(string)
 		}
+		if raw, ok := data["app_token"]; ok {
+			cfg.AppToken = raw.(string)
+		}
+		if raw, ok := data["app_url"]; ok {
+			cfg.AppURL = raw.(string)
+		}
+		if raw, ok := data["message_text"]; ok {
+			cfg.MessageText = raw.(string)
+		}
+		if raw, ok := data[timeoutKey]; ok {
+			timeout, _ := model.ParseDuration(raw.(string))
+			cfg.Timeout = time.Duration(timeout)
+		}
 		if raw, ok := data["channel"]; ok {
 			cfg.Channel = raw.(string)
 		}
@@ -1246,6 +1331,10 @@ func flattenSlackConfig(v []*slackConfig) []interface{} {
 			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
 		}
 		cfg["api_url"] = v.APIURL
+		cfg["app_token"] = v.AppToken
+		cfg["app_url"] = v.AppURL
+		cfg["message_text"] = v.MessageText
+		cfg[timeoutKey] = flattenDuration(v.Timeout)
 		cfg["channel"] = v.Channel
 		cfg["username"] = v.Username
 		cfg["color"] = v.Color
@@ -1390,6 +1479,13 @@ func expandPagerdutyConfig(v []interface{}) []*pagerdutyConfig {
 		if raw, ok := data["group"]; ok {
 			cfg.Group = raw.(string)
 		}
+		if raw, ok := data["source"]; ok {
+			cfg.Source = raw.(string)
+		}
+		if raw, ok := data[timeoutKey]; ok {
+			timeout, _ := model.ParseDuration(raw.(string))
+			cfg.Timeout = time.Duration(timeout)
+		}
 		if raw, ok := data["details"]; ok {
 			cfg.Details = expandStringMap(raw.(map[string]interface{}))
 		}
@@ -1421,6 +1517,8 @@ func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
 		cfg["class"] = v.Class
 		cfg["component"] = v.Component
 		cfg["group"] = v.Group
+		cfg["source"] = v.Source
+		cfg[timeoutKey] = flattenDuration(v.Timeout)
 		cfg["details"] = v.Details
 		cfg["images"] = flattenPagerdutyConfigImages(v.Images)
 		cfg["links"] = flattenPagerdutyConfigLinks(v.Links)
@@ -1468,15 +1566,25 @@ func expandPushoverConfig(v []interface{}) []*pushoverConfig {
 			cfg.Priority = raw.(string)
 		}
 		if raw, ok := data["retry"]; ok {
-			retry, _ := time.ParseDuration(raw.(string))
-			cfg.Retry = retry
+			retry, _ := model.ParseDuration(raw.(string))
+			cfg.Retry = time.Duration(retry)
 		}
 		if raw, ok := data["expire"]; ok {
-			expire, _ := time.ParseDuration(raw.(string))
-			cfg.Expire = expire
+			expire, _ := model.ParseDuration(raw.(string))
+			cfg.Expire = time.Duration(expire)
 		}
 		if raw, ok := data["html"]; ok {
 			cfg.HTML = raw.(bool)
+		}
+		if raw, ok := data["device"]; ok {
+			cfg.Device = raw.(string)
+		}
+		if raw, ok := data["ttl"]; ok {
+			ttl, _ := model.ParseDuration(raw.(string))
+			cfg.TTL = time.Duration(ttl)
+		}
+		if raw, ok := data["monospace"]; ok {
+			cfg.Monospace = raw.(bool)
 		}
 		pushoverConf = append(pushoverConf, cfg)
 	}
@@ -1504,9 +1612,12 @@ func flattenPushoverConfig(v []*pushoverConfig) []interface{} {
 		cfg["url_title"] = v.URLTitle
 		cfg["sound"] = v.Sound
 		cfg["priority"] = v.Priority
-		cfg["retry"] = v.Retry.String()
-		cfg["expire"] = v.Expire.String()
+		cfg["retry"] = flattenDuration(v.Retry)
+		cfg["expire"] = flattenDuration(v.Expire)
 		cfg["html"] = v.HTML
+		cfg["device"] = v.Device
+		cfg["ttl"] = flattenDuration(v.TTL)
+		cfg["monospace"] = v.Monospace
 
 		pushoverConf = append(pushoverConf, cfg)
 	}
@@ -1777,6 +1888,9 @@ func expandInhibitRuleConfig(v []interface{}) []*inhibitRule {
 		cfg := &inhibitRule{}
 		data := v.(map[string]interface{})
 
+		if raw, ok := data["name"]; ok {
+			cfg.Name = raw.(string)
+		}
 		if raw, ok := data["source_matchers"]; ok {
 			cfg.SourceMatchers = expandStringArray(raw.([]interface{}))
 		}
@@ -1800,12 +1914,31 @@ func flattenInhibitRuleConfig(v []*inhibitRule) []interface{} {
 
 	for _, v := range v {
 		cfg := make(map[string]interface{})
+		cfg["name"] = v.Name
 		cfg["source_matchers"] = v.SourceMatchers
 		cfg["target_matchers"] = v.TargetMatchers
 		cfg["equal"] = v.Equal
 		inhibitRuleConf = append(inhibitRuleConf, cfg)
 	}
 	return inhibitRuleConf
+}
+
+// allTimeIntervals merges both spellings of the top-level time interval list
+// into a single slice. Configurations generated by this provider only use
+// time_intervals, but one written by hand or by an older provider version may
+// carry mute_time_intervals instead, and Alertmanager accepts either.
+func allTimeIntervals(c alertmanagerConfig) []*muteTimeInterval {
+	if len(c.MuteTimeIntervals) == 0 {
+		return c.TimeIntervals
+	}
+	if len(c.TimeIntervals) == 0 {
+		return c.MuteTimeIntervals
+	}
+
+	merged := make([]*muteTimeInterval, 0, len(c.MuteTimeIntervals)+len(c.TimeIntervals))
+	merged = append(merged, c.MuteTimeIntervals...)
+	merged = append(merged, c.TimeIntervals...)
+	return merged
 }
 
 func expandMuteTimeIntervalConfig(v []interface{}) []*muteTimeInterval {

@@ -48,5 +48,3 @@ Read-Only:
 - `expr` (String)
 - `labels` (Map of String)
 - `record` (String)
-
-

@@ -19,4 +19,11 @@ const (
 	apiURLKey         = "api_url"
 	messageKey        = "message"
 	beginKey          = "begin"
+	timeoutKey        = "timeout"
+	usernameKey       = "username"
+
+	// mimirMin31Descr flags attributes backed by an Alertmanager field that Mimir
+	// only vendors from 3.1.0 onwards. Mimir rejects a whole configuration when it
+	// carries an unknown key, so setting one of these against an older Mimir fails.
+	mimirMin31Descr = " Requires Mimir >= 3.1.0."
 )

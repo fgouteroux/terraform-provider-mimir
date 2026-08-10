@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func getChildRouteSchemaLevel() int {
@@ -249,7 +250,7 @@ func httpConfigFields() map[string]*schema.Schema {
 			Description: "Sets the `Authorization` header with the configured username and password.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"username": {
+					usernameKey: {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
@@ -390,6 +391,32 @@ func emailConfigFields() map[string]*schema.Schema {
 				Schema: tlsConfigFields(),
 			},
 		},
+		"force_implicit_tls": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS. When left unset, the connection type is derived from the smarthost port." + mimirMin31Descr,
+		},
+		"threading": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			MaxItems:    1,
+			Description: "Group notifications for the same alert into an email thread." + mimirMin31Descr,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"enabled": {
+						Type:        schema.TypeBool,
+						Optional:    true,
+						Description: "Whether to thread notifications for the same alert.",
+					},
+					"thread_by_date": {
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validation.StringInSlice([]string{"none", "daily"}, false),
+						Description:  "How often a new thread is started, either `none` to keep one thread per alert or `daily` to start one per day. Required when `enabled` is set.",
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -507,6 +534,18 @@ func pagerdutyConfigFields() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "A description of the incident.",
+		},
+		"source": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The unique location of the affected system.",
+		},
+		timeoutKey: {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "The maximum time allowed to invoke PagerDuty. When left unset, the notification timeout applies." + mimirMin31Descr,
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
 		},
 		"details": {
 			Type:        schema.TypeMap,
@@ -664,6 +703,13 @@ func webhookConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "The maximum number of alerts to include in a single webhook message. Alerts above this threshold are truncated. When leaving this at its default value of 0, all alerts are included.",
 		},
+		timeoutKey: {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "The maximum time allowed to invoke the webhook. When left unset, the notification timeout applies.",
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
 		httpConfigKey: {
 			Type:     schema.TypeList,
 			Optional: true,
@@ -733,6 +779,21 @@ func discordConfigFields() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Notification message.",
+		},
+		"content": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Message content template." + mimirMin31Descr,
+		},
+		usernameKey: {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Username to display the message as, overriding the webhook's own name." + mimirMin31Descr,
+		},
+		"avatar_url": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Avatar to display the message with, overriding the webhook's own avatar." + mimirMin31Descr,
 		},
 		httpConfigKey: {
 			Type:     schema.TypeList,
@@ -814,6 +875,23 @@ func pushoverConfigFields() map[string]*schema.Schema {
 			ValidateFunc: validateDuration,
 			StateFunc:    formatDuration,
 		},
+		"device": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The name of one of your devices to send the notification to. When left unset, the notification is sent to all devices.",
+		},
+		"ttl": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "How long the notification will live on the user's device before being automatically deleted.",
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
+		"monospace": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Whether the notification message is rendered in a monospace font." + mimirMin31Descr,
+		},
 		"html": {
 			Type:     schema.TypeBool,
 			Optional: true,
@@ -885,7 +963,7 @@ func opsgenieConfigFields() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
-					"username": {
+					usernameKey: {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
@@ -952,12 +1030,35 @@ func slackConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "The Slack webhook URL. Defaults to global settings if none are set here.",
 		},
+		"app_token": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Sensitive:   true,
+			Description: "The Slack app token, used to send notifications through the Slack API instead of a webhook. Defaults to global settings if none are set here." + mimirMin31Descr,
+		},
+		"app_url": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The Slack API URL used with `app_token`. Defaults to global settings if none are set here." + mimirMin31Descr,
+		},
+		"message_text": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The message text sent alongside the attachment when notifying through the Slack API." + mimirMin31Descr,
+		},
+		timeoutKey: {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "The maximum time allowed to invoke Slack. When left unset, the notification timeout applies." + mimirMin31Descr,
+			ValidateFunc: validateDuration,
+			StateFunc:    formatDuration,
+		},
 		"channel": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "The channel or user to send notifications to.",
 		},
-		"username": {
+		usernameKey: {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
@@ -1144,6 +1245,11 @@ func telegramConfigFields() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Parse mode for telegram message, supported values are MarkdownV2, Markdown, HTML and empty string for plain text.",
+		},
+		"message_thread_id": {
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Description: "ID of the message thread where to send the messages." + mimirMin31Descr,
 		},
 		httpConfigKey: {
 			Type:     schema.TypeList,
@@ -1431,6 +1537,37 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Default:     false,
 						Description: "The default SMTP TLS requirement.",
 					},
+					"smtp_tls_config": {
+						Type:        schema.TypeList,
+						Optional:    true,
+						MaxItems:    1,
+						Description: "The default SMTP TLS configuration.",
+						Elem: &schema.Resource{
+							Schema: tlsConfigFields(),
+						},
+					},
+					"smtp_force_implicit_tls": {
+						Type:        schema.TypeBool,
+						Optional:    true,
+						Description: "Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS. When left unset, the connection type is derived from the smarthost port." + mimirMin31Descr,
+					},
+					"slack_app_token": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Sensitive:   true,
+						Description: "The default Slack app token, used to send notifications through the Slack API instead of a webhook." + mimirMin31Descr,
+					},
+					"slack_app_url": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "The default Slack API URL used with `slack_app_token`." + mimirMin31Descr,
+					},
+					"telegram_bot_token": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Sensitive:   true,
+						Description: "The default Telegram bot token." + mimirMin31Descr,
+					},
 				},
 			},
 		},
@@ -1440,6 +1577,11 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Description: "Mutes an alert (target) matching a set of matchers when an alert (source) exists that matches another set of matchers.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "An optional name for the inhibition rule." + mimirMin31Descr,
+					},
 					"source_matchers": {
 						Type:        schema.TypeList,
 						Optional:    true,
@@ -1878,6 +2020,36 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Default:     nil,
 						Description: "The default SMTP TLS requirement.",
 					},
+					"smtp_tls_config": {
+						Type:        schema.TypeList,
+						Computed:    true,
+						Description: "The default SMTP TLS configuration.",
+						Elem: &schema.Resource{
+							Schema: tlsConfigFields(),
+						},
+					},
+					"smtp_force_implicit_tls": {
+						Type:        schema.TypeBool,
+						Computed:    true,
+						Description: "Force a direct TLS connection to the SMTP server instead of upgrading an established one with STARTTLS." + mimirMin31Descr,
+					},
+					"slack_app_token": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Sensitive:   true,
+						Description: "The default Slack app token, used to send notifications through the Slack API instead of a webhook." + mimirMin31Descr,
+					},
+					"slack_app_url": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The default Slack API URL used with `slack_app_token`." + mimirMin31Descr,
+					},
+					"telegram_bot_token": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Sensitive:   true,
+						Description: "The default Telegram bot token." + mimirMin31Descr,
+					},
 				},
 			},
 		},
@@ -1887,6 +2059,11 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Description: "Mutes an alert (target) matching a set of matchers when an alert (source) exists that matches another set of matchers.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "An optional name for the inhibition rule." + mimirMin31Descr,
+					},
 					"source_matchers": {
 						Type:        schema.TypeList,
 						Computed:    true,

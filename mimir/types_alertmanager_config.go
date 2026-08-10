@@ -20,11 +20,16 @@ type alertmanagerUserConfig struct {
 // marshalling. See the following issue for details:
 // https://github.com/prometheus/alertmanager/issues/1985
 type alertmanagerConfig struct {
-	Global            *globalConfig       `yaml:"global,omitempty" json:"global,omitempty"`
-	Route             *route              `yaml:"route,omitempty" json:"route,omitempty"`
-	InhibitRules      []*inhibitRule      `yaml:"inhibit_rules,omitempty" json:"inhibit_rules,omitempty"`
-	Receivers         []*receiver         `yaml:"receivers,omitempty" json:"receivers,omitempty"`
+	Global       *globalConfig  `yaml:"global,omitempty" json:"global,omitempty"`
+	Route        *route         `yaml:"route,omitempty" json:"route,omitempty"`
+	InhibitRules []*inhibitRule `yaml:"inhibit_rules,omitempty" json:"inhibit_rules,omitempty"`
+	Receivers    []*receiver    `yaml:"receivers,omitempty" json:"receivers,omitempty"`
+	// MuteTimeIntervals is the deprecated spelling of TimeIntervals. It is kept
+	// for reading configurations that were not written by this provider;
+	// generated configurations always use TimeIntervals. Alertmanager resolves
+	// both keys against the same namespace.
 	MuteTimeIntervals []*muteTimeInterval `yaml:"mute_time_intervals,omitempty" json:"mute_time_intervals,omitempty"`
+	TimeIntervals     []*muteTimeInterval `yaml:"time_intervals,omitempty" json:"time_intervals,omitempty"`
 	Templates         []string            `yaml:"templates,omitempty" json:"templates,omitempty"`
 }
 
@@ -54,6 +59,14 @@ type globalConfig struct {
 	VictorOpsAPIURL  *amcommoncfg.URL `yaml:"victorops_api_url,omitempty" json:"victorops_api_url,omitempty"`
 	VictorOpsAPIKey  string           `yaml:"victorops_api_key,omitempty" json:"victorops_api_key,omitempty"`
 	TelegramAPIURL   *amcommoncfg.URL `yaml:"telegram_api_url,omitempty" json:"telegram_api_url,omitempty"`
+	SMTPTLSConfig    *tlsConfig       `yaml:"smtp_tls_config,omitempty" json:"smtp_tls_config,omitempty"`
+
+	SlackAppToken    string           `yaml:"slack_app_token,omitempty" json:"slack_app_token,omitempty"`
+	SlackAppURL      *amcommoncfg.URL `yaml:"slack_app_url,omitempty" json:"slack_app_url,omitempty"`
+	TelegramBotToken string           `yaml:"telegram_bot_token,omitempty" json:"telegram_bot_token,omitempty"`
+	// SMTPForceImplicitTLS is a plain bool for the same reason as
+	// emailConfig.ForceImplicitTLS.
+	SMTPForceImplicitTLS bool `yaml:"smtp_force_implicit_tls,omitempty" json:"smtp_force_implicit_tls,omitempty"`
 }
 
 type route struct {
@@ -70,6 +83,7 @@ type route struct {
 }
 
 type inhibitRule struct {
+	Name           string   `yaml:"name,omitempty" json:"name,omitempty"`
 	TargetMatchers []string `yaml:"target_matchers,omitempty" json:"target_matchers,omitempty"`
 	SourceMatchers []string `yaml:"source_matchers,omitempty" json:"source_matchers,omitempty"`
 	Equal          []string `yaml:"equal,omitempty" json:"equal,omitempty"`
@@ -98,6 +112,7 @@ type webhookConfig struct {
 	URL           string            `yaml:"url,omitempty" json:"url,omitempty"`
 	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 	MaxAlerts     int32             `yaml:"max_alerts,omitempty" json:"max_alerts,omitempty"`
+	Timeout       time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 }
 
 type webexConfig struct {
@@ -114,6 +129,9 @@ type discordConfig struct {
 	WebhookURL    string            `yaml:"webhook_url,omitempty" json:"webhook_url,omitempty"`
 	Title         string            `yaml:"title,omitempty" json:"title,omitempty"`
 	Message       string            `yaml:"message,omitempty" json:"message,omitempty"`
+	Content       string            `yaml:"content,omitempty" json:"content,omitempty"`
+	Username      string            `yaml:"username,omitempty" json:"username,omitempty"`
+	AvatarURL     string            `yaml:"avatar_url,omitempty" json:"avatar_url,omitempty"`
 }
 
 type pagerdutyConfig struct {
@@ -132,6 +150,8 @@ type pagerdutyConfig struct {
 	Class         string            `yaml:"class,omitempty" json:"class,omitempty"`
 	Component     string            `yaml:"component,omitempty" json:"component,omitempty"`
 	Group         string            `yaml:"group,omitempty" json:"group,omitempty"`
+	Source        string            `yaml:"source,omitempty" json:"source,omitempty"`
+	Timeout       time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 }
 
 type opsgenieConfig struct {
@@ -170,6 +190,10 @@ type slackConfig struct {
 	VSendResolved *bool             `yaml:"send_resolved,omitempty" json:"send_resolved,omitempty"`
 	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 	APIURL        string            `yaml:"api_url,omitempty" json:"api_url,omitempty"`
+	AppToken      string            `yaml:"app_token,omitempty" json:"app_token,omitempty"`
+	AppURL        string            `yaml:"app_url,omitempty" json:"app_url,omitempty"`
+	MessageText   string            `yaml:"message_text,omitempty" json:"message_text,omitempty"`
+	Timeout       time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 	Channel       string            `yaml:"channel,omitempty" json:"channel,omitempty"`
 	Username      string            `yaml:"username,omitempty" json:"username,omitempty"`
 	Color         string            `yaml:"color,omitempty" json:"color,omitempty"`
@@ -302,6 +326,16 @@ type emailConfig struct {
 	Text          string            `yaml:"text,omitempty" json:"text,omitempty"`
 	RequireTLS    *bool             `yaml:"require_tls,omitempty" json:"require_tls,omitempty"`
 	TLSConfig     tlsConfig         `yaml:"tls_config,omitempty" json:"tls_config,omitempty"`
+	// ForceImplicitTLS is a plain bool rather than a pointer so that leaving it
+	// unset keeps the key out of the generated configuration: Mimir rejects the
+	// whole configuration when it carries a key it does not know about.
+	ForceImplicitTLS bool             `yaml:"force_implicit_tls,omitempty" json:"force_implicit_tls,omitempty"`
+	Threading        *threadingConfig `yaml:"threading,omitempty" json:"threading,omitempty"`
+}
+
+type threadingConfig struct {
+	Enabled      bool   `yaml:"enabled,omitempty" json:"enabled,omitempty"`
+	ThreadByDate string `yaml:"thread_by_date,omitempty" json:"thread_by_date,omitempty"`
 }
 
 type pushoverConfig struct {
@@ -318,6 +352,9 @@ type pushoverConfig struct {
 	Retry         time.Duration     `yaml:"retry,omitempty" json:"retry,omitempty"`
 	Expire        time.Duration     `yaml:"expire,omitempty" json:"expire,omitempty"`
 	HTML          bool              `yaml:"html,omitempty" json:"html,omitempty"`
+	Device        string            `yaml:"device,omitempty" json:"device,omitempty"`
+	TTL           time.Duration     `yaml:"ttl,omitempty" json:"ttl,omitempty"`
+	Monospace     bool              `yaml:"monospace,omitempty" json:"monospace,omitempty"`
 }
 
 type snsConfig struct {
@@ -342,6 +379,7 @@ type telegramConfig struct {
 	Message              string            `yaml:"message,omitempty" json:"message,omitempty"`
 	DisableNotifications bool              `yaml:"disable_notifications,omitempty" json:"disable_notifications,omitempty"`
 	ParseMode            string            `yaml:"parse_mode,omitempty" json:"parse_mode,omitempty"`
+	MessageThreadID      int               `yaml:"message_thread_id,omitempty" json:"message_thread_id,omitempty"`
 }
 
 type sigV4Config struct {

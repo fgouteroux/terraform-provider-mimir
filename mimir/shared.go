@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -266,6 +267,21 @@ func formatDuration(v interface{}) string {
 		return ""
 	}
 	return str
+}
+
+// flattenDuration renders a duration held as a time.Duration back into state.
+//
+// Configured values reach state through formatDuration, which normalizes with
+// model.Duration. Rendering with time.Duration.String() instead disagrees
+// whenever the value carries trailing zero sub-units or exceeds a day ("1h" vs
+// "1h0m0s", "1d" vs "24h0m0s"), which shows up as a permanent diff. Zero maps to
+// the empty string for the same reason formatDuration does it: an unset optional
+// attribute must not read back as "0s".
+func flattenDuration(d time.Duration) string {
+	if d == 0 {
+		return ""
+	}
+	return model.Duration(d).String()
 }
 
 func formatPromQLExpr(v interface{}) string {
