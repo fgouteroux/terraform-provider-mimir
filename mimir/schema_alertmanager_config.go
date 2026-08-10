@@ -1424,10 +1424,11 @@ func snsConfigFields() map[string]*schema.Schema {
 func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		orgIDKey: {
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Optional:    true,
-			Description: orgIDDescription,
+			Type:         schema.TypeString,
+			ForceNew:     true,
+			Optional:     true,
+			Description:  orgIDDescription,
+			ValidateFunc: validateOrgID,
 		},
 		"global": {
 			Type:     schema.TypeList,
@@ -1846,6 +1847,24 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Description: "The root node of the routing tree.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
+					"matchers": {
+						Type:        schema.TypeList,
+						Optional:    true,
+						Description: "A list of matchers that an alert has to fulfill to match the node.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
+					"mute_time_intervals": {
+						Type:        schema.TypeList,
+						Optional:    true,
+						Description: "Times when the route should be muted. These must match the name of a time interval defined in the time_interval block.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
+					"active_time_intervals": {
+						Type:        schema.TypeList,
+						Optional:    true,
+						Description: "Times when the route should be active. These must match the name of a time interval defined in the time_interval block.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
 					"group_by": {
 						Type:        schema.TypeList,
 						Optional:    true,
@@ -1906,10 +1925,11 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		orgIDKey: {
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Optional:    true,
-			Description: orgIDDescription,
+			Type:         schema.TypeString,
+			ForceNew:     true,
+			Optional:     true,
+			Description:  orgIDDescription,
+			ValidateFunc: validateOrgID,
 		},
 		"name": {
 			Type:        schema.TypeString,
@@ -2325,6 +2345,24 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Description: "The root node of the routing tree.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
+					"matchers": {
+						Type:        schema.TypeList,
+						Computed:    true,
+						Description: "A list of matchers that an alert has to fulfill to match the node.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
+					"mute_time_intervals": {
+						Type:        schema.TypeList,
+						Computed:    true,
+						Description: "Times when the route should be muted. These must match the name of a time interval defined in the time_interval block.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
+					"active_time_intervals": {
+						Type:        schema.TypeList,
+						Computed:    true,
+						Description: "Times when the route should be active. These must match the name of a time interval defined in the time_interval block.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
 					"group_by": {
 						Type:        schema.TypeList,
 						Computed:    true,

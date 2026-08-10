@@ -26,10 +26,11 @@ func dataSourcemimirDistributorTenantStats() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			orgIDKey: {
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Optional:    true,
-				Description: orgIDDescription,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Optional:     true,
+				Description:  orgIDDescription,
+				ValidateFunc: validateOrgID,
 			},
 			"user": {
 				Type:        schema.TypeString,

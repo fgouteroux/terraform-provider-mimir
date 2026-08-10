@@ -1351,8 +1351,11 @@ Required:
 
 Optional:
 
+- `active_time_intervals` (List of String) Times when the route should be active. These must match the name of a time interval defined in the time_interval block.
 - `child_route` (Block List) (see [below for nested schema](#nestedblock--route--child_route))
 - `group_by` (List of String) The labels by which incoming alerts are grouped together.
+- `matchers` (List of String) A list of matchers that an alert has to fulfill to match the node.
+- `mute_time_intervals` (List of String) Times when the route should be muted. These must match the name of a time interval defined in the time_interval block.
 
 <a id="nestedblock--route--child_route"></a>
 ### Nested Schema for `route.child_route`
