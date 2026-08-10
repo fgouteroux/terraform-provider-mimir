@@ -49,6 +49,7 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 				Description:  "Alerting Rule group interval",
 				Optional:     true,
 				ValidateFunc: validateDuration,
+				StateFunc:    formatDuration,
 			},
 			"source_tenants": {
 				Type:        schema.TypeList,

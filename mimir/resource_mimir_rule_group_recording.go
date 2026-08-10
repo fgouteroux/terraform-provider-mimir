@@ -49,6 +49,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Description:  "Recording Rule group interval",
 				Optional:     true,
 				ValidateFunc: validateDuration,
+				StateFunc:    formatDuration,
 			},
 			"query_offset": {
 				Type:          schema.TypeString,
@@ -56,6 +57,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Optional:      true,
 				ConflictsWith: []string{"evaluation_delay"},
 				ValidateFunc:  validateDuration,
+				StateFunc:     formatDuration,
 			},
 			"evaluation_delay": {
 				Type:          schema.TypeString,
@@ -64,6 +66,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Deprecated:    "With Mimir >= 2.13, replaced by query_offset. This attribute will be removed when it is no longer supported in Mimir.",
 				ConflictsWith: []string{"query_offset"},
 				ValidateFunc:  validateDuration,
+				StateFunc:     formatDuration,
 			},
 			"source_tenants": {
 				Type:        schema.TypeList,
