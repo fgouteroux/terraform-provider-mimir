@@ -1,12 +1,9 @@
 package mimir
 
 import (
-	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -142,13 +139,7 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 }
 
 func TestAccResourceRuleGroupRecording_EvaluationDelay(t *testing.T) {
-	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
-	validVersion, _ := version.NewVersion("2.12.0")
-
-	if !currentVersion.Equal(validVersion) {
-		fmt.Printf("Skipping ruler evaluation delay tests (current version '%s' is not '%s')\n", currentVersion, validVersion)
-		return
-	}
+	skipUnlessMimirVersion(t, "2.12.0")
 
 	// Init client
 	client, err := NewAPIClient(setupClient())
@@ -188,13 +179,7 @@ func TestAccResourceRuleGroupRecording_EvaluationDelay(t *testing.T) {
 }
 
 func TestAccResourceRuleGroupRecording_QueryOffset(t *testing.T) {
-	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
-	minVersion, _ := version.NewVersion("2.13.0")
-
-	if currentVersion.LessThan(minVersion) {
-		fmt.Printf("Skipping ruler query offset tests (current version '%s' is less than '%s')\n", currentVersion, minVersion)
-		return
-	}
+	skipBelowMimirVersion(t, "2.13.0")
 
 	// Init client
 	client, err := NewAPIClient(setupClient())

@@ -2,14 +2,11 @@ package mimir
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
-	"github.com/hashicorp/go-version"
 )
 
 func testAccCheckMimirAlertmanagerConfigExists(n string, client *apiClient) resource.TestCheckFunc {
@@ -1152,13 +1149,7 @@ func TestAccResourceAlertmanagerConfig_MsteamsReceiver(t *testing.T) {
 
 		--- FAIL: TestAccResourceAlertmanagerConfig_MsteamsReceiver (0.44s)
 	*/
-	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
-	minVersion, _ := version.NewVersion("2.12.0")
-
-	if currentVersion.LessThan(minVersion) {
-		fmt.Printf("Skipping alertmanager msteams receiver tests (current version '%s' is less than '%s')\n", currentVersion, minVersion)
-		return
-	}
+	skipBelowMimirVersion(t, "2.12.0")
 
 	// Init client
 	client, err := NewAPIClient(setupClient())
@@ -1261,13 +1252,7 @@ const testAccResourceAlertmanagerConfig_MsteamsReceiver_update = `
 
 func TestAccResourceAlertmanagerConfig_Msteamsv2Receiver(t *testing.T) {
 	// Skip this test if mimir version is older than 3.0.0 https://github.com/grafana/mimir/commit/633a7534c2981e570f3feb4da94c4c6f8fa450c6
-	currentVersion, _ := version.NewVersion(os.Getenv("MIMIR_VERSION"))
-	minVersion, _ := version.NewVersion("3.0.0")
-
-	if currentVersion.LessThan(minVersion) {
-		fmt.Printf("Skipping alertmanager msteams receiver tests (current version '%s' is less than '%s')\n", currentVersion, minVersion)
-		return
-	}
+	skipBelowMimirVersion(t, "3.0.0")
 
 	// Init client
 	client, err := NewAPIClient(setupClient())

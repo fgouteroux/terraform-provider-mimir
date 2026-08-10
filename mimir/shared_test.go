@@ -13,24 +13,42 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// skipBelowMimirVersion skips a test when MIMIR_VERSION is unset, unparseable, or
-// below min. Unlike the older inline pattern (version.NewVersion(os.Getenv(...))
-// then .LessThan, which nil-panics on an empty MIMIR_VERSION and uses bare
-// `return` that go test reports as PASS), this guards the empty/unparseable case
-// and uses t.Skip so the gate produces a real `--- SKIP`.
-func skipBelowMimirVersion(t *testing.T, min string) {
+// mimirVersion returns the Mimir version under test, skipping when MIMIR_VERSION
+// is unset or unparseable. The older inline pattern
+// (version.NewVersion(os.Getenv(...)) followed by .LessThan) nil-panics on an
+// empty MIMIR_VERSION, which takes the whole package down under a plain
+// `go test`, and its bare `return` made a skipped gate report as PASS.
+func mimirVersion(t *testing.T, requirement string) *version.Version {
 	t.Helper()
 	v := os.Getenv("MIMIR_VERSION")
 	if v == "" {
-		t.Skipf("MIMIR_VERSION not set; skipping test requiring Mimir >= %s", min)
+		t.Skipf("MIMIR_VERSION not set; skipping test requiring Mimir %s", requirement)
 	}
 	cur, err := version.NewVersion(v)
 	if err != nil {
-		t.Skipf("MIMIR_VERSION %q unparseable; skipping test requiring Mimir >= %s", v, min)
+		t.Skipf("MIMIR_VERSION %q unparseable; skipping test requiring Mimir %s", v, requirement)
 	}
+	return cur
+}
+
+// skipBelowMimirVersion skips a test unless the Mimir under test is at least min.
+func skipBelowMimirVersion(t *testing.T, min string) {
+	t.Helper()
+	cur := mimirVersion(t, ">= "+min)
 	minV, _ := version.NewVersion(min)
 	if cur.LessThan(minV) {
-		t.Skipf("Mimir %s < %s; skipping group-label persistence test", cur, minV)
+		t.Skipf("Mimir %s < %s; skipping test", cur, minV)
+	}
+}
+
+// skipUnlessMimirVersion skips a test unless the Mimir under test is exactly
+// want, for behaviour that only ever existed in a single release.
+func skipUnlessMimirVersion(t *testing.T, want string) {
+	t.Helper()
+	cur := mimirVersion(t, "== "+want)
+	wantV, _ := version.NewVersion(want)
+	if !cur.Equal(wantV) {
+		t.Skipf("Mimir %s is not %s; skipping test", cur, wantV)
 	}
 }
 
