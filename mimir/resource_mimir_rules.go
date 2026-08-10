@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -266,8 +267,12 @@ func resourceMimirRules() *schema.Resource {
 
 			// Check if content has changed (either directly or via file modification)
 			contentChanged := diff.HasChange("content") || diff.HasChange("only_groups") || diff.HasChange("ignore_groups") || diff.Id() == ""
-			if !contentChanged && diff.Get("content_file").(string) != "" {
-				// For content_file, compare hashes to detect file content changes
+			if !contentChanged {
+				// Read recomputes content_hash over the groups that actually
+				// exist in Mimir, so a group deleted out of band makes the stored
+				// hash diverge from the hash of the configured set and the plan
+				// repairs the drift. This has to apply to inline content as well
+				// as content_file, otherwise a deleted group is never recreated.
 				contentChanged = newContentHash != oldContentHash
 			}
 
@@ -666,10 +671,65 @@ func resourceMimirRulesImport(ctx context.Context, d *schema.ResourceData, m int
 	d.Set(orgIDKey, orgID)
 	d.Set(namespaceKey, namespace)
 
-	// Note: For import, the user will need to provide content/content_file afterward
-	// We can't automatically detect the YAML content from the API
+	// Terraform calls Read straight after the importer, and Read needs a rule
+	// configuration to work out which groups it manages. Without one it fails
+	// with "no rule configuration provided" and the import can never complete,
+	// so rebuild content from the namespace as the ruler currently holds it.
+	client, ok := m.(*apiClient)
+	if !ok {
+		return nil, fmt.Errorf("import %q: provider is not configured", d.Id())
+	}
+
+	headers := make(map[string]string)
+	if orgID != "" {
+		headers["X-Scope-OrgID"] = orgID
+	}
+
+	body, err := client.sendRequest("ruler", "GET", rulesNamespacePath(namespace), "", headers)
+	if err != nil {
+		return nil, fmt.Errorf("import %q: failed to read namespace: %w", d.Id(), err)
+	}
+
+	groups, err := decodeNamespaceRuleGroups(body)
+	if err != nil {
+		return nil, fmt.Errorf("import %q: %w", d.Id(), err)
+	}
+	if len(groups.Groups) == 0 {
+		return nil, fmt.Errorf("import %q: namespace holds no rule group", d.Id())
+	}
+
+	content, err := yaml.Marshal(groups)
+	if err != nil {
+		return nil, fmt.Errorf("import %q: failed to serialize rule groups: %w", d.Id(), err)
+	}
+	d.Set(contentKey, string(content))
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// decodeNamespaceRuleGroups decodes a ruler namespace listing. The API has been
+// observed returning both a namespace-keyed map ({<ns>: [{name: ...}]}) and a
+// flat list ([{name: ...}]), so accept either.
+func decodeNamespaceRuleGroups(body string) (RuleGroups, error) {
+	var byNamespace map[string][]RuleGroup
+	if err := yaml.Unmarshal([]byte(body), &byNamespace); err == nil {
+		var groups RuleGroups
+		names := make([]string, 0, len(byNamespace))
+		for ns := range byNamespace {
+			names = append(names, ns)
+		}
+		sort.Strings(names)
+		for _, ns := range names {
+			groups.Groups = append(groups.Groups, byNamespace[ns]...)
+		}
+		return groups, nil
+	}
+
+	var flat []RuleGroup
+	if err := yaml.Unmarshal([]byte(body), &flat); err != nil {
+		return RuleGroups{}, fmt.Errorf("failed to parse the rule groups returned by the ruler: %w", err)
+	}
+	return RuleGroups{Groups: flat}, nil
 }
 
 // Helper functions
