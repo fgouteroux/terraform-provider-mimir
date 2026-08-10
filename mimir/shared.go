@@ -295,7 +295,13 @@ func formatPromQLExpr(v interface{}) string {
 
 // Converts a string of the form "HH:MM" into the number of minutes elapsed in the day.
 func parseTime(in string) (mins int) {
+	// start_time and end_time are both Optional and validateTime returns early
+	// for "", so an unset half of a times block reaches this function as an
+	// empty string. Indexing [1] unconditionally then panics the provider.
 	timestampComponents := strings.Split(in, ":")
+	if len(timestampComponents) != 2 {
+		return 0
+	}
 	timeStampHours, _ := strconv.Atoi(timestampComponents[0])
 	timeStampMinutes, _ := strconv.Atoi(timestampComponents[1])
 

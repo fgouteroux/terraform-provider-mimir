@@ -408,9 +408,14 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 }
 
 func expandSnsSigV4Config(v interface{}) *sigV4Config {
-	sigV4ConfigConf := &sigV4Config{}
+	// Allocate inside the guard, like every other nested block: a non-nil
+	// pointer defeats `yaml:"sigv4,omitempty"` and emits `sigv4: {}` for every
+	// sns_configs block, which then reads back as a one-element block the user
+	// never wrote.
+	var sigV4ConfigConf *sigV4Config
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
+		sigV4ConfigConf = &sigV4Config{}
 		cfg := data[0].(map[string]interface{})
 		sigV4ConfigConf.Region = cfg["region"].(string)
 		sigV4ConfigConf.AccessKey = cfg["access_key"].(string)
@@ -423,6 +428,9 @@ func expandSnsSigV4Config(v interface{}) *sigV4Config {
 
 func flattenSnsSigV4Config(v *sigV4Config) []interface{} {
 	sigV4ConfigConf := make(map[string]interface{})
+	if v == nil {
+		return nil
+	}
 	sigV4ConfigConf["region"] = v.Region
 	sigV4ConfigConf["access_key"] = v.AccessKey
 	sigV4ConfigConf["secret_key"] = v.SecretKey
@@ -487,7 +495,9 @@ func flattenSnsConfig(v []*snsConfig) []interface{} {
 		if v.HTTPConfig != nil {
 			cfg["http_config"] = flattenHTTPConfig(v.HTTPConfig)
 		}
-		cfg["sigv4"] = flattenSnsSigV4Config(v.Sigv4)
+		if v.Sigv4 != nil {
+			cfg["sigv4"] = flattenSnsSigV4Config(v.Sigv4)
+		}
 		cfg["api_url"] = v.APIUrl
 		cfg["topic_arn"] = v.TopicARN
 		cfg["phone_number"] = v.PhoneNumber
