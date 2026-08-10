@@ -84,7 +84,7 @@ func resourceMimirRules() *schema.Resource {
 			},
 
 			// Content input methods (mutually exclusive)
-			"content": {
+			contentKey: {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Description:   "YAML content containing rule groups. Mutually exclusive with 'content_file'. Group-level `labels` are supported and require Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).",

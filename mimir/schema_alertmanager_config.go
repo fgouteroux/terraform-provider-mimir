@@ -780,7 +780,7 @@ func discordConfigFields() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Notification message.",
 		},
-		"content": {
+		contentKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Message content template." + mimirMin31Descr,
