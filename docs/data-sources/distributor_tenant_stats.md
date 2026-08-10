@@ -39,5 +39,3 @@ Read-Only:
 - `series` (Number)
 - `total_ingest_rate` (Number)
 - `user` (String)
-
-

@@ -481,13 +481,10 @@ Optional:
 
 Optional:
 
+- `id` (String)
 - `name` (String)
 - `type` (String)
 - `username` (String)
-
-Read-Only:
-
-- `id` (String) The ID of this resource.
 
 
 
@@ -1598,6 +1595,8 @@ Optional:
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 terraform import mimir_alertmanager_config.mytenant {{org_id}}
