@@ -36,10 +36,18 @@ func dataSourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	d.SetId(client.headers["X-Scope-OrgID"])
+	// Identify the tenant this data source actually read, not the provider-wide
+	// one: with a data-source-level org_id the two differ, and using the provider
+	// value gave the resource an ID and a name belonging to another tenant.
+	tenant := orgID
+	if tenant == "" {
+		tenant = client.headers["X-Scope-OrgID"]
+	}
+
+	d.SetId(tenant)
 
 	if name == "" {
-		name = client.headers["X-Scope-OrgID"]
+		name = tenant
 	}
 
 	if err := d.Set("name", name); err != nil {

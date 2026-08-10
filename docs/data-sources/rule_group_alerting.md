@@ -34,6 +34,8 @@ data "mimir_rule_group_alerting" "alert" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `interval` (String) Alerting Rule group interval
+- `labels` (Map of String) Group-level labels applied to all rules in the group.
 - `rule` (List of Object) (see [below for nested schema](#nestedatt--rule))
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
 
