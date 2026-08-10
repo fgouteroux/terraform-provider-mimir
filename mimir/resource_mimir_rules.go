@@ -28,6 +28,15 @@ type RuleGroup struct {
 	Rules           []Rule   `yaml:"rules"`
 	SourceTenants   []string `yaml:"source_tenants,omitempty"`
 	Limit           int      `yaml:"limit,omitempty"`
+	// QueryOffset, EvaluationDelay and AlignEvaluationTimeOnInterval are group
+	// fields of Mimir's vendored rulefmt.RuleGroup. This resource parses the
+	// user's YAML into this struct and marshals it back out, so a field missing
+	// here is silently stripped from the rule group sent to Mimir.
+	// EvaluationDelay is deprecated upstream in favour of QueryOffset, and is
+	// carried only so an existing configuration is not rewritten.
+	QueryOffset                   string `yaml:"query_offset,omitempty"`
+	EvaluationDelay               string `yaml:"evaluation_delay,omitempty"`
+	AlignEvaluationTimeOnInterval bool   `yaml:"align_evaluation_time_on_interval,omitempty"`
 	// Labels are group-level labels applied to all rules in the group.
 	// Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).
 	Labels map[string]string `yaml:"labels,omitempty"`
@@ -40,9 +49,10 @@ type Rule struct {
 	Labels map[string]string `yaml:"labels,omitempty"`
 
 	// Alerting rule fields
-	Alert       string            `yaml:"alert,omitempty"`
-	For         string            `yaml:"for,omitempty"`
-	Annotations map[string]string `yaml:"annotations,omitempty"`
+	Alert         string            `yaml:"alert,omitempty"`
+	For           string            `yaml:"for,omitempty"`
+	KeepFiringFor string            `yaml:"keep_firing_for,omitempty"`
+	Annotations   map[string]string `yaml:"annotations,omitempty"`
 
 	// Recording rule fields
 	Record string `yaml:"record,omitempty"`
