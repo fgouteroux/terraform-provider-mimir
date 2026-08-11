@@ -6,7 +6,7 @@ GoReleaser already produces a per-release list of commit subjects. This file exi
 what that list cannot convey: behaviour that changes under an unchanged configuration,
 and the reason a fix matters. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.1.0] - unreleased
+## [1.1.0] - 2026-08-11
 
 First release since `v1.0.13`. It aligns the Alertmanager receiver schema with the Alertmanager
 fork Mimir vendors, and fixes the defects found by a full review of the provider. A minor bump
