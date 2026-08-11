@@ -1,0 +1,170 @@
+package mimir
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+)
+
+// TestRulesImportRebuildsContent covers an import that could never complete:
+// the importer set only org_id and namespace, then Terraform called Read, which
+// needs a rule configuration and failed with "no rule configuration provided".
+func TestRulesImportRebuildsContent(t *testing.T) {
+	const listing = `namespace1:
+  - name: group_one
+    interval: 1m
+    rules:
+      - alert: HighErrorRate
+        expr: rate(errors[5m]) > 1
+        keep_firing_for: 10m
+`
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.URL.Path, rulesNamespacePath("namespace1"); got != want {
+			t.Errorf("importer requested %q, want %q", got, want)
+		}
+		w.Header().Set("Content-Type", "application/yaml")
+		_, _ = w.Write([]byte(listing))
+	}))
+	defer srv.Close()
+
+	client, err := NewAPIClient(&apiClientOpt{uri: srv.URL, headers: map[string]string{}, timeout: 5})
+	if err != nil {
+		t.Fatalf("NewAPIClient: %v", err)
+	}
+
+	res := resourceMimirRules()
+	d := res.Data(&terraform.InstanceState{ID: "tenant1/namespace1"})
+	d.SetId("tenant1/namespace1")
+
+	imported, err := resourceMimirRulesImport(context.Background(), d, client)
+	if err != nil {
+		t.Fatalf("import failed: %v", err)
+	}
+	if len(imported) != 1 {
+		t.Fatalf("got %d resources, want 1", len(imported))
+	}
+
+	got := imported[0].Get(contentKey).(string)
+	if got == "" {
+		t.Fatal("importer left content empty; Read would fail with \"no rule configuration provided\"")
+	}
+	for _, want := range []string{"name: group_one", "alert: HighErrorRate", "keep_firing_for: 10m"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("rebuilt content is missing %q:\n%s", want, got)
+		}
+	}
+	if imported[0].Get(namespaceKey).(string) != "namespace1" {
+		t.Errorf("namespace = %q, want namespace1", imported[0].Get(namespaceKey))
+	}
+}
+
+// TestDecodeNamespaceRuleGroupsAcceptsBothShapes pins the two response shapes
+// the ruler has been observed returning.
+func TestDecodeNamespaceRuleGroupsAcceptsBothShapes(t *testing.T) {
+	keyed := "ns:\n  - name: a\n    rules:\n      - record: r\n        expr: up\n"
+	flat := "- name: a\n  rules:\n    - record: r\n      expr: up\n"
+
+	for name, body := range map[string]string{"namespace-keyed": keyed, "flat list": flat} {
+		groups, err := decodeNamespaceRuleGroups(body)
+		if err != nil {
+			t.Errorf("%s: %v", name, err)
+			continue
+		}
+		if len(groups.Groups) != 1 || groups.Groups[0].Name != "a" {
+			t.Errorf("%s: got %+v, want one group named a", name, groups.Groups)
+		}
+	}
+}
+
+// TestOutOfBandDeletionIsPlanned covers drift repair for inline content: the
+// hash comparison used to be skipped unless content_file was set, so a group
+// deleted directly in Mimir produced an empty plan and was never recreated.
+func TestOutOfBandDeletionIsPlanned(t *testing.T) {
+	res := resourceMimirRules()
+	content := "groups:\n  - name: g1\n    rules:\n      - record: r\n        expr: up\n"
+
+	cfg := terraform.NewResourceConfigRaw(map[string]interface{}{
+		namespaceKey: "ns",
+		contentKey:   content,
+	})
+
+	// State as Read leaves it once g1 has been deleted out of band: the hash is
+	// computed over the surviving (empty) set, so it diverges from the config.
+	state := &terraform.InstanceState{
+		ID: "ns",
+		Attributes: map[string]string{
+			"namespace":    "ns",
+			contentKey:     content,
+			"content_hash": "stale-hash-from-a-namespace-missing-g1",
+		},
+	}
+
+	diff, err := res.Diff(context.Background(), state, cfg, nil)
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	if diff == nil || diff.Empty() {
+		t.Fatal("a rule group deleted out of band produced an empty plan; the drift is never repaired")
+	}
+	if _, planned := diff.Attributes["content_hash"]; !planned {
+		t.Errorf("expected content_hash in the plan, got %v", diff.Attributes)
+	}
+}
+
+// TestExcludedGroupIsNotDeleted covers the blast radius of an import. The
+// importer necessarily seeds content — and therefore managed_groups — with every
+// group the namespace holds, so narrowing the configuration afterwards used to
+// make Update delete the groups it excluded. A group still declared in the
+// configuration but excluded from management must be left alone in Mimir.
+func TestExcludedGroupIsNotDeleted(t *testing.T) {
+	content := "groups:\n" +
+		"  - name: a\n    rules:\n      - record: r\n        expr: up\n" +
+		"  - name: shared\n    rules:\n      - record: s\n        expr: up\n"
+
+	var deleted []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodDelete {
+			parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+			deleted = append(deleted, parts[len(parts)-1])
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	client, err := NewAPIClient(&apiClientOpt{uri: srv.URL, headers: map[string]string{}, timeout: 5})
+	if err != nil {
+		t.Fatalf("NewAPIClient: %v", err)
+	}
+
+	res := resourceMimirRules()
+	// Prior state: the import claimed both groups. New configuration keeps the
+	// same content but manages only "a".
+	state := &terraform.InstanceState{
+		ID: "ns",
+		Attributes: map[string]string{
+			namespaceKey:       "ns",
+			contentKey:         content,
+			"managed_groups.#": "2",
+			"managed_groups.0": "a",
+			"managed_groups.1": "shared",
+			"only_groups.#":    "0",
+		},
+	}
+	d := res.Data(state)
+	_ = d.Set(contentKey, content)
+	_ = d.Set("only_groups", []interface{}{"a"})
+
+	if diags := resourceMimirRulesUpdate(context.Background(), d, client); diags.HasError() {
+		t.Fatalf("update: %v", diags)
+	}
+
+	for _, name := range deleted {
+		if name == "shared" {
+			t.Errorf("group %q is still declared in the configuration but was deleted from Mimir", name)
+		}
+	}
+}

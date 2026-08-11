@@ -37,7 +37,18 @@ func dataSourcemimirRuleGroupAlerting() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateGroupRuleName,
 			},
-			"source_tenants": {
+			intervalKey: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Alerting Rule group interval",
+			},
+			labelsKey: {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: "Group-level labels applied to all rules in the group.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			sourceTenantsKey: {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
@@ -61,6 +72,11 @@ func dataSourcemimirRuleGroupAlerting() *schema.Resource {
 						"for": {
 							Type:        schema.TypeString,
 							Description: "Alerting Rule duration",
+							Computed:    true,
+						},
+						"keep_firing_for": {
+							Type:        schema.TypeString,
+							Description: "How long an alert will continue firing after the condition that triggered it has cleared.",
 							Computed:    true,
 						},
 						"annotations": {
@@ -117,6 +133,12 @@ func dataSourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.Resourc
 	}
 	if err := d.Set("rule", flattenAlertingRules(data.Rules)); err != nil {
 		return diag.FromErr(err)
+	}
+	if err := d.Set(intervalKey, data.Interval); err != nil {
+		return diag.Errorf("error setting item: %v", err)
+	}
+	if err := d.Set(labelsKey, data.Labels); err != nil {
+		return diag.Errorf("error setting item: %v", err)
 	}
 	if err := d.Set("source_tenants", data.SourceTenants); err != nil {
 		return diag.FromErr(err)

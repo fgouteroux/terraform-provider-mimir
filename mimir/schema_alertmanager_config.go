@@ -379,8 +379,8 @@ func emailConfigFields() map[string]*schema.Schema {
 		"require_tls": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Default:     false,
-			Description: "The SMTP TLS requirement.",
+			Default:     true,
+			Description: "The SMTP TLS requirement. Defaults to true, matching Alertmanager: set it to false explicitly for a relay that does not offer STARTTLS.",
 		},
 		"tls_config": {
 			Type:        schema.TypeList,
@@ -431,6 +431,7 @@ func msteamsConfigFields() map[string]*schema.Schema {
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The incoming webhook URL.",
 		},
 		titleKey: {
@@ -471,6 +472,7 @@ func msteamsv2ConfigFields() map[string]*schema.Schema {
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The incoming webhook URL.",
 		},
 		titleKey: {
@@ -768,6 +770,7 @@ func discordConfigFields() map[string]*schema.Schema {
 		"webhook_url": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The webhook URL.",
 		},
 		titleKey: {
@@ -827,11 +830,13 @@ func pushoverConfigFields() map[string]*schema.Schema {
 		"user_key": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The recipient user's user key.",
 		},
 		"token": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The registered application's API token.",
 		},
 		titleKey: {
@@ -1028,6 +1033,7 @@ func slackConfigFields() map[string]*schema.Schema {
 		apiURLKey: {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "The Slack webhook URL. Defaults to global settings if none are set here.",
 		},
 		"app_token": {
@@ -1418,10 +1424,11 @@ func snsConfigFields() map[string]*schema.Schema {
 func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		orgIDKey: {
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Optional:    true,
-			Description: orgIDDescription,
+			Type:         schema.TypeString,
+			ForceNew:     true,
+			Optional:     true,
+			Description:  orgIDDescription,
+			ValidateFunc: validateOrgID,
 		},
 		"global": {
 			Type:     schema.TypeList,
@@ -1534,8 +1541,8 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 					"smtp_require_tls": {
 						Type:        schema.TypeBool,
 						Optional:    true,
-						Default:     false,
-						Description: "The default SMTP TLS requirement.",
+						Default:     true,
+						Description: "The default SMTP TLS requirement. Defaults to true, matching Alertmanager: set it to false explicitly for a relay that does not offer STARTTLS.",
 					},
 					"smtp_tls_config": {
 						Type:        schema.TypeList,
@@ -1900,10 +1907,11 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		orgIDKey: {
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Optional:    true,
-			Description: orgIDDescription,
+			Type:         schema.TypeString,
+			ForceNew:     true,
+			Optional:     true,
+			Description:  orgIDDescription,
+			ValidateFunc: validateOrgID,
 		},
 		"name": {
 			Type:        schema.TypeString,

@@ -42,7 +42,7 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 				Description: "Recording Rule group interval",
 				Computed:    true,
 			},
-			"query_offset": {
+			queryOffsetKey: {
 				Type:        schema.TypeString,
 				Description: "The duration by which to delay the execution of the recording rule.",
 				Computed:    true,
@@ -53,7 +53,13 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 				Deprecated:  "With Mimir >= 2.13, replaced by query_offset. This attribute will be removed when it is no longer supported in Mimir.",
 				Computed:    true,
 			},
-			"source_tenants": {
+			labelsKey: {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: "Group-level labels applied to all rules in the group.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			sourceTenantsKey: {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
@@ -129,6 +135,9 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 	}
 	if err := d.Set("evaluation_delay", data.EvaluationDelay); err != nil {
 		return diag.FromErr(err)
+	}
+	if err := d.Set(labelsKey, data.Labels); err != nil {
+		return diag.Errorf("error setting item: %v", err)
 	}
 	if err := d.Set("source_tenants", data.SourceTenants); err != nil {
 		return diag.FromErr(err)

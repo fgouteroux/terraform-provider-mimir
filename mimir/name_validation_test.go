@@ -2,6 +2,7 @@ package mimir
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -175,9 +176,10 @@ func TestParseRuleGroupID(t *testing.T) {
 	}
 }
 
-// TestResourceMimirRulesImport pins the importer's re-validation guards directly (no server
-// needed: the importer never touches its meta parameter). Without this, deleting the
-// validOrgID/validNamespace blocks passes the entire suite (verified by mutation).
+// TestResourceMimirRulesImport pins the importer's re-validation guards. The guards run before
+// the importer contacts the ruler, so a nil meta is enough: a valid ID gets past validation and
+// then fails on the missing client, an invalid one is rejected by the guard itself. Without this,
+// deleting the validOrgID/validNamespace blocks passes the entire suite (verified by mutation).
 func TestResourceMimirRulesImport(t *testing.T) {
 	res := resourceMimirRules()
 	cases := []struct {
@@ -195,15 +197,25 @@ func TestResourceMimirRulesImport(t *testing.T) {
 	for _, c := range cases {
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
 		d.SetId(c.id)
-		got, err := resourceMimirRulesImport(context.Background(), d, nil)
-		if (err != nil) != c.wantErr {
-			t.Errorf("resourceMimirRulesImport(%q) err=%v, wantErr=%v", c.id, err, c.wantErr)
+		_, err := resourceMimirRulesImport(context.Background(), d, nil)
+		if err == nil {
+			t.Errorf("resourceMimirRulesImport(%q) unexpectedly succeeded with no configured provider", c.id)
 			continue
 		}
-		if err == nil {
-			if len(got) != 1 || got[0].Get(orgIDKey).(string) != c.org || got[0].Get(namespaceKey).(string) != c.ns {
-				t.Errorf("resourceMimirRulesImport(%q) set org_id/namespace = %q/%q, want %q/%q",
-					c.id, got[0].Get(orgIDKey), got[0].Get(namespaceKey), c.org, c.ns)
+
+		// A rejected ID never reaches the ruler call, so the two outcomes are
+		// distinguishable by the error alone.
+		rejected := !strings.Contains(err.Error(), "provider is not configured")
+		if rejected != c.wantErr {
+			t.Errorf("resourceMimirRulesImport(%q) err=%v, wantRejected=%v", c.id, err, c.wantErr)
+			continue
+		}
+		if !c.wantErr {
+			if got := d.Get(orgIDKey).(string); got != c.org {
+				t.Errorf("resourceMimirRulesImport(%q) set org_id = %q, want %q", c.id, got, c.org)
+			}
+			if got := d.Get(namespaceKey).(string); got != c.ns {
+				t.Errorf("resourceMimirRulesImport(%q) set namespace = %q, want %q", c.id, got, c.ns)
 			}
 		}
 	}

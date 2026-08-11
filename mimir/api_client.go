@@ -13,6 +13,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -52,8 +53,13 @@ type apiClient struct {
 // Make a new api client for RESTful calls
 func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 	/* Remove any trailing slashes since we will append
-	   to this URL with our own root-prefixed location */
+	   to this URL with our own root-prefixed location. Every per-component
+	   override is concatenated with a root-prefixed path the same way, so they
+	   all need the same treatment or the request URL grows a double slash. */
 	opt.uri = strings.TrimSuffix(opt.uri, "/")
+	opt.rulerURI = strings.TrimSuffix(opt.rulerURI, "/")
+	opt.alertmanagerURI = strings.TrimSuffix(opt.alertmanagerURI, "/")
+	opt.distributorURI = strings.TrimSuffix(opt.distributorURI, "/")
 
 	// Setup HTTPS client
 	tlsConfig := &tls.Config{}
@@ -90,7 +96,9 @@ func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 			}
 		}
 		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
+		if !caCertPool.AppendCertsFromPEM(caCert) {
+			return nil, fmt.Errorf("no valid PEM certificate found in the provided ca")
+		}
 		tlsConfig.RootCAs = caCertPool
 	}
 
@@ -100,7 +108,12 @@ func NewAPIClient(opt *apiClientOpt) (*apiClient, error) {
 	}
 
 	if opt.proxyURL != "" {
-		log.Printf("api_client.go: Using proxy: %s\n", opt.proxyURL)
+		// Gated on debug like every other log in this file: this ran on every
+		// provider init with a proxy, wrote to stderr (which CI surfaces as an
+		// error annotation), and the URL can carry credentials.
+		if opt.debug {
+			log.Printf("api_client.go: Using proxy: %s\n", opt.proxyURL)
+		}
 		proxy, err := url.Parse(opt.proxyURL)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing proxy url: %s", err)
@@ -159,7 +172,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	if client.token != "" {
@@ -186,12 +199,12 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 
 	if client.debug {
-		reqDump, err := httputil.DumpRequestOut(req, true)
+		reqDump, err := httputil.DumpRequestOut(req, false)
 		if err != nil {
-			log.Fatal(err)
+			return "", err
 		}
 
-		log.Printf("REQUEST:\n%s", string(reqDump))
+		log.Printf("REQUEST:\n%s", redactCredentials(string(reqDump)))
 	}
 
 	resp, err := client.httpClient.Do(req)
@@ -204,12 +217,12 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 
 	if client.debug {
-		respDump, err := httputil.DumpResponse(resp, true)
+		respDump, err := httputil.DumpResponse(resp, false)
 		if err != nil {
-			log.Fatal(err)
+			return "", err
 		}
 
-		log.Printf("RESPONSE:\n%s", string(respDump))
+		log.Printf("RESPONSE:\n%s", redactCredentials(string(respDump)))
 	}
 
 	bodyBytes, err2 := io.ReadAll(resp.Body)
@@ -225,4 +238,15 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 
 	return body, nil
+}
+
+// credentialHeaderRegexp matches the header lines that carry a credential in an
+// httputil dump. The dumps deliberately exclude bodies: an alertmanager
+// configuration body carries slack api_url, pushover token, smtp_auth_password
+// and the like, so dumping it would leak exactly what this redaction exists to
+// protect. Headers still need masking for the bearer token and basic-auth pair.
+var credentialHeaderRegexp = regexp.MustCompile(`(?im)^(Authorization|Proxy-Authorization|X-Amz-Security-Token):.*$`)
+
+func redactCredentials(dump string) string {
+	return credentialHeaderRegexp.ReplaceAllString(dump, "$1: <redacted>")
 }

@@ -200,7 +200,7 @@ func TestAccResourceRuleGroupRecording_QueryOffset(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "namespace", "namespace_1"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "rule.0.record", "test1_info"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "rule.0.expr", "test1_metric"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "query_offset", "5m"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", queryOffsetKey, "5m"),
 				),
 			},
 			{
@@ -211,7 +211,7 @@ func TestAccResourceRuleGroupRecording_QueryOffset(t *testing.T) {
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "namespace", "namespace_1"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "rule.0.record", "test1_info"),
 					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "rule.0.expr", "test1_metric"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", "query_offset", "1m"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_query_offset", queryOffsetKey, "1m"),
 				),
 			},
 		},

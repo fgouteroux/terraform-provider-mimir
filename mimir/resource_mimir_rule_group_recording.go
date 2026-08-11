@@ -49,13 +49,15 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Description:  "Recording Rule group interval",
 				Optional:     true,
 				ValidateFunc: validateDuration,
+				StateFunc:    formatDuration,
 			},
-			"query_offset": {
+			queryOffsetKey: {
 				Type:          schema.TypeString,
 				Description:   "The duration by which to delay the execution of the recording rule.",
 				Optional:      true,
 				ConflictsWith: []string{"evaluation_delay"},
 				ValidateFunc:  validateDuration,
+				StateFunc:     formatDuration,
 			},
 			"evaluation_delay": {
 				Type:          schema.TypeString,
@@ -64,8 +66,9 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Deprecated:    "With Mimir >= 2.13, replaced by query_offset. This attribute will be removed when it is no longer supported in Mimir.",
 				ConflictsWith: []string{"query_offset"},
 				ValidateFunc:  validateDuration,
+				StateFunc:     formatDuration,
 			},
-			"source_tenants": {
+			sourceTenantsKey: {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Allows aggregating data from multiple tenants while evaluating a rule group.",
@@ -315,6 +318,12 @@ func resourcemimirRuleGroupRecordingDelete(ctx context.Context, d *schema.Resour
 	path := rulesGroupPath(namespace, name)
 	_, err := client.sendRequest("ruler", "DELETE", path, "", headers)
 	if err != nil {
+		// A group already gone is the desired end state, not a failure: without
+		// this the resource stays stuck in state and destroy can never complete.
+		if strings.Contains(err.Error(), "response code '404'") {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(fmt.Errorf(
 			"cannot delete recording rule group '%s' from %s: %v",
 			name,

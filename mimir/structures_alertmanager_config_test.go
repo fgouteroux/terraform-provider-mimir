@@ -294,3 +294,24 @@ func TestFlattenDurationMatchesStateFunc(t *testing.T) {
 		}
 	}
 }
+
+// TestFlattenSlackActionOmitsAbsentConfirm covers the confirm sub-block, which
+// was flattened unconditionally: a nil pointer still produced a one-element list
+// and the plan kept trying to remove a block the user never wrote.
+func TestFlattenSlackActionOmitsAbsentConfirm(t *testing.T) {
+	got := flattenSlackConfigActions([]slackAction{{
+		Type: "button", Text: "Runbook", URL: "https://runbook.example.com",
+	}})
+
+	action := got[0].(map[string]interface{})
+	if _, present := action["confirm"]; present {
+		t.Errorf("confirm block written for an action that declares none: %v", action)
+	}
+
+	withConfirm := flattenSlackConfigActions([]slackAction{{
+		Type: "button", ConfirmField: &slackConfirmationField{Text: "sure?"},
+	}})
+	if _, present := withConfirm[0].(map[string]interface{})["confirm"]; !present {
+		t.Error("confirm block dropped for an action that declares one")
+	}
+}

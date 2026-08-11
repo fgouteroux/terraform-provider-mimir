@@ -107,7 +107,7 @@ func TestOnlyGroupsRejectsUnknownGroup(t *testing.T) {
 	content := "groups:\n  - name: real_group\n    rules:\n      - record: up:sum\n        expr: sum(up)\n"
 
 	cfg := terraform.NewResourceConfigRaw(map[string]interface{}{
-		"namespace":   "ns",
+		namespaceKey:  "ns",
 		contentKey:    content,
 		"only_groups": []interface{}{"typo_group"},
 	})
@@ -127,7 +127,7 @@ func TestOnlyGroupsAcceptsKnownGroup(t *testing.T) {
 	content := "groups:\n  - name: real_group\n    rules:\n      - record: up:sum\n        expr: sum(up)\n"
 
 	cfg := terraform.NewResourceConfigRaw(map[string]interface{}{
-		"namespace":   "ns",
+		namespaceKey:  "ns",
 		contentKey:    content,
 		"only_groups": []interface{}{"real_group"},
 	})
