@@ -6,6 +6,13 @@ GoReleaser already produces a per-release list of commit subjects. This file exi
 what that list cannot convey: behaviour that changes under an unchanged configuration,
 and the reason a fix matters. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- PromQL expressions are parsed with the same options as Mimir, so experimental functions and
+  binop fill modifiers no longer fail validation.
+
 ## [1.1.0] - 2026-08-11
 
 First release since `v1.0.13`. It aligns the Alertmanager receiver schema with the Alertmanager
