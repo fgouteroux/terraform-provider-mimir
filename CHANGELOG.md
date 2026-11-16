@@ -27,6 +27,7 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
   operator disables `-alertmanager.require-explicit-sns-credentials`. The `sigv4` attribute
   descriptions now say so; the provider does not enforce it, as the flag can be turned off.
 - Acceptance tests run against Mimir 2.17.12, 3.1.10 and 3.2.5.
+- Built with Go 1.26.
 
 ## [1.1.0] - 2026-08-11
 

@@ -1,6 +1,6 @@
 module github.com/fgouteroux/terraform-provider-mimir
 
-go 1.25.8
+go 1.26.11
 
 require (
 	github.com/hashicorp/go-version v1.9.0
