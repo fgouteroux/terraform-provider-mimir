@@ -12,6 +12,21 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
 
 - PromQL expressions are parsed with the same options as Mimir, so experimental functions and
   binop fill modifiers no longer fail validation.
+- PromQL validation uses Prometheus v0.314.0, which matches the function set of Mimir 3.2:
+  `max_of`, `min_of`, `start`, `end`, `range`, `step` and `start_timestamp` are now accepted.
+- A 404 from Mimir's router (wrong URI, missing `/prometheus` prefix) is now reported as an
+  error. It used to read as "object deleted", so the resource was silently dropped from state
+  and recreated on the next apply.
+- `mimir_distributor_tenant_stats` calls `/distributor/all_user_stats` when only `uri` is set,
+  and returns an error instead of an empty result when the endpoint is not found.
+- The custom headers example used `header` instead of `headers`.
+
+### Changed
+
+- Since Mimir 3.2.5, SNS receivers need `sigv4.access_key` and `sigv4.secret_key` unless the
+  operator disables `-alertmanager.require-explicit-sns-credentials`. The `sigv4` attribute
+  descriptions now say so; the provider does not enforce it, as the flag can be turned off.
+- Acceptance tests run against Mimir 2.17.12, 3.1.10 and 3.2.5.
 
 ## [1.1.0] - 2026-08-11
 

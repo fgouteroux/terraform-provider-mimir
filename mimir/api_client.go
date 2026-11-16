@@ -233,11 +233,27 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	}
 	body := string(bodyBytes)
 
+	if resp.StatusCode == http.StatusNotFound && isRouteNotFound(body) {
+		// Callers treat "response code '404'" as "the object is gone" and drop it
+		// from state. A 404 from the HTTP router means the URL itself is wrong
+		// (missing /prometheus prefix, wrong component URI), not that the object
+		// was deleted, so it must surface as an error instead.
+		return body, fmt.Errorf("endpoint %s not found (HTTP 404): check the provider URIs, the ruler API is served under Mimir's Prometheus HTTP prefix (default /prometheus)", fullURI)
+	}
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return body, fmt.Errorf("unexpected response code '%d': %s", resp.StatusCode, body)
 	}
 
 	return body, nil
+}
+
+// isRouteNotFound reports whether a 404 body is Go's default router response,
+// which Mimir returns for paths it does not serve. Mimir's own "not found"
+// answers for rule groups and alertmanager configs carry an error message
+// ("group does not exist", "alertmanager storage object not found") instead.
+func isRouteNotFound(body string) bool {
+	return strings.TrimSpace(body) == "404 page not found"
 }
 
 // credentialHeaderRegexp matches the header lines that carry a credential in an
