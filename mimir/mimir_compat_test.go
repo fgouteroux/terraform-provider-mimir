@@ -46,6 +46,22 @@ func TestSendRequestRouteNotFound(t *testing.T) {
 	}
 }
 
+func TestIsRouteNotFound(t *testing.T) {
+	for body, want := range map[string]bool{
+		"404 page not found\n": true,
+		"<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n": true,
+		"<!DOCTYPE html><html><body>Not Found</body></html>": true,
+		"group does not exist\n":                             false,
+		"group namespace does not exist\n":                   false,
+		"alertmanager storage object not found\n":            false,
+		"": false,
+	} {
+		if got := isRouteNotFound(body); got != want {
+			t.Errorf("isRouteNotFound(%q) = %v, want %v", body, got, want)
+		}
+	}
+}
+
 func TestDistributorStatsPath(t *testing.T) {
 	for uri, want := range map[string]string{
 		"http://mimir:8080/distributor": "/all_user_stats",

@@ -14,8 +14,8 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
   binop fill modifiers no longer fail validation.
 - PromQL validation uses Prometheus v0.314.0, which matches the function set of Mimir 3.2:
   `max_of`, `min_of`, `start`, `end`, `range`, `step` and `start_timestamp` are now accepted.
-- A 404 from Mimir's router (wrong URI, missing `/prometheus` prefix) is now reported as an
-  error. It used to read as "object deleted", so the resource was silently dropped from state
+- A 404 from Mimir's router (wrong URI, missing `/prometheus` prefix) or an HTML 404 page from
+  a reverse proxy in front of Mimir is now reported as an error. It used to read as "object deleted", so the resource was silently dropped from state
   and recreated on the next apply.
 - `mimir_distributor_tenant_stats` calls `/distributor/all_user_stats` when only `uri` is set,
   and returns an error instead of an empty result when the endpoint is not found.

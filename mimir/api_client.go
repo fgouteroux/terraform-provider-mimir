@@ -248,12 +248,16 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 	return body, nil
 }
 
-// isRouteNotFound reports whether a 404 body is Go's default router response,
-// which Mimir returns for paths it does not serve. Mimir's own "not found"
-// answers for rule groups and alertmanager configs carry an error message
-// ("group does not exist", "alertmanager storage object not found") instead.
+// isRouteNotFound reports whether a 404 means "no such endpoint" rather than
+// "no such object". Mimir's own "not found" answers for rule groups and
+// alertmanager configs are plain-text error messages ("group does not exist",
+// "alertmanager storage object not found"). Two other bodies only come from
+// routing: Go's default "404 page not found", which Mimir's router returns for
+// paths it does not serve, and an HTML error page, which a reverse proxy in
+// front of Mimir (such as an nginx gateway) returns for paths it does not forward.
 func isRouteNotFound(body string) bool {
-	return strings.TrimSpace(body) == "404 page not found"
+	b := strings.ToLower(strings.TrimSpace(body))
+	return b == "404 page not found" || strings.HasPrefix(b, "<html") || strings.HasPrefix(b, "<!doctype html")
 }
 
 // credentialHeaderRegexp matches the header lines that carry a credential in an
