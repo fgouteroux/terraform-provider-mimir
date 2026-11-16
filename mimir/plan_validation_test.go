@@ -188,9 +188,10 @@ func TestAccDataSourceTenantLimits(t *testing.T) {
 			{
 				Config: `data "mimir_tenant_limits" "this" {}`,
 				Check: resource.ComposeTestCheckFunc(
-					// Mimir's defaults: -distributor.ingestion-rate-limit and
-					// -ingester.max-global-series-per-user.
-					resource.TestCheckResourceAttr("data.mimir_tenant_limits.this", "ingestion_rate", "10000"),
+					// ingestion_rate is overridden for the test tenant in
+					// .github/mimir/runtime.yaml; max_global_series_per_user
+					// keeps Mimir's default.
+					resource.TestCheckResourceAttr("data.mimir_tenant_limits.this", "ingestion_rate", "12345"),
 					resource.TestCheckResourceAttr("data.mimir_tenant_limits.this", "max_global_series_per_user", "150000"),
 				),
 			},
@@ -235,4 +236,23 @@ func TestAccResourceRuleGroupAlerting_MimirRuleChecks(t *testing.T) {
 			},
 		},
 	})
+}
+
+// Without -runtime-config.file Mimir does not register /api/v1/user_limits;
+// the error must say so instead of the generic URI hint.
+func TestDataSourceTenantLimitsRuntimeConfigHint(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	defer srv.Close()
+
+	client, err := NewAPIClient(&apiClientOpt{uri: srv.URL, headers: map[string]string{"X-Scope-OrgID": "mytenant"}, timeout: 2})
+	if err != nil {
+		t.Fatalf("NewAPIClient: %v", err)
+	}
+
+	res := dataSourcemimirTenantLimits()
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+	diags := res.ReadContext(t.Context(), d, client)
+	if !diags.HasError() || !strings.Contains(diags[0].Summary, "-runtime-config.file") {
+		t.Fatalf("want an error mentioning -runtime-config.file, got %v", diags)
+	}
 }

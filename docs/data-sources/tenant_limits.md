@@ -3,12 +3,12 @@
 page_title: "mimir_tenant_limits Data Source - terraform-provider-mimir"
 subcategory: ""
 description: |-
-  The effective limits of a tenant, as returned by Mimir's /api/v1/user_limits endpoint: the tenant's runtime overrides merged over the defaults. The request goes to alertmanager_uri, or uri when it is unset, since the endpoint is served at the root of every Mimir component.
+  The effective limits of a tenant, as returned by Mimir's /api/v1/user_limits endpoint: the tenant's runtime overrides merged over the defaults. Mimir only serves this endpoint when it runs with -runtime-config.file. The request goes to alertmanager_uri, or uri when it is unset, since the endpoint is served at the root of every Mimir component.
 ---
 
 # mimir_tenant_limits (Data Source)
 
-The effective limits of a tenant, as returned by Mimir's /api/v1/user_limits endpoint: the tenant's runtime overrides merged over the defaults. The request goes to alertmanager_uri, or uri when it is unset, since the endpoint is served at the root of every Mimir component.
+The effective limits of a tenant, as returned by Mimir's /api/v1/user_limits endpoint: the tenant's runtime overrides merged over the defaults. Mimir only serves this endpoint when it runs with -runtime-config.file. The request goes to alertmanager_uri, or uri when it is unset, since the endpoint is served at the root of every Mimir component.
 
 ## Example Usage
 

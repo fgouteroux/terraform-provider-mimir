@@ -3,6 +3,7 @@ package mimir
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -56,7 +57,7 @@ func dataSourcemimirTenantLimits() *schema.Resource {
 	}
 
 	return &schema.Resource{
-		Description: "The effective limits of a tenant, as returned by Mimir's /api/v1/user_limits endpoint: the tenant's runtime overrides merged over the defaults. The request goes to alertmanager_uri, or uri when it is unset, since the endpoint is served at the root of every Mimir component.",
+		Description: "The effective limits of a tenant, as returned by Mimir's /api/v1/user_limits endpoint: the tenant's runtime overrides merged over the defaults. Mimir only serves this endpoint when it runs with -runtime-config.file. The request goes to alertmanager_uri, or uri when it is unset, since the endpoint is served at the root of every Mimir component.",
 		ReadContext: dataSourcemimirTenantLimitsRead,
 		Schema:      s,
 	}
@@ -74,6 +75,9 @@ func dataSourcemimirTenantLimitsRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	body, err := client.sendRequest("alertmanager", "GET", userLimitsPath, "", headers)
+	if errors.Is(err, errRouteNotFound) {
+		return diag.FromErr(fmt.Errorf("cannot read tenant limits: %w. Mimir only serves %s when it runs with -runtime-config.file", err, userLimitsPath))
+	}
 	if err = handleHTTPError(err, "Cannot read tenant limits"); err != nil {
 		return diag.FromErr(err)
 	}

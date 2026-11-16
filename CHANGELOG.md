@@ -11,7 +11,8 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
 ### Added
 
 - `mimir_tenant_limits` data source, reading the tenant's effective limits from Mimir's
-  `/api/v1/user_limits` endpoint. The `alertmanager_*` limits require Mimir >= 3.2.
+  `/api/v1/user_limits` endpoint, which Mimir only serves when it runs with
+  `-runtime-config.file`. The `alertmanager_*` limits require Mimir >= 3.2.
 
 - `mimir_rule_group_alerting` gains `query_offset`, and both single-group resources and their
   data sources gain `align_evaluation_time_on_interval` and `limit` (persisted by Mimir >= 3.0).

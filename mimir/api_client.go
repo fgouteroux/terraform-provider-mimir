@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -238,7 +239,7 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 		// from state. A 404 from the HTTP router means the URL itself is wrong
 		// (missing /prometheus prefix, wrong component URI), not that the object
 		// was deleted, so it must surface as an error instead.
-		return body, fmt.Errorf("endpoint %s not found (HTTP 404): check the provider URIs, the ruler API is served under Mimir's Prometheus HTTP prefix (default /prometheus)", fullURI)
+		return body, fmt.Errorf("%w: %s (HTTP 404): check the provider URIs, the ruler API is served under Mimir's Prometheus HTTP prefix (default /prometheus)", errRouteNotFound, fullURI)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -247,6 +248,10 @@ func (client *apiClient) sendRequest(component, method string, path, data string
 
 	return body, nil
 }
+
+// errRouteNotFound marks a 404 for a path the server does not serve at all, as
+// opposed to a missing object; see isRouteNotFound.
+var errRouteNotFound = errors.New("endpoint not found")
 
 // isRouteNotFound reports whether a 404 means "no such endpoint" rather than
 // "no such object". Mimir's own "not found" answers for rule groups and
