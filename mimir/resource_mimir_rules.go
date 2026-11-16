@@ -369,8 +369,8 @@ func validateRuleGroupsContent(ruleGroups RuleGroups) error {
 		durations := map[string]model.Duration{}
 		for _, f := range []struct{ name, value string }{
 			{"interval", group.Interval},
-			{"query_offset", group.QueryOffset},
-			{"evaluation_delay", group.EvaluationDelay},
+			{queryOffsetKey, group.QueryOffset},
+			{evaluationDelayKey, group.EvaluationDelay},
 		} {
 			if f.value == "" {
 				continue
@@ -385,7 +385,7 @@ func validateRuleGroupsContent(ruleGroups RuleGroups) error {
 		// Mimir rejects a group whose query_offset and deprecated
 		// evaluation_delay are both set to different values.
 		if group.QueryOffset != "" && group.EvaluationDelay != "" {
-			if durations["query_offset"] != durations["evaluation_delay"] {
+			if durations[queryOffsetKey] != durations[evaluationDelayKey] {
 				return fmt.Errorf("group %d (%s): query_offset and the deprecated evaluation_delay are set to different values; remove evaluation_delay", i, group.Name)
 			}
 		}
