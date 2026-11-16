@@ -103,22 +103,8 @@ func TestAccResourceAlertmanagerConfig_HTTPConfigFields(t *testing.T) {
 		CheckDestroy:      testAccCheckMimirAlertmanagerConfigDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAlertmanagerConfigHTTPConfigFields,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirAlertmanagerConfigExists(res, client),
-					resource.TestCheckResourceAttr(res, "receiver.0.webhook_configs.0.http_config.0.no_proxy", "localhost"),
-					resource.TestCheckResourceAttr(res, "receiver.0.webhook_configs.0.http_config.0.http_headers.#", "2"),
-					resource.TestCheckResourceAttr(res, "receiver.0.webhook_configs.0.http_config.0.proxy_connect_header.#", "1"),
-					resource.TestCheckResourceAttr(res, "receiver.1.webhook_configs.0.http_config.0.oauth2.0.grant_type", oauth2GrantTypeJWTBearer),
-					resource.TestCheckResourceAttr(res, "receiver.1.webhook_configs.0.http_config.0.oauth2.0.claims.tenant", "mytenant"),
-				),
-			},
-			{
-				// Headers come back from Mimir as a map: the set must not diff.
-				Config:   testAccResourceAlertmanagerConfigHTTPConfigFields,
-				PlanOnly: true,
-			},
-			{
+				// Rejected at plan time: runs first so the last step leaves a
+				// valid configuration for the post-test destroy.
 				Config: `
     resource "mimir_alertmanager_config" "mytenant" {
       route {
@@ -141,6 +127,22 @@ func TestAccResourceAlertmanagerConfig_HTTPConfigFields(t *testing.T) {
       }
     }`,
 				ExpectError: regexp.MustCompile(`setting header "Authorization" is not allowed`),
+			},
+			{
+				Config: testAccResourceAlertmanagerConfigHTTPConfigFields,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMimirAlertmanagerConfigExists(res, client),
+					resource.TestCheckResourceAttr(res, "receiver.0.webhook_configs.0.http_config.0.no_proxy", "localhost"),
+					resource.TestCheckResourceAttr(res, "receiver.0.webhook_configs.0.http_config.0.http_headers.#", "2"),
+					resource.TestCheckResourceAttr(res, "receiver.0.webhook_configs.0.http_config.0.proxy_connect_header.#", "1"),
+					resource.TestCheckResourceAttr(res, "receiver.1.webhook_configs.0.http_config.0.oauth2.0.grant_type", oauth2GrantTypeJWTBearer),
+					resource.TestCheckResourceAttr(res, "receiver.1.webhook_configs.0.http_config.0.oauth2.0.claims.tenant", "mytenant"),
+				),
+			},
+			{
+				// Headers come back from Mimir as a map: the set must not diff.
+				Config:   testAccResourceAlertmanagerConfigHTTPConfigFields,
+				PlanOnly: true,
 			},
 		},
 	})
