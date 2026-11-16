@@ -125,7 +125,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--tls_config))
 
@@ -147,15 +151,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--discord_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.discord_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--discord_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.discord_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--discord_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -169,6 +193,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--discord_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.discord_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--discord_configs--http_config--tls_config"></a>
@@ -249,7 +282,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--tls_config))
 
@@ -271,15 +308,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--msteams_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--msteams_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.msteams_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--msteams_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -293,6 +350,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--msteams_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--msteams_configs--http_config--tls_config"></a>
@@ -329,7 +395,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--tls_config))
 
@@ -351,15 +421,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--msteamsv2_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--msteamsv2_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.msteamsv2_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -373,6 +463,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--msteamsv2_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--msteamsv2_configs--http_config--tls_config"></a>
@@ -419,7 +518,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--tls_config))
 
@@ -441,15 +544,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--opsgenie_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.opsgenie_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--opsgenie_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.opsgenie_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--opsgenie_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -463,6 +586,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--opsgenie_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.opsgenie_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--opsgenie_configs--http_config--tls_config"></a>
@@ -522,7 +654,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--tls_config))
 
@@ -544,15 +680,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--pagerduty_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.pagerduty_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--pagerduty_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.pagerduty_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--pagerduty_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -566,6 +722,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--pagerduty_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.pagerduty_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--pagerduty_configs--http_config--tls_config"></a>
@@ -632,7 +797,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--tls_config))
 
@@ -654,15 +823,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--pushover_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--pushover_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.pushover_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--pushover_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -676,6 +865,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--pushover_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--pushover_configs--http_config--tls_config"></a>
@@ -769,7 +967,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--tls_config))
 
@@ -791,15 +993,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--slack_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.slack_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--slack_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.slack_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--slack_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -813,6 +1035,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--slack_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.slack_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--slack_configs--http_config--tls_config"></a>
@@ -854,7 +1085,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--tls_config))
 
@@ -876,15 +1111,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--sns_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.sns_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--sns_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.sns_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--sns_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -898,6 +1153,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--sns_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.sns_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--sns_configs--http_config--tls_config"></a>
@@ -950,7 +1214,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--tls_config))
 
@@ -972,15 +1240,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--telegram_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.telegram_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--telegram_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.telegram_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--telegram_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -994,6 +1282,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--telegram_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.telegram_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--telegram_configs--http_config--tls_config"></a>
@@ -1035,7 +1332,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--tls_config))
 
@@ -1057,15 +1358,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--victorops_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.victorops_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--victorops_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.victorops_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--victorops_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -1079,6 +1400,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--victorops_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.victorops_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--victorops_configs--http_config--tls_config"></a>
@@ -1115,7 +1445,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--tls_config))
 
@@ -1137,15 +1471,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--webex_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.webex_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--webex_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.webex_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--webex_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -1159,6 +1513,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--webex_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.webex_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--webex_configs--http_config--tls_config"></a>
@@ -1196,7 +1559,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--tls_config))
 
@@ -1218,15 +1585,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--webhook_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--webhook_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.webhook_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -1240,6 +1627,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--webhook_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--webhook_configs--http_config--tls_config"></a>
@@ -1282,7 +1678,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--tls_config))
 
@@ -1304,15 +1704,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--receiver--wechat_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--receiver--wechat_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.wechat_configs.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--receiver--wechat_configs--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -1326,6 +1746,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--receiver--wechat_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--receiver--wechat_configs--http_config--tls_config"></a>
@@ -1450,7 +1879,11 @@ Optional:
 - `bearer_token` (String, Sensitive)
 - `enable_http2` (Boolean) Whether to enable HTTP2.
 - `follow_redirects` (Boolean) Configure whether HTTP requests follow HTTP 3xx redirects.
+- `http_headers` (Block Set) Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed. (see [below for nested schema](#nestedblock--global--http_config--http_headers))
+- `no_proxy` (String) Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.
 - `oauth2` (Block List, Max: 1) Set the OAuth 2.0 configuration. (see [below for nested schema](#nestedblock--global--http_config--oauth2))
+- `proxy_connect_header` (Block Set) Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment. (see [below for nested schema](#nestedblock--global--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean) Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.
 - `proxy_url` (String)
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--global--http_config--tls_config))
 
@@ -1472,15 +1905,35 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedblock--global--http_config--http_headers"></a>
+### Nested Schema for `global.http_config.http_headers`
+
+Required:
+
+- `name` (String) The header name.
+
+Optional:
+
+- `secrets` (List of String, Sensitive) The header values, hidden from logs and plan output.
+- `values` (List of String) The header values.
+
+
 <a id="nestedblock--global--http_config--oauth2"></a>
 ### Nested Schema for `global.http_config.oauth2`
 
 Optional:
 
+- `audience` (String) The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.
+- `claims` (Map of String) Extra claims added to the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key` (String, Sensitive) The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.
+- `client_certificate_key_id` (String) The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.
 - `client_id` (String)
 - `client_secret` (String, Sensitive)
 - `endpoint_params` (Map of String) Parameters to append to the token URL.
+- `grant_type` (String) The OAuth 2.0 grant type: `client_credentials` (the default) or `urn:ietf:params:oauth:grant-type:jwt-bearer` (RFC 7523).
+- `iss` (String) The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.
 - `scopes` (List of String) Scopes for the token request.
+- `signature_algorithm` (String) The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.
 - `tls_config` (Block List, Max: 1) Configures the TLS settings. (see [below for nested schema](#nestedblock--global--http_config--oauth2--tls_config))
 - `token_url` (String) The URL to fetch the token from.
 
@@ -1494,6 +1947,15 @@ Optional:
 - `min_version` (String) Minimum acceptable TLS version
 - `server_name` (String) ServerName extension to indicate the name of the server.
 
+
+
+<a id="nestedblock--global--http_config--proxy_connect_header"></a>
+### Nested Schema for `global.http_config.proxy_connect_header`
+
+Required:
+
+- `name` (String) The header name.
+- `values` (List of String, Sensitive) The header values.
 
 
 <a id="nestedblock--global--http_config--tls_config"></a>

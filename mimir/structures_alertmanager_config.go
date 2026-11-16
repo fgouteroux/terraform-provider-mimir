@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/prometheus/alertmanager/config"
 	amcommoncfg "github.com/prometheus/alertmanager/config/common"
 	"github.com/prometheus/alertmanager/timeinterval"
@@ -24,6 +25,15 @@ func expandHTTPConfigOAuth2(v interface{}) *oauth2 {
 		oauth2Conf.Scopes = expandStringArray(cfg["scopes"].([]interface{}))
 		oauth2Conf.EndpointParams = expandStringMap(cfg["endpoint_params"].(map[string]interface{}))
 		oauth2Conf.TLSConfig = expandTLSConfig(cfg["tls_config"])
+		oauth2Conf.GrantType = cfg["grant_type"].(string)
+		oauth2Conf.ClientCertificateKeyID = cfg["client_certificate_key_id"].(string)
+		oauth2Conf.ClientCertificateKey = cfg["client_certificate_key"].(string)
+		oauth2Conf.SignatureAlgorithm = cfg["signature_algorithm"].(string)
+		oauth2Conf.Iss = cfg["iss"].(string)
+		oauth2Conf.Audience = cfg["audience"].(string)
+		if claims := cfg["claims"].(map[string]interface{}); len(claims) > 0 {
+			oauth2Conf.Claims = claims
+		}
 	}
 	return oauth2Conf
 }
@@ -38,6 +48,19 @@ func flattenHTTPConfigOAuth2(v *oauth2) []interface{} {
 		oauth2Conf["endpoint_params"] = v.EndpointParams
 		if v.TLSConfig != nil {
 			oauth2Conf["tls_config"] = flattenTLSConfig(v.TLSConfig)
+		}
+		oauth2Conf["grant_type"] = v.GrantType
+		oauth2Conf["client_certificate_key_id"] = v.ClientCertificateKeyID
+		oauth2Conf["client_certificate_key"] = v.ClientCertificateKey
+		oauth2Conf["signature_algorithm"] = v.SignatureAlgorithm
+		oauth2Conf["iss"] = v.Iss
+		oauth2Conf["audience"] = v.Audience
+		if len(v.Claims) > 0 {
+			claims := make(map[string]interface{}, len(v.Claims))
+			for name, value := range v.Claims {
+				claims[name] = fmt.Sprint(value)
+			}
+			oauth2Conf["claims"] = claims
 		}
 	}
 	return []interface{}{oauth2Conf}
@@ -122,6 +145,10 @@ func expandHTTPConfig(v interface{}) *httpClientConfig {
 		httpConf.EnableHTTP2 = new(bool)
 		*httpConf.EnableHTTP2 = cfg["enable_http2"].(bool)
 		httpConf.BearerToken = cfg["bearer_token"].(string)
+		httpConf.NoProxy = cfg["no_proxy"].(string)
+		httpConf.ProxyFromEnvironment = cfg["proxy_from_environment"].(bool)
+		httpConf.ProxyConnectHeader = expandProxyConnectHeader(cfg["proxy_connect_header"])
+		httpConf.HTTPHeaders = expandHTTPHeaders(cfg["http_headers"])
 
 		if len(cfg["authorization"].([]interface{})) > 0 {
 			httpConf.Authorization = expandHTTPConfigAuthorization(cfg["authorization"].([]interface{}))
@@ -143,12 +170,85 @@ func expandHTTPConfig(v interface{}) *httpClientConfig {
 	return httpConf
 }
 
+// setItems returns the elements of a TypeSet value, which is a *schema.Set
+// when read from ResourceData and a plain list when built by hand.
+func setItems(v interface{}) []interface{} {
+	switch items := v.(type) {
+	case *schema.Set:
+		return items.List()
+	case []interface{}:
+		return items
+	}
+	return nil
+}
+
+func expandProxyConnectHeader(v interface{}) map[string][]string {
+	items := setItems(v)
+	if len(items) == 0 {
+		return nil
+	}
+	headers := make(map[string][]string, len(items))
+	for _, item := range items {
+		cfg := item.(map[string]interface{})
+		headers[cfg["name"].(string)] = expandStringArray(cfg["values"].([]interface{}))
+	}
+	return headers
+}
+
+func flattenProxyConnectHeader(v map[string][]string) []interface{} {
+	headers := make([]interface{}, 0, len(v))
+	for name, values := range v {
+		headers = append(headers, map[string]interface{}{
+			"name":   name,
+			"values": values,
+		})
+	}
+	return headers
+}
+
+func expandHTTPHeaders(v interface{}) map[string]*header {
+	items := setItems(v)
+	if len(items) == 0 {
+		return nil
+	}
+	headers := make(map[string]*header, len(items))
+	for _, item := range items {
+		cfg := item.(map[string]interface{})
+		headers[cfg["name"].(string)] = &header{
+			Values:  expandStringArray(cfg["values"].([]interface{})),
+			Secrets: expandStringArray(cfg["secrets"].([]interface{})),
+		}
+	}
+	return headers
+}
+
+func flattenHTTPHeaders(v map[string]*header) []interface{} {
+	headers := make([]interface{}, 0, len(v))
+	for name, h := range v {
+		entry := map[string]interface{}{"name": name}
+		if h != nil {
+			entry["values"] = h.Values
+			entry["secrets"] = h.Secrets
+		}
+		headers = append(headers, entry)
+	}
+	return headers
+}
+
 func flattenHTTPConfig(v *httpClientConfig) []interface{} {
 	httpConf := make(map[string]interface{})
 
 	if v != nil {
 		httpConf["proxy_url"] = v.ProxyURL
 		httpConf["bearer_token"] = v.BearerToken
+		httpConf["no_proxy"] = v.NoProxy
+		httpConf["proxy_from_environment"] = v.ProxyFromEnvironment
+		if len(v.ProxyConnectHeader) > 0 {
+			httpConf["proxy_connect_header"] = flattenProxyConnectHeader(v.ProxyConnectHeader)
+		}
+		if len(v.HTTPHeaders) > 0 {
+			httpConf["http_headers"] = flattenHTTPHeaders(v.HTTPHeaders)
+		}
 
 		if v.FollowRedirects != nil {
 			httpConf["follow_redirects"] = v.FollowRedirects

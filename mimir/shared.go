@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"path/filepath"
 	"reflect"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/prometheus/alertmanager/matcher/compat"
+	commoncfg "github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/prometheus/model/rulefmt"
@@ -575,6 +577,20 @@ func validateTemplateFiles(v interface{}, k string) (ws []string, errs []error) 
 	for name := range v.(map[string]interface{}) {
 		_, nameErrs := validateTemplateName(name, k)
 		errs = append(errs, nameErrs...)
+	}
+	return
+}
+
+// validateHTTPHeaderName rejects the http_headers names that prometheus/common
+// reserves (Authorization, Content-Type, ...), as Alertmanager does on load.
+func validateHTTPHeaderName(v interface{}, k string) (ws []string, errs []error) {
+	name := http.CanonicalHeaderKey(v.(string))
+	if name == "" {
+		errs = append(errs, fmt.Errorf("%q: header name must not be empty", k))
+		return
+	}
+	if _, reserved := commoncfg.ReservedHeaders[name]; reserved {
+		errs = append(errs, fmt.Errorf("%q: setting header %q is not allowed", k, name))
 	}
 	return
 }

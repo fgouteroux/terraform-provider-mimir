@@ -21,6 +21,11 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
 - `mimir_alertmanager_config` gains `receiver.labels`, `webhook_configs.payload` and
   `slack_configs.update_message`, all requiring Mimir >= 3.2. `payload` takes a YAML or JSON
   document; formatting differences do not show as a diff.
+- `http_config` gains `http_headers`, `no_proxy`, `proxy_from_environment` and
+  `proxy_connect_header`, and its `oauth2` block gains the JWT bearer grant (`grant_type`,
+  `client_certificate_key`, `client_certificate_key_id`, `signature_algorithm`, `iss`,
+  `audience`, `claims`). Header names that Alertmanager reserves are rejected at plan time.
+  The file-based variants stay out, since Mimir refuses settings that load files.
 
 ### Changed
 

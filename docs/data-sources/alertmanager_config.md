@@ -77,7 +77,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--global--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--global--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--global--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--global--http_config--tls_config))
 
@@ -99,15 +103,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--global--http_config--http_headers"></a>
+### Nested Schema for `global.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--global--http_config--oauth2"></a>
 ### Nested Schema for `global.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--global--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -121,6 +142,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--global--http_config--proxy_connect_header"></a>
+### Nested Schema for `global.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--global--http_config--tls_config"></a>
@@ -204,7 +234,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--tls_config))
 
@@ -226,15 +260,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--discord_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.discord_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--discord_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.discord_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -248,6 +299,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--discord_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.discord_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--discord_configs--http_config--tls_config"></a>
@@ -328,7 +388,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--tls_config))
 
@@ -350,15 +414,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--msteams_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--msteams_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.msteams_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -372,6 +453,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--msteams_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.msteams_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--msteams_configs--http_config--tls_config"></a>
@@ -408,7 +498,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--msteamsv2_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteamsv2_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--msteamsv2_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteamsv2_configs--http_config--tls_config))
 
@@ -430,15 +524,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--msteamsv2_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--msteamsv2_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.msteamsv2_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteamsv2_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -452,6 +563,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--msteamsv2_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.msteamsv2_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--msteamsv2_configs--http_config--tls_config"></a>
@@ -498,7 +618,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs--http_config--tls_config))
 
@@ -520,15 +644,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--opsgenie_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.opsgenie_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--opsgenie_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.opsgenie_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--opsgenie_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -542,6 +683,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--opsgenie_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.opsgenie_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--opsgenie_configs--http_config--tls_config"></a>
@@ -601,7 +751,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs--http_config--tls_config))
 
@@ -623,15 +777,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--pagerduty_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.pagerduty_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--pagerduty_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.pagerduty_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pagerduty_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -645,6 +816,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--pagerduty_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.pagerduty_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--pagerduty_configs--http_config--tls_config"></a>
@@ -711,7 +891,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--pushover_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pushover_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--pushover_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pushover_configs--http_config--tls_config))
 
@@ -733,15 +917,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--pushover_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--pushover_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.pushover_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--pushover_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -755,6 +956,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--pushover_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.pushover_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--pushover_configs--http_config--tls_config"></a>
@@ -848,7 +1058,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--slack_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--slack_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--slack_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--slack_configs--http_config--tls_config))
 
@@ -870,15 +1084,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--slack_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.slack_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--slack_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.slack_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--slack_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -892,6 +1123,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--slack_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.slack_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--slack_configs--http_config--tls_config"></a>
@@ -933,7 +1173,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs--http_config--tls_config))
 
@@ -955,15 +1199,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--sns_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.sns_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--sns_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.sns_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--sns_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -977,6 +1238,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--sns_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.sns_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--sns_configs--http_config--tls_config"></a>
@@ -1029,7 +1299,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config--tls_config))
 
@@ -1051,15 +1325,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--telegram_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.telegram_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--telegram_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.telegram_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--telegram_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -1073,6 +1364,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--telegram_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.telegram_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--telegram_configs--http_config--tls_config"></a>
@@ -1114,7 +1414,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs--http_config--tls_config))
 
@@ -1136,15 +1440,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--victorops_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.victorops_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--victorops_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.victorops_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--victorops_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -1158,6 +1479,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--victorops_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.victorops_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--victorops_configs--http_config--tls_config"></a>
@@ -1194,7 +1524,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--tls_config))
 
@@ -1216,15 +1550,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--webex_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.webex_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--webex_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.webex_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webex_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -1238,6 +1589,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--webex_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.webex_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--webex_configs--http_config--tls_config"></a>
@@ -1275,7 +1635,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config--tls_config))
 
@@ -1297,15 +1661,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--webhook_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--webhook_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.webhook_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -1319,6 +1700,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--webhook_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.webhook_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--webhook_configs--http_config--tls_config"></a>
@@ -1361,7 +1751,11 @@ Read-Only:
 - `bearer_token` (String)
 - `enable_http2` (Boolean)
 - `follow_redirects` (Boolean)
+- `http_headers` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs--http_config--http_headers))
+- `no_proxy` (String)
 - `oauth2` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs--http_config--oauth2))
+- `proxy_connect_header` (Set of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs--http_config--proxy_connect_header))
+- `proxy_from_environment` (Boolean)
 - `proxy_url` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs--http_config--tls_config))
 
@@ -1383,15 +1777,32 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedobjatt--receiver--wechat_configs--http_config--http_headers"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.http_headers`
+
+Read-Only:
+
+- `name` (String)
+- `secrets` (List of String)
+- `values` (List of String)
+
+
 <a id="nestedobjatt--receiver--wechat_configs--http_config--oauth2"></a>
 ### Nested Schema for `receiver.wechat_configs.http_config.oauth2`
 
 Read-Only:
 
+- `audience` (String)
+- `claims` (Map of String)
+- `client_certificate_key` (String)
+- `client_certificate_key_id` (String)
 - `client_id` (String)
 - `client_secret` (String)
 - `endpoint_params` (Map of String)
+- `grant_type` (String)
+- `iss` (String)
 - `scopes` (List of String)
+- `signature_algorithm` (String)
 - `tls_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--wechat_configs--http_config--oauth2--tls_config))
 - `token_url` (String)
 
@@ -1405,6 +1816,15 @@ Read-Only:
 - `min_version` (String)
 - `server_name` (String)
 
+
+
+<a id="nestedobjatt--receiver--wechat_configs--http_config--proxy_connect_header"></a>
+### Nested Schema for `receiver.wechat_configs.http_config.proxy_connect_header`
+
+Read-Only:
+
+- `name` (String)
+- `values` (List of String)
 
 
 <a id="nestedobjatt--receiver--wechat_configs--http_config--tls_config"></a>
