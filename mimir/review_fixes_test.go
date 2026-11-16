@@ -23,9 +23,16 @@ func TestParseTimeHandlesPartialRange(t *testing.T) {
 		"garbage": 0,
 	}
 	for in, want := range cases {
-		if got := parseTime(in); got != want {
+		got, err := parseTime(in)
+		if err != nil {
+			t.Fatalf("parseTime(%q): %v", in, err)
+		}
+		if got != want {
 			t.Errorf("parseTime(%q) = %d, want %d", in, got, want)
 		}
+	}
+	if _, err := parseTime("ab:00"); err == nil {
+		t.Error("parseTime(\"ab:00\") must fail")
 	}
 }
 

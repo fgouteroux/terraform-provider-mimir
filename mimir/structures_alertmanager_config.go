@@ -13,6 +13,46 @@ import (
 	"github.com/prometheus/common/model"
 )
 
+// parseOptionalDuration parses a duration attribute, where an empty string
+// means unset.
+func parseOptionalDuration(key, value string) (time.Duration, error) {
+	if value == "" {
+		return 0, nil
+	}
+	d, err := model.ParseDuration(value)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", key, err)
+	}
+	return time.Duration(d), nil
+}
+
+// parseOptionalURL parses a URL attribute, where an empty string means unset.
+func parseOptionalURL(key, value string) (*amcommoncfg.URL, error) {
+	if value == "" {
+		return nil, nil
+	}
+	u, err := url.Parse(value)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", key, err)
+	}
+	return &amcommoncfg.URL{URL: u}, nil
+}
+
+// parseOptionalHostPort parses a host:port attribute, where an empty string
+// means unset.
+func parseOptionalHostPort(key, value string) (config.HostPort, error) {
+	var hp config.HostPort
+	if value == "" {
+		return hp, nil
+	}
+	var err error
+	hp.Host, hp.Port, err = net.SplitHostPort(value)
+	if err != nil {
+		return hp, fmt.Errorf("%s: %w", key, err)
+	}
+	return hp, nil
+}
+
 func expandHTTPConfigOAuth2(v interface{}) *oauth2 {
 	var oauth2Conf *oauth2
 	data := v.([]interface{})
@@ -275,38 +315,38 @@ func flattenHTTPConfig(v *httpClientConfig) []interface{} {
 	return []interface{}{httpConf}
 }
 
-func expandGlobalConfig(v interface{}) *globalConfig {
+func expandGlobalConfig(v interface{}) (*globalConfig, error) {
 	var globalConf *globalConfig
 	data := v.([]interface{})
 	if len(data) != 0 && data[0] != nil {
 		globalConf = &globalConfig{}
 		cfg := data[0].(map[string]interface{})
-		resolveTimeout, _ := model.ParseDuration(cfg["resolve_timeout"].(string))
+		resolveTimeout, err := parseOptionalDuration("resolve_timeout", cfg["resolve_timeout"].(string))
+		if err != nil {
+			return nil, err
+		}
 		globalConf.ResolveTimeout = new(model.Duration)
-		*globalConf.ResolveTimeout = resolveTimeout
+		*globalConf.ResolveTimeout = model.Duration(resolveTimeout)
 
-		pagerdutyURL, _ := url.Parse(cfg["pagerduty_url"].(string))
-		if pagerdutyURL.String() != "" {
-			globalConf.PagerdutyURL = &amcommoncfg.URL{URL: pagerdutyURL}
+		if globalConf.PagerdutyURL, err = parseOptionalURL("pagerduty_url", cfg["pagerduty_url"].(string)); err != nil {
+			return nil, err
 		}
 
-		slackAPIURL, _ := url.Parse(cfg["slack_api_url"].(string))
-		if slackAPIURL.String() != "" {
-			globalConf.SlackAPIURL = &amcommoncfg.URL{URL: slackAPIURL}
+		if globalConf.SlackAPIURL, err = parseOptionalURL("slack_api_url", cfg["slack_api_url"].(string)); err != nil {
+			return nil, err
 		}
 
 		globalConf.SlackAppToken = cfg["slack_app_token"].(string)
-		slackAppURL, _ := url.Parse(cfg["slack_app_url"].(string))
-		if slackAppURL.String() != "" {
-			globalConf.SlackAppURL = &amcommoncfg.URL{URL: slackAppURL}
+		if globalConf.SlackAppURL, err = parseOptionalURL("slack_app_url", cfg["slack_app_url"].(string)); err != nil {
+			return nil, err
 		}
 
 		globalConf.SMTPFrom = cfg["smtp_from"].(string)
 		globalConf.SMTPHello = cfg["smtp_hello"].(string)
 
-		var hp config.HostPort
-		hp.Host, hp.Port, _ = net.SplitHostPort(cfg["smtp_smarthost"].(string))
-		globalConf.SMTPSmarthost = hp
+		if globalConf.SMTPSmarthost, err = parseOptionalHostPort("smtp_smarthost", cfg["smtp_smarthost"].(string)); err != nil {
+			return nil, err
+		}
 
 		globalConf.SMTPAuthUsername = cfg["smtp_auth_username"].(string)
 		globalConf.SMTPAuthPassword = cfg["smtp_auth_password"].(string)
@@ -319,36 +359,31 @@ func expandGlobalConfig(v interface{}) *globalConfig {
 		globalConf.HTTPConfig = expandHTTPConfig(cfg["http_config"])
 
 		globalConf.OpsGenieAPIKey = cfg["opsgenie_api_key"].(string)
-		opsGenieAPIURL, _ := url.Parse(cfg["opsgenie_api_url"].(string))
-		if opsGenieAPIURL.String() != "" {
-			globalConf.OpsGenieAPIURL = &amcommoncfg.URL{URL: opsGenieAPIURL}
+		if globalConf.OpsGenieAPIURL, err = parseOptionalURL("opsgenie_api_url", cfg["opsgenie_api_url"].(string)); err != nil {
+			return nil, err
 		}
 
-		webexAPIURL, _ := url.Parse(cfg["webex_api_url"].(string))
-		if webexAPIURL.String() != "" {
-			globalConf.WebexAPIURL = &amcommoncfg.URL{URL: webexAPIURL}
+		if globalConf.WebexAPIURL, err = parseOptionalURL("webex_api_url", cfg["webex_api_url"].(string)); err != nil {
+			return nil, err
 		}
 
 		globalConf.WeChatAPISecret = cfg["wechat_api_secret"].(string)
 		globalConf.WeChatAPICorpID = cfg["wechat_api_corp_id"].(string)
-		weChatAPIURL, _ := url.Parse(cfg["wechat_api_url"].(string))
-		if weChatAPIURL.String() != "" {
-			globalConf.WeChatAPIURL = &amcommoncfg.URL{URL: weChatAPIURL}
+		if globalConf.WeChatAPIURL, err = parseOptionalURL("wechat_api_url", cfg["wechat_api_url"].(string)); err != nil {
+			return nil, err
 		}
 
 		globalConf.VictorOpsAPIKey = cfg["victorops_api_key"].(string)
-		victorOpsAPIURL, _ := url.Parse(cfg["victorops_api_url"].(string))
-		if victorOpsAPIURL.String() != "" {
-			globalConf.VictorOpsAPIURL = &amcommoncfg.URL{URL: victorOpsAPIURL}
+		if globalConf.VictorOpsAPIURL, err = parseOptionalURL("victorops_api_url", cfg["victorops_api_url"].(string)); err != nil {
+			return nil, err
 		}
 
-		telegramAPIURL, _ := url.Parse(cfg["telegram_api_url"].(string))
-		if telegramAPIURL.String() != "" {
-			globalConf.TelegramAPIURL = &amcommoncfg.URL{URL: telegramAPIURL}
+		if globalConf.TelegramAPIURL, err = parseOptionalURL("telegram_api_url", cfg["telegram_api_url"].(string)); err != nil {
+			return nil, err
 		}
 		globalConf.TelegramBotToken = cfg["telegram_bot_token"].(string)
 	}
-	return globalConf
+	return globalConf, nil
 }
 
 func flattenGlobalConfig(v *globalConfig) []interface{} {
@@ -421,7 +456,7 @@ func flattenGlobalConfig(v *globalConfig) []interface{} {
 	return []interface{}{globalConf}
 }
 
-func expandReceiverConfig(v []interface{}) []*receiver {
+func expandReceiverConfig(v []interface{}) ([]*receiver, error) {
 	var receiverConf []*receiver
 
 	for _, v := range v {
@@ -437,16 +472,28 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 			}
 		}
 		if raw, ok := data["pagerduty_configs"]; ok {
-			cfg.PagerdutyConfigs = expandPagerdutyConfig(raw.([]interface{}))
+			configs, err := expandPagerdutyConfig(raw.([]interface{}))
+			if err != nil {
+				return nil, fmt.Errorf("receiver %q: %w", cfg.Name, err)
+			}
+			cfg.PagerdutyConfigs = configs
 		}
 		if raw, ok := data["email_configs"]; ok {
-			cfg.EmailConfigs = expandEmailConfig(raw.([]interface{}))
+			configs, err := expandEmailConfig(raw.([]interface{}))
+			if err != nil {
+				return nil, fmt.Errorf("receiver %q: %w", cfg.Name, err)
+			}
+			cfg.EmailConfigs = configs
 		}
 		if raw, ok := data["wechat_configs"]; ok {
 			cfg.WeChatConfigs = expandWeChatConfig(raw.([]interface{}))
 		}
 		if raw, ok := data["webhook_configs"]; ok {
-			cfg.WebhookConfigs = expandWebhookConfig(raw.([]interface{}))
+			configs, err := expandWebhookConfig(raw.([]interface{}))
+			if err != nil {
+				return nil, fmt.Errorf("receiver %q: %w", cfg.Name, err)
+			}
+			cfg.WebhookConfigs = configs
 		}
 		if raw, ok := data["webex_configs"]; ok {
 			cfg.WebexConfigs = expandWebexConfig(raw.([]interface{}))
@@ -455,13 +502,21 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 			cfg.DiscordConfigs = expandDiscordConfig(raw.([]interface{}))
 		}
 		if raw, ok := data["pushover_configs"]; ok {
-			cfg.PushoverConfigs = expandPushoverConfig(raw.([]interface{}))
+			configs, err := expandPushoverConfig(raw.([]interface{}))
+			if err != nil {
+				return nil, fmt.Errorf("receiver %q: %w", cfg.Name, err)
+			}
+			cfg.PushoverConfigs = configs
 		}
 		if raw, ok := data["opsgenie_configs"]; ok {
 			cfg.OpsgenieConfigs = expandOpsgenieConfig(raw.([]interface{}))
 		}
 		if raw, ok := data["slack_configs"]; ok {
-			cfg.SlackConfigs = expandSlackConfig(raw.([]interface{}))
+			configs, err := expandSlackConfig(raw.([]interface{}))
+			if err != nil {
+				return nil, fmt.Errorf("receiver %q: %w", cfg.Name, err)
+			}
+			cfg.SlackConfigs = configs
 		}
 		if raw, ok := data["telegram_configs"]; ok {
 			cfg.TelegramConfigs = expandTelegramConfig(raw.([]interface{}))
@@ -480,7 +535,7 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		}
 		receiverConf = append(receiverConf, cfg)
 	}
-	return receiverConf
+	return receiverConf, nil
 }
 
 func flattenReceiverConfig(v []*receiver) []interface{} {
@@ -882,7 +937,7 @@ func flattenOpsgenieConfig(v []*opsgenieConfig) []interface{} {
 	return opsgenieConf
 }
 
-func expandWebhookConfig(v []interface{}) []*webhookConfig {
+func expandWebhookConfig(v []interface{}) ([]*webhookConfig, error) {
 	var webhookConf []*webhookConfig
 
 	for _, v := range v {
@@ -902,15 +957,18 @@ func expandWebhookConfig(v []interface{}) []*webhookConfig {
 			cfg.MaxAlerts = int32(raw.(int))
 		}
 		if raw, ok := data[timeoutKey]; ok {
-			timeout, _ := model.ParseDuration(raw.(string))
-			cfg.Timeout = time.Duration(timeout)
+			timeout, err := parseOptionalDuration(timeoutKey, raw.(string))
+			if err != nil {
+				return nil, err
+			}
+			cfg.Timeout = timeout
 		}
 		if raw, ok := data["payload"]; ok {
 			cfg.Payload = expandYAMLDocument(raw.(string))
 		}
 		webhookConf = append(webhookConf, cfg)
 	}
-	return webhookConf
+	return webhookConf, nil
 }
 
 func flattenWebhookConfig(v []*webhookConfig) []interface{} {
@@ -1115,7 +1173,7 @@ func flattenWeChatConfig(v []*weChatConfig) []interface{} {
 	return weChatConf
 }
 
-func expandEmailConfig(v []interface{}) []*emailConfig {
+func expandEmailConfig(v []interface{}) ([]*emailConfig, error) {
 	var emailConf []*emailConfig
 
 	for _, v := range v {
@@ -1136,8 +1194,10 @@ func expandEmailConfig(v []interface{}) []*emailConfig {
 			cfg.Hello = raw.(string)
 		}
 		if raw, ok := data["smarthost"]; ok {
-			var hp config.HostPort
-			hp.Host, hp.Port, _ = net.SplitHostPort(raw.(string))
+			hp, err := parseOptionalHostPort("smarthost", raw.(string))
+			if err != nil {
+				return nil, err
+			}
 			cfg.Smarthost = hp
 		}
 
@@ -1177,7 +1237,7 @@ func expandEmailConfig(v []interface{}) []*emailConfig {
 		}
 		emailConf = append(emailConf, cfg)
 	}
-	return emailConf
+	return emailConf, nil
 }
 
 func flattenEmailConfig(v []*emailConfig) []interface{} {
@@ -1357,7 +1417,7 @@ func flattenSlackConfigActions(v []slackAction) []interface{} {
 	return slackActionConf
 }
 
-func expandSlackConfig(v []interface{}) []*slackConfig {
+func expandSlackConfig(v []interface{}) ([]*slackConfig, error) {
 	var slackConf []*slackConfig
 
 	for _, v := range v {
@@ -1393,8 +1453,11 @@ func expandSlackConfig(v []interface{}) []*slackConfig {
 			cfg.MessageText = raw.(string)
 		}
 		if raw, ok := data[timeoutKey]; ok {
-			timeout, _ := model.ParseDuration(raw.(string))
-			cfg.Timeout = time.Duration(timeout)
+			timeout, err := parseOptionalDuration(timeoutKey, raw.(string))
+			if err != nil {
+				return nil, err
+			}
+			cfg.Timeout = timeout
 		}
 		if raw, ok := data["channel"]; ok {
 			cfg.Channel = raw.(string)
@@ -1450,7 +1513,7 @@ func expandSlackConfig(v []interface{}) []*slackConfig {
 
 		slackConf = append(slackConf, cfg)
 	}
-	return slackConf
+	return slackConf, nil
 }
 
 func flattenSlackConfig(v []*slackConfig) []interface{} {
@@ -1568,7 +1631,7 @@ func flattenPagerdutyConfigImages(v []pagerdutyImage) []interface{} {
 	return pagerdutyImageConf
 }
 
-func expandPagerdutyConfig(v []interface{}) []*pagerdutyConfig {
+func expandPagerdutyConfig(v []interface{}) ([]*pagerdutyConfig, error) {
 	var pagerdutyConf []*pagerdutyConfig
 
 	for _, v := range v {
@@ -1622,15 +1685,18 @@ func expandPagerdutyConfig(v []interface{}) []*pagerdutyConfig {
 			cfg.Source = raw.(string)
 		}
 		if raw, ok := data[timeoutKey]; ok {
-			timeout, _ := model.ParseDuration(raw.(string))
-			cfg.Timeout = time.Duration(timeout)
+			timeout, err := parseOptionalDuration(timeoutKey, raw.(string))
+			if err != nil {
+				return nil, err
+			}
+			cfg.Timeout = timeout
 		}
 		if raw, ok := data["details"]; ok {
 			cfg.Details = expandStringMap(raw.(map[string]interface{}))
 		}
 		pagerdutyConf = append(pagerdutyConf, cfg)
 	}
-	return pagerdutyConf
+	return pagerdutyConf, nil
 }
 
 func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
@@ -1666,7 +1732,7 @@ func flattenPagerdutyConfig(v []*pagerdutyConfig) []interface{} {
 	return pagerdutyConf
 }
 
-func expandPushoverConfig(v []interface{}) []*pushoverConfig {
+func expandPushoverConfig(v []interface{}) ([]*pushoverConfig, error) {
 	var pushoverConf []*pushoverConfig
 
 	for _, v := range v {
@@ -1705,12 +1771,18 @@ func expandPushoverConfig(v []interface{}) []*pushoverConfig {
 			cfg.Priority = raw.(string)
 		}
 		if raw, ok := data["retry"]; ok {
-			retry, _ := model.ParseDuration(raw.(string))
-			cfg.Retry = time.Duration(retry)
+			retry, err := parseOptionalDuration("retry", raw.(string))
+			if err != nil {
+				return nil, err
+			}
+			cfg.Retry = retry
 		}
 		if raw, ok := data["expire"]; ok {
-			expire, _ := model.ParseDuration(raw.(string))
-			cfg.Expire = time.Duration(expire)
+			expire, err := parseOptionalDuration("expire", raw.(string))
+			if err != nil {
+				return nil, err
+			}
+			cfg.Expire = expire
 		}
 		if raw, ok := data["html"]; ok {
 			cfg.HTML = raw.(bool)
@@ -1719,15 +1791,18 @@ func expandPushoverConfig(v []interface{}) []*pushoverConfig {
 			cfg.Device = raw.(string)
 		}
 		if raw, ok := data["ttl"]; ok {
-			ttl, _ := model.ParseDuration(raw.(string))
-			cfg.TTL = time.Duration(ttl)
+			ttl, err := parseOptionalDuration("ttl", raw.(string))
+			if err != nil {
+				return nil, err
+			}
+			cfg.TTL = ttl
 		}
 		if raw, ok := data["monospace"]; ok {
 			cfg.Monospace = raw.(bool)
 		}
 		pushoverConf = append(pushoverConf, cfg)
 	}
-	return pushoverConf
+	return pushoverConf, nil
 }
 
 func flattenPushoverConfig(v []*pushoverConfig) []interface{} {
@@ -2080,7 +2155,7 @@ func allTimeIntervals(c alertmanagerConfig) []*muteTimeInterval {
 	return merged
 }
 
-func expandMuteTimeIntervalConfig(v []interface{}) []*muteTimeInterval {
+func expandMuteTimeIntervalConfig(v []interface{}) ([]*muteTimeInterval, error) {
 	var muteTimeIntervalConf []*muteTimeInterval
 
 	for _, v := range v {
@@ -2091,11 +2166,15 @@ func expandMuteTimeIntervalConfig(v []interface{}) []*muteTimeInterval {
 			cfg.Name = raw.(string)
 		}
 		if raw, ok := data["time_intervals"]; ok {
-			cfg.TimeIntervals = expandTimeIntervalConfig(raw.([]interface{}))
+			intervals, err := expandTimeIntervalConfig(raw.([]interface{}))
+			if err != nil {
+				return nil, fmt.Errorf("time_interval %q: %w", cfg.Name, err)
+			}
+			cfg.TimeIntervals = intervals
 		}
 		muteTimeIntervalConf = append(muteTimeIntervalConf, cfg)
 	}
-	return muteTimeIntervalConf
+	return muteTimeIntervalConf, nil
 }
 
 func flattenMuteTimeIntervalConfig(v []*muteTimeInterval) []interface{} {
@@ -2114,7 +2193,7 @@ func flattenMuteTimeIntervalConfig(v []*muteTimeInterval) []interface{} {
 	return muteTimeIntervalConf
 }
 
-func expandTimeIntervalConfig(v []interface{}) []timeinterval.TimeInterval {
+func expandTimeIntervalConfig(v []interface{}) ([]timeinterval.TimeInterval, error) {
 	var timeIntervalConf []timeinterval.TimeInterval
 
 	for _, v := range v {
@@ -2122,7 +2201,11 @@ func expandTimeIntervalConfig(v []interface{}) []timeinterval.TimeInterval {
 		data := v.(map[string]interface{})
 
 		if raw, ok := data["times"]; ok {
-			cfg.Times = expandTimeRange(raw.([]interface{}))
+			times, err := expandTimeRange(raw.([]interface{}))
+			if err != nil {
+				return nil, err
+			}
+			cfg.Times = times
 		}
 		if raw, ok := data["weekdays"]; ok {
 			cfg.Weekdays = expandWeekdayRange(raw.([]interface{}))
@@ -2137,16 +2220,19 @@ func expandTimeIntervalConfig(v []interface{}) []timeinterval.TimeInterval {
 			cfg.Years = expandYearRange(raw.([]interface{}))
 		}
 		if raw, ok := data["location"]; ok {
-			loc, _ := time.LoadLocation(raw.(string))
+			loc, err := time.LoadLocation(raw.(string))
+			if err != nil {
+				return nil, fmt.Errorf("location: %w", err)
+			}
 			cfg.Location = new(timeinterval.Location)
 			*cfg.Location = timeinterval.Location{Location: loc}
 		}
 		timeIntervalConf = append(timeIntervalConf, cfg)
 	}
-	return timeIntervalConf
+	return timeIntervalConf, nil
 }
 
-func expandTimeRange(v []interface{}) []timeinterval.TimeRange {
+func expandTimeRange(v []interface{}) ([]timeinterval.TimeRange, error) {
 	var timeRangeConf []timeinterval.TimeRange
 
 	for _, v := range v {
@@ -2154,15 +2240,23 @@ func expandTimeRange(v []interface{}) []timeinterval.TimeRange {
 		data := v.(map[string]interface{})
 
 		if raw, ok := data["start_time"]; ok {
-			cfg.StartMinute = parseTime(raw.(string))
+			start, err := parseTime(raw.(string))
+			if err != nil {
+				return nil, fmt.Errorf("start_time: %w", err)
+			}
+			cfg.StartMinute = start
 		}
 		if raw, ok := data["end_time"]; ok {
-			cfg.EndMinute = parseTime(raw.(string))
+			end, err := parseTime(raw.(string))
+			if err != nil {
+				return nil, fmt.Errorf("end_time: %w", err)
+			}
+			cfg.EndMinute = end
 		}
 
 		timeRangeConf = append(timeRangeConf, cfg)
 	}
-	return timeRangeConf
+	return timeRangeConf, nil
 }
 
 func flattenTimeRange(v []timeinterval.TimeRange) []interface{} {

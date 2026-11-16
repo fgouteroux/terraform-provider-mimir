@@ -216,11 +216,24 @@ func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, p
 		headers["X-Scope-OrgID"] = orgID
 	}
 
+	global, err := expandGlobalConfig(d.Get("global").([]interface{}))
+	if err != nil {
+		return fmt.Errorf("global: %w", err)
+	}
+	timeIntervals, err := expandMuteTimeIntervalConfig(d.Get("time_interval").([]interface{}))
+	if err != nil {
+		return err
+	}
+	receivers, err := expandReceiverConfig(d.Get("receiver").([]interface{}))
+	if err != nil {
+		return err
+	}
+
 	alertmanagerConf := &alertmanagerConfig{
-		Global:        expandGlobalConfig(d.Get("global").([]interface{})),
-		TimeIntervals: expandMuteTimeIntervalConfig(d.Get("time_interval").([]interface{})),
+		Global:        global,
+		TimeIntervals: timeIntervals,
 		InhibitRules:  expandInhibitRuleConfig(d.Get("inhibit_rule").([]interface{})),
-		Receivers:     expandReceiverConfig(d.Get("receiver").([]interface{})),
+		Receivers:     receivers,
 		Route:         expandRouteConfig(d.Get("route").([]interface{})),
 		Templates:     expandStringArray(d.Get("templates").([]interface{})),
 	}

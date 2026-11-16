@@ -1,6 +1,7 @@
 package mimir
 
 import (
+	"log"
 	"os"
 	"strconv"
 
@@ -16,8 +17,11 @@ func getChildRouteSchemaLevel() int {
 	if level == "" {
 		level = "3"
 	}
-	// convert to int
-	lev, _ := strconv.Atoi(level)
+	lev, err := strconv.Atoi(level)
+	if err != nil {
+		log.Printf("[WARN] MIMIR_ALERTMANAGER_CHILD_ROUTE_MAX_LEVEL=%q is not an integer, using 3: %v", level, err) //nolint:gosec // %q escapes control characters
+		return 3
+	}
 
 	return lev
 }
@@ -434,9 +438,10 @@ func emailConfigFields() map[string]*schema.Schema {
 			Description: "The hostname to identify to the SMTP server.",
 		},
 		"smarthost": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "The SMTP host through which emails are sent.",
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validateHostPort,
+			Description:  "The SMTP host through which emails are sent.",
 		},
 		"auth_username": {
 			Type:        schema.TypeString,
@@ -1569,33 +1574,40 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						},
 					},
 					"pagerduty_url": {
-						Type:     schema.TypeString,
-						Optional: true,
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateAlertmanagerURL,
 					},
 					"opsgenie_api_url": {
-						Type:     schema.TypeString,
-						Optional: true,
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateAlertmanagerURL,
 					},
 					"webex_api_url": {
-						Type:     schema.TypeString,
-						Optional: true,
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateAlertmanagerURL,
 					},
 					"wechat_api_url": {
-						Type:     schema.TypeString,
-						Optional: true,
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateAlertmanagerURL,
 					},
 					"victorops_api_url": {
-						Type:     schema.TypeString,
-						Optional: true,
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateAlertmanagerURL,
 					},
 					"telegram_api_url": {
-						Type:     schema.TypeString,
-						Optional: true,
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateAlertmanagerURL,
 					},
 					"slack_api_url": {
-						Type:      schema.TypeString,
-						Optional:  true,
-						Sensitive: true,
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateAlertmanagerURL,
+						Sensitive:    true,
 					},
 					"opsgenie_api_key": {
 						Type:      schema.TypeString,
@@ -1627,9 +1639,10 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Description: "The default hostname to identify to the SMTP server.",
 					},
 					"smtp_smarthost": {
-						Type:        schema.TypeString,
-						Optional:    true,
-						Description: "The default SMTP smarthost used for sending emails, including port number.",
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateHostPort,
+						Description:  "The default SMTP smarthost used for sending emails, including port number.",
 					},
 					"smtp_auth_username": {
 						Type:        schema.TypeString,
@@ -1680,9 +1693,10 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Description: "The default Slack app token, used to send notifications through the Slack API instead of a webhook." + mimirMin31Descr,
 					},
 					"slack_app_url": {
-						Type:        schema.TypeString,
-						Optional:    true,
-						Description: "The default Slack API URL used with `slack_app_token`." + mimirMin31Descr,
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validateAlertmanagerURL,
+						Description:  "The default Slack API URL used with `slack_app_token`." + mimirMin31Descr,
 					},
 					"telegram_bot_token": {
 						Type:        schema.TypeString,
@@ -1832,10 +1846,11 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 									},
 								},
 								"location": {
-									Type:        schema.TypeString,
-									Optional:    true,
-									Default:     "UTC",
-									Description: "A string that matches a location in the IANA time zone database.",
+									Type:         schema.TypeString,
+									Optional:     true,
+									ValidateFunc: validateLocation,
+									Default:      "UTC",
+									Description:  "A string that matches a location in the IANA time zone database.",
 								},
 							},
 						},

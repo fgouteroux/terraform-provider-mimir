@@ -199,120 +199,148 @@ func resourceMimirRules() *schema.Resource {
 			},
 		},
 
-		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
-			if err := validateRuleGroupsConfiguration(diff); err != nil {
-				return err
-			}
-
-			// Parse the configuration to determine what will be managed
-			var ruleGroups RuleGroups
-			var err error
-			var fileContent []byte
-
-			if content := diff.Get("content").(string); content != "" {
-				err = yaml.Unmarshal([]byte(content), &ruleGroups)
-			} else if contentFile := diff.Get("content_file").(string); contentFile != "" {
-				fileContent, err = os.ReadFile(contentFile)
-				if err == nil {
-					err = yaml.Unmarshal(fileContent, &ruleGroups)
-				}
-			}
-
-			if err != nil || len(ruleGroups.Groups) == 0 {
-				return nil
-			}
-			// content is checked by its ValidateFunc; content_file is only read
-			// here, so check it now rather than at apply.
-			if diff.Get("content_file").(string) != "" {
-				if err := validateRuleGroupsContent(ruleGroups); err != nil {
-					return fmt.Errorf("content_file validation failed: %w", err)
-				}
-			}
-
-			// Determine which groups will be managed
-			allGroupNames := make([]string, len(ruleGroups.Groups))
-			for i, group := range ruleGroups.Groups {
-				allGroupNames[i] = group.Name
-			}
-
-			var managedGroups []string
-			if onlyGroups := diff.Get("only_groups").(*schema.Set); onlyGroups != nil && onlyGroups.Len() > 0 {
-				var unknown []string
-				for _, name := range onlyGroups.List() {
-					groupName := name.(string)
-					if contains(allGroupNames, groupName) {
-						managedGroups = append(managedGroups, groupName)
-					} else {
-						unknown = append(unknown, groupName)
-					}
-				}
-				// Reject names that match no group instead of silently managing
-				// fewer groups. Update derives the delete set from the managed
-				// groups recorded in state, so a set that silently shrinks to
-				// empty makes Update delete every group this resource owns and
-				// still report success.
-				if len(unknown) > 0 {
-					return fmt.Errorf(
-						"only_groups references rule group(s) %s which are not defined in the configuration (defined: %s)",
-						strings.Join(unknown, ", "), strings.Join(allGroupNames, ", "))
-				}
-			} else if ignoreGroups := diff.Get("ignore_groups").(*schema.Set); ignoreGroups != nil && ignoreGroups.Len() > 0 {
-				var ignored []string
-				for _, name := range ignoreGroups.List() {
-					ignored = append(ignored, name.(string))
-				}
-				for _, groupName := range allGroupNames {
-					if !contains(ignored, groupName) {
-						managedGroups = append(managedGroups, groupName)
-					}
-				}
-			} else {
-				managedGroups = allGroupNames
-			}
-
-			// Calculate new content hash
-			newContentHash := calculateContentHash(ruleGroups, managedGroups)
-			oldContentHash := diff.Get("content_hash").(string)
-
-			// Check if content has changed (either directly or via file modification)
-			contentChanged := diff.HasChange("content") || diff.HasChange("only_groups") || diff.HasChange("ignore_groups") || diff.Id() == ""
-			if !contentChanged {
-				// Read recomputes content_hash over the groups that actually
-				// exist in Mimir, so a group deleted out of band makes the stored
-				// hash diverge from the hash of the configured set and the plan
-				// repairs the drift. This has to apply to inline content as well
-				// as content_file, otherwise a deleted group is never recreated.
-				contentChanged = newContentHash != oldContentHash
-			}
-
-			if contentChanged {
-				// Set the computed fields so they appear in the plan
-				diff.SetNew("managed_groups", managedGroups)
-				diff.SetNew("groups_count", len(managedGroups))
-				diff.SetNew("content_hash", newContentHash)
-
-				// Calculate total rules and collect rule names
-				totalRules := 0
-				var ruleNames []string
-				for _, group := range ruleGroups.Groups {
-					if contains(managedGroups, group.Name) {
-						totalRules += len(group.Rules)
-						for _, rule := range group.Rules {
-							if rule.Alert != "" {
-								ruleNames = append(ruleNames, rule.Alert)
-							} else if rule.Record != "" {
-								ruleNames = append(ruleNames, rule.Record)
-							}
-						}
-					}
-				}
-				diff.SetNew("total_rules", totalRules)
-				diff.SetNew("rule_names", ruleNames)
-			}
-
-			return nil
-		},
+		CustomizeDiff: resourceMimirRulesCustomizeDiff,
 	}
+}
+
+// resourceMimirRulesCustomizeDiff recomputes the managed groups and their
+// content hash at plan time.
+func resourceMimirRulesCustomizeDiff(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	if err := validateRuleGroupsConfiguration(diff); err != nil {
+		return err
+	}
+
+	// Parse the configuration to determine what will be managed
+	var ruleGroups RuleGroups
+	var err error
+	var fileContent []byte
+
+	if content := diff.Get("content").(string); content != "" {
+		err = yaml.Unmarshal([]byte(content), &ruleGroups)
+	} else if contentFile := diff.Get("content_file").(string); contentFile != "" {
+		fileContent, err = os.ReadFile(contentFile)
+		if err == nil {
+			err = yaml.Unmarshal(fileContent, &ruleGroups)
+		}
+	}
+
+	if err != nil || len(ruleGroups.Groups) == 0 {
+		return nil
+	}
+	// content is checked by its ValidateFunc; content_file is only read
+	// here, so check it now rather than at apply.
+	if diff.Get("content_file").(string) != "" {
+		if err := validateRuleGroupsContent(ruleGroups); err != nil {
+			return fmt.Errorf("content_file validation failed: %w", err)
+		}
+	}
+
+	// Determine which groups will be managed
+	allGroupNames := make([]string, len(ruleGroups.Groups))
+	for i, group := range ruleGroups.Groups {
+		allGroupNames[i] = group.Name
+	}
+
+	managedGroups, err := plannedManagedGroups(diff, allGroupNames)
+	if err != nil {
+		return err
+	}
+
+	// Calculate new content hash
+	newContentHash, err := calculateContentHash(ruleGroups, managedGroups)
+	if err != nil {
+		return err
+	}
+	oldContentHash := diff.Get("content_hash").(string)
+
+	// Check if content has changed (either directly or via file modification)
+	contentChanged := diff.HasChange("content") || diff.HasChange("only_groups") || diff.HasChange("ignore_groups") || diff.Id() == ""
+	if !contentChanged {
+		// Read recomputes content_hash over the groups that actually
+		// exist in Mimir, so a group deleted out of band makes the stored
+		// hash diverge from the hash of the configured set and the plan
+		// repairs the drift. This has to apply to inline content as well
+		// as content_file, otherwise a deleted group is never recreated.
+		contentChanged = newContentHash != oldContentHash
+	}
+
+	if contentChanged {
+		return setPlannedComputedFields(diff, ruleGroups, managedGroups, newContentHash)
+	}
+
+	return nil
+}
+
+// plannedManagedGroups returns the groups the resource will manage, from
+// only_groups or ignore_groups.
+func plannedManagedGroups(diff *schema.ResourceDiff, allGroupNames []string) ([]string, error) {
+	var managedGroups []string
+	if onlyGroups := diff.Get("only_groups").(*schema.Set); onlyGroups != nil && onlyGroups.Len() > 0 {
+		var unknown []string
+		for _, name := range onlyGroups.List() {
+			groupName := name.(string)
+			if contains(allGroupNames, groupName) {
+				managedGroups = append(managedGroups, groupName)
+			} else {
+				unknown = append(unknown, groupName)
+			}
+		}
+		// Reject names that match no group instead of silently managing
+		// fewer groups. Update derives the delete set from the managed
+		// groups recorded in state, so a set that silently shrinks to
+		// empty makes Update delete every group this resource owns and
+		// still report success.
+		if len(unknown) > 0 {
+			return nil, fmt.Errorf(
+				"only_groups references rule group(s) %s which are not defined in the configuration (defined: %s)",
+				strings.Join(unknown, ", "), strings.Join(allGroupNames, ", "))
+		}
+	} else if ignoreGroups := diff.Get("ignore_groups").(*schema.Set); ignoreGroups != nil && ignoreGroups.Len() > 0 {
+		var ignored []string
+		for _, name := range ignoreGroups.List() {
+			ignored = append(ignored, name.(string))
+		}
+		for _, groupName := range allGroupNames {
+			if !contains(ignored, groupName) {
+				managedGroups = append(managedGroups, groupName)
+			}
+		}
+	} else {
+		managedGroups = allGroupNames
+	}
+	return managedGroups, nil
+}
+
+// setPlannedComputedFields shows the computed fields in the plan.
+func setPlannedComputedFields(diff *schema.ResourceDiff, ruleGroups RuleGroups, managedGroups []string, contentHash string) error {
+	totalRules := 0
+	var ruleNames []string
+	for _, group := range ruleGroups.Groups {
+		if !contains(managedGroups, group.Name) {
+			continue
+		}
+		totalRules += len(group.Rules)
+		for _, rule := range group.Rules {
+			if rule.Alert != "" {
+				ruleNames = append(ruleNames, rule.Alert)
+			} else if rule.Record != "" {
+				ruleNames = append(ruleNames, rule.Record)
+			}
+		}
+	}
+
+	for key, value := range map[string]interface{}{
+		"managed_groups": managedGroups,
+		"groups_count":   len(managedGroups),
+		"content_hash":   contentHash,
+		"total_rules":    totalRules,
+		"rule_names":     ruleNames,
+	} {
+		if err := diff.SetNew(key, value); err != nil {
+			return fmt.Errorf("setting %s: %w", key, err)
+		}
+	}
+	return nil
 }
 
 // Validation functions
@@ -551,8 +579,8 @@ func resourceMimirRulesCreate(ctx context.Context, d *schema.ResourceData, m int
 		if err := createRuleGroup(client, namespace, orgID, group); err != nil {
 			// Record which groups were actually created so Delete can clean them
 			// up when Terraform destroys the tainted resource on the next apply.
-			d.Set("managed_groups", createdGroups)
-			return diag.FromErr(fmt.Errorf("failed to create rule group '%s': %w", group.Name, err))
+			createErr := fmt.Errorf("failed to create rule group '%s': %w", group.Name, err)
+			return diag.FromErr(errors.Join(createErr, d.Set("managed_groups", createdGroups)))
 		}
 		createdGroups = append(createdGroups, group.Name)
 	}
@@ -563,7 +591,9 @@ func resourceMimirRulesCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	// Set computed fields
-	setComputedFields(d, ruleGroups, managedGroups)
+	if err := setComputedFields(d, ruleGroups, managedGroups); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return resourceMimirRulesRead(ctx, d, m)
 }
@@ -612,7 +642,9 @@ func resourceMimirRulesRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	// Update computed fields based on what actually exists
-	setComputedFields(d, ruleGroups, existingGroups)
+	if err := setComputedFields(d, ruleGroups, existingGroups); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -688,10 +720,12 @@ func resourceMimirRulesUpdate(ctx context.Context, d *schema.ResourceData, m int
 			// the update was rejected, causing a subsequent plan to appear clean
 			// despite the change never being applied.
 			oldHash, _ := d.GetChange("content_hash")
-			d.Set("content_hash", oldHash)
 			oldManagedGroupsRaw, _ := d.GetChange("managed_groups")
-			d.Set("managed_groups", oldManagedGroupsRaw)
-			return diag.FromErr(fmt.Errorf("failed to create/update rule group '%s': %w", group.Name, err))
+			return diag.FromErr(errors.Join(
+				fmt.Errorf("failed to create/update rule group '%s': %w", group.Name, err),
+				d.Set("content_hash", oldHash),
+				d.Set("managed_groups", oldManagedGroupsRaw),
+			))
 		}
 	}
 
@@ -701,7 +735,9 @@ func resourceMimirRulesUpdate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	// Update computed fields
-	setComputedFields(d, newRuleGroups, newManagedGroups)
+	if err := setComputedFields(d, newRuleGroups, newManagedGroups); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return resourceMimirRulesRead(ctx, d, m)
 }
@@ -758,8 +794,12 @@ func resourceMimirRulesImport(ctx context.Context, d *schema.ResourceData, m int
 		return nil, fmt.Errorf("import ID %q: namespace %q must not be \".\"/\"..\" and must contain no control characters or '/'", d.Id(), namespace)
 	}
 
-	d.Set(orgIDKey, orgID)
-	d.Set(namespaceKey, namespace)
+	if err := d.Set(orgIDKey, orgID); err != nil {
+		return nil, err
+	}
+	if err := d.Set(namespaceKey, namespace); err != nil {
+		return nil, err
+	}
 
 	// Terraform calls Read straight after the importer, and Read needs a rule
 	// configuration to work out which groups it manages. Without one it fails
@@ -792,7 +832,9 @@ func resourceMimirRulesImport(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		return nil, fmt.Errorf("import %q: failed to serialize rule groups: %w", d.Id(), err)
 	}
-	d.Set(contentKey, string(content))
+	if err := d.Set(contentKey, string(content)); err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -884,11 +926,7 @@ func determineGroupsToManage(ruleGroups RuleGroups, d *schema.ResourceData) []st
 	return allGroupNames
 }
 
-func setComputedFields(d *schema.ResourceData, ruleGroups RuleGroups, managedGroups []string) {
-	// Set managed_groups
-	d.Set("managed_groups", managedGroups)
-	d.Set("groups_count", len(managedGroups))
-
+func setComputedFields(d *schema.ResourceData, ruleGroups RuleGroups, managedGroups []string) error {
 	// Calculate total rules and other stats
 	var totalRules int
 	var ruleNames []string
@@ -924,16 +962,27 @@ func setComputedFields(d *schema.ResourceData, ruleGroups RuleGroups, managedGro
 		groupDetails = append(groupDetails, groupDetail)
 	}
 
-	d.Set("total_rules", totalRules)
-	d.Set("rule_names", ruleNames)
-	d.Set("groups", groupDetails)
+	contentHash, err := calculateContentHash(ruleGroups, managedGroups)
+	if err != nil {
+		return err
+	}
 
-	// Calculate content hash
-	contentHash := calculateContentHash(ruleGroups, managedGroups)
-	d.Set("content_hash", contentHash)
+	for key, value := range map[string]interface{}{
+		"managed_groups": managedGroups,
+		"groups_count":   len(managedGroups),
+		"total_rules":    totalRules,
+		"rule_names":     ruleNames,
+		"groups":         groupDetails,
+		"content_hash":   contentHash,
+	} {
+		if err := d.Set(key, value); err != nil {
+			return fmt.Errorf("setting %s: %w", key, err)
+		}
+	}
+	return nil
 }
 
-func calculateContentHash(ruleGroups RuleGroups, managedGroups []string) string {
+func calculateContentHash(ruleGroups RuleGroups, managedGroups []string) (string, error) {
 	// Create a subset of rule groups that are actually managed
 	managedRuleGroups := RuleGroups{}
 	for _, group := range ruleGroups.Groups {
@@ -942,10 +991,11 @@ func calculateContentHash(ruleGroups RuleGroups, managedGroups []string) string 
 		}
 	}
 
-	data, _ := yaml.Marshal(managedRuleGroups)
-	h := sha256.New()
-	h.Write(data)
-	return fmt.Sprintf("%x", h.Sum(nil))
+	data, err := yaml.Marshal(managedRuleGroups)
+	if err != nil {
+		return "", fmt.Errorf("unable to encode the managed rule groups: %w", err)
+	}
+	return fmt.Sprintf("%x", sha256.Sum256(data)), nil
 }
 
 func createRuleGroup(client *apiClient, namespace, orgID string, group RuleGroup) error {

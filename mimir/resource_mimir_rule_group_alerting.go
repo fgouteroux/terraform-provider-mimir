@@ -179,14 +179,17 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 	if v, ok := d.GetOk(labelsKey); ok {
 		rules.Labels = expandStringMap(v.(map[string]interface{}))
 	}
-	data, _ := yaml.Marshal(rules)
+	data, err := yaml.Marshal(rules)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("unable to encode the rule group: %w", err))
+	}
 	headers := map[string]string{contentTypeHeader: contentTypeYAML}
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID
 	}
 
 	path := rulesNamespacePath(namespace)
-	_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
+	_, err = client.sendRequest("ruler", "POST", path, string(data), headers)
 	baseMsg := fmt.Sprintf("Cannot create alerting rule group '%s' (namespace: %s) -", name, namespace)
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
@@ -306,14 +309,17 @@ func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.Resourc
 		if v, ok := d.GetOk(labelsKey); ok {
 			rules.Labels = expandStringMap(v.(map[string]interface{}))
 		}
-		data, _ := yaml.Marshal(rules)
+		data, err := yaml.Marshal(rules)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("unable to encode the rule group: %w", err))
+		}
 		headers := map[string]string{contentTypeHeader: contentTypeYAML}
 		if orgID != "" {
 			headers["X-Scope-OrgID"] = orgID
 		}
 
 		path := rulesNamespacePath(namespace)
-		_, err := client.sendRequest("ruler", "POST", path, string(data), headers)
+		_, err = client.sendRequest("ruler", "POST", path, string(data), headers)
 		baseMsg := fmt.Sprintf("Cannot update alerting rule group '%s' (namespace: %s) -", name, namespace)
 
 		err = handleHTTPError(err, baseMsg)

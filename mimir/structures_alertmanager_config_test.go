@@ -15,6 +15,15 @@ import (
 // whose optional attributes are all left unset: every declared key is present,
 // holding the zero value of its type. Deriving it from the schema keeps this
 // helper correct as attributes are added.
+// must unwraps an expand result. Tests feed valid values, so an error is a
+// test failure.
+func must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func zeroValues(s map[string]*schema.Schema) map[string]interface{} {
 	data := make(map[string]interface{}, len(s))
 	for key, attr := range s {
@@ -64,15 +73,15 @@ func TestExpandAlertmanagerConfigOmitsUnsetKeys(t *testing.T) {
 	}
 
 	cfg := alertmanagerConfig{
-		Global: expandGlobalConfig(unset(globalConfigFieldsForTest())),
+		Global: must(expandGlobalConfig(unset(globalConfigFieldsForTest()))),
 		Receivers: []*receiver{{
 			Name:             "everything-unset",
-			WebhookConfigs:   expandWebhookConfig(unset(webhookConfigFields())),
+			WebhookConfigs:   must(expandWebhookConfig(unset(webhookConfigFields()))),
 			DiscordConfigs:   expandDiscordConfig(unset(discordConfigFields())),
-			EmailConfigs:     expandEmailConfig(unset(emailConfigFields())),
-			PagerdutyConfigs: expandPagerdutyConfig(unset(pagerdutyConfigFields())),
-			SlackConfigs:     expandSlackConfig(unset(slackConfigFields())),
-			PushoverConfigs:  expandPushoverConfig(unset(pushoverConfigFields())),
+			EmailConfigs:     must(expandEmailConfig(unset(emailConfigFields()))),
+			PagerdutyConfigs: must(expandPagerdutyConfig(unset(pagerdutyConfigFields()))),
+			SlackConfigs:     must(expandSlackConfig(unset(slackConfigFields()))),
+			PushoverConfigs:  must(expandPushoverConfig(unset(pushoverConfigFields()))),
 			TelegramConfigs:  expandTelegramConfig(unset(telegramConfigFields())),
 		}},
 		InhibitRules: expandInhibitRuleConfig(unset(inhibitRuleFieldsForTest())),
@@ -125,46 +134,46 @@ func TestExpandAlertmanagerConfigEmitsSetKeys(t *testing.T) {
 
 	cfg := alertmanagerConfig{
 		//nolint:gosec // placeholder credentials, this test never reaches a network
-		Global: expandGlobalConfig(with(globalConfigFieldsForTest(), map[string]interface{}{
+		Global: must(expandGlobalConfig(with(globalConfigFieldsForTest(), map[string]interface{}{
 			"smtp_force_implicit_tls": true,
 			"slack_app_token":         "xapp-1-token",
 			"slack_app_url":           "https://slack.example.com/api",
 			"telegram_bot_token":      "bot-token",
 			"smtp_tls_config":         []interface{}{map[string]interface{}{"server_name": "smtp.example.com", "insecure_skip_verify": false, "min_version": "", "max_version": ""}},
-		})),
+		}))),
 		Receivers: []*receiver{{
 			Name: "everything-set",
-			WebhookConfigs: expandWebhookConfig(with(webhookConfigFields(), map[string]interface{}{
+			WebhookConfigs: must(expandWebhookConfig(with(webhookConfigFields(), map[string]interface{}{
 				"url":     "https://example.com/hook",
 				"timeout": "10s",
-			})),
+			}))),
 			DiscordConfigs: expandDiscordConfig(with(discordConfigFields(), map[string]interface{}{
 				"content":    "content template",
 				usernameKey:  "alertmanager",
 				"avatar_url": "https://example.com/avatar.png",
 			})),
-			EmailConfigs: expandEmailConfig(with(emailConfigFields(), map[string]interface{}{
+			EmailConfigs: must(expandEmailConfig(with(emailConfigFields(), map[string]interface{}{
 				"to":                 "ops@example.com",
 				"force_implicit_tls": true,
 				"threading":          []interface{}{map[string]interface{}{"enabled": true, "thread_by_date": "daily"}},
 				"tls_config":         []interface{}{map[string]interface{}{"server_name": "mail.example.com", "insecure_skip_verify": false, "min_version": "", "max_version": ""}},
-			})),
-			PagerdutyConfigs: expandPagerdutyConfig(with(pagerdutyConfigFields(), map[string]interface{}{
+			}))),
+			PagerdutyConfigs: must(expandPagerdutyConfig(with(pagerdutyConfigFields(), map[string]interface{}{
 				"source":  "mimir",
 				"timeout": "15s",
-			})),
+			}))),
 			//nolint:gosec // placeholder credentials, this test never reaches a network
-			SlackConfigs: expandSlackConfig(with(slackConfigFields(), map[string]interface{}{
+			SlackConfigs: must(expandSlackConfig(with(slackConfigFields(), map[string]interface{}{
 				"app_token":    "xapp-1-token",
 				"app_url":      "https://slack.example.com/api",
 				"message_text": "text template",
 				"timeout":      "20s",
-			})),
-			PushoverConfigs: expandPushoverConfig(with(pushoverConfigFields(), map[string]interface{}{
+			}))),
+			PushoverConfigs: must(expandPushoverConfig(with(pushoverConfigFields(), map[string]interface{}{
 				"device":    "phone",
 				"ttl":       "1h",
 				"monospace": true,
-			})),
+			}))),
 			TelegramConfigs: expandTelegramConfig(with(telegramConfigFields(), map[string]interface{}{
 				"message_thread_id": 42,
 			})),
@@ -217,7 +226,7 @@ func TestExpandAlertmanagerConfigUsesTimeIntervals(t *testing.T) {
 	}}
 
 	got := marshalYAML(t, alertmanagerConfig{
-		TimeIntervals: expandMuteTimeIntervalConfig(interval),
+		TimeIntervals: must(expandMuteTimeIntervalConfig(interval)),
 	})
 
 	if !strings.Contains(got, "time_intervals:") {
