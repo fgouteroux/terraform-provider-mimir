@@ -13,7 +13,7 @@ import (
 )
 
 type Stats struct {
-	User            string  `json:"UserID"`
+	User            string  `json:"userID"`
 	Series          int     `json:"numSeries"`
 	TotalIngestRate float64 `json:"ingestionRate"`
 	APIIngestRate   float64 `json:"APIIngestionRate"`
@@ -77,20 +77,16 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 	user := d.Get("user").(string)
 	orgID := d.Get(orgIDKey).(string)
 
-	headers := map[string]string{"Accept": "json"}
+	headers := map[string]string{"Accept": "application/json"}
 	if orgID != "" {
 		headers["X-Scope-OrgID"] = orgID
 	}
 
-	jobraw, err := client.sendRequest("distributor", "GET", "/all_user_stats", "", headers)
+	jobraw, err := client.sendRequest("distributor", "GET", distributorStatsPath(client.distributorURI), "", headers)
 
 	baseMsg := "Cannot read user stats"
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
-		if strings.Contains(err.Error(), "response code '404'") {
-			d.SetId("")
-			return nil
-		}
 		return diag.FromErr(err)
 	}
 
@@ -135,4 +131,16 @@ func dataSourcemimirDistributorTenantStatsRead(ctx context.Context, d *schema.Re
 	d.SetId(id.UniqueId())
 
 	return nil
+}
+
+// distributorStatsPath returns the path of Mimir's /distributor/all_user_stats
+// endpoint relative to the configured URI. The documented distributor_uri form
+// already ends in /distributor; any other URI (including the uri fallback) is a
+// base URL, and the bare /all_user_stats path it would otherwise get was removed
+// in Mimir 2.0.
+func distributorStatsPath(distributorURI string) string {
+	if strings.HasSuffix(distributorURI, "/distributor") {
+		return "/all_user_stats"
+	}
+	return "/distributor/all_user_stats"
 }

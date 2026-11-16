@@ -3,7 +3,7 @@ provider "mimir" {
   alertmanager_uri = "http://127.0.0.1:8080"
   distributor_uri = "http://127.0.0.1:8080/distributor"
   org_id = "mytenant"
-  header = {
+  headers = {
     "Custom-Auth" = "Custom value"
   }
 }

@@ -1387,7 +1387,7 @@ func snsConfigFields() map[string]*schema.Schema {
 			Type:        schema.TypeList,
 			Optional:    true,
 			MaxItems:    1,
-			Description: "Configures AWS's Signature Verification 4 signing process to sign requests.",
+			Description: "Configures AWS's Signature Verification 4 signing process to sign requests. Since Mimir 3.2.5, access_key and secret_key are required by default: Mimir rejects SNS receivers without explicit credentials unless the operator sets -alertmanager.require-explicit-sns-credentials=false.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"region": {
@@ -1396,24 +1396,26 @@ func snsConfigFields() map[string]*schema.Schema {
 						Description: "The AWS region. If blank, the region from the default credentials chain is used.",
 					},
 					"access_key": {
-						Type:      schema.TypeString,
-						Optional:  true,
-						Sensitive: true,
+						Type:        schema.TypeString,
+						Optional:    true,
+						Sensitive:   true,
+						Description: "The AWS API access key. Required by Mimir >= 3.2.5 unless explicit SNS credentials are disabled by the operator.",
 					},
 					"secret_key": {
-						Type:      schema.TypeString,
-						Optional:  true,
-						Sensitive: true,
+						Type:        schema.TypeString,
+						Optional:    true,
+						Sensitive:   true,
+						Description: "The AWS API secret key. Required by Mimir >= 3.2.5 unless explicit SNS credentials are disabled by the operator.",
 					},
 					"profile": {
 						Type:        schema.TypeString,
 						Optional:    true,
-						Description: "Named AWS profile used to authenticate.",
+						Description: "Named AWS profile used to authenticate. On Mimir >= 3.2.5 it does not replace access_key and secret_key unless explicit SNS credentials are disabled by the operator.",
 					},
 					"role_arn": {
 						Type:        schema.TypeString,
 						Optional:    true,
-						Description: "AWS Role ARN, an alternative to using AWS API keys.",
+						Description: "AWS Role ARN to assume. On Mimir >= 3.2.5 it does not replace access_key and secret_key unless explicit SNS credentials are disabled by the operator.",
 					},
 				},
 			},

@@ -24,7 +24,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
-        go-version: '1.25'
+        go-version: '1.26'
       id: go
 
     - name: Check out code into the Go module directory
@@ -66,16 +66,17 @@ jobs:
           - ubuntu-latest
         terraform:
           - '1.5.*'
+        # Latest patch of the two newest minors, plus the last minor of the previous major.
         mimir-version:
-          - '2.17.10'
-          - '3.0.6'
-          - '3.1.4'
+          - '2.17.12'
+          - '3.1.10'
+          - '3.2.5'
     steps:
 
     - name: Setup Go
       uses: actions/setup-go@v6
       with:
-        go-version: '1.25'
+        go-version: '1.26'
         check-latest: true
 
     - name: Check out code

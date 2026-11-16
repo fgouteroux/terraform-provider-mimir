@@ -837,7 +837,7 @@ Optional:
 - `message` (String) The message content of the SNS notification.
 - `phone_number` (String) Phone number if message is delivered via SMS in E.164 format.
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
-- `sigv4` (Block List, Max: 1) Configures AWS's Signature Verification 4 signing process to sign requests. (see [below for nested schema](#nestedblock--receiver--sns_configs--sigv4))
+- `sigv4` (Block List, Max: 1) Configures AWS's Signature Verification 4 signing process to sign requests. Since Mimir 3.2.5, access_key and secret_key are required by default: Mimir rejects SNS receivers without explicit credentials unless the operator sets -alertmanager.require-explicit-sns-credentials=false. (see [below for nested schema](#nestedblock--receiver--sns_configs--sigv4))
 - `subject` (String) Subject line when the message is delivered to email endpoints.
 - `target_arn` (String) The mobile platform endpoint ARN if message is delivered via mobile notifications.
 - `topic_arn` (String) SNS topic ARN. If not set, a value for the phone_number or target_arn should be set.
@@ -915,11 +915,11 @@ Optional:
 
 Optional:
 
-- `access_key` (String, Sensitive)
-- `profile` (String) Named AWS profile used to authenticate.
+- `access_key` (String, Sensitive) The AWS API access key. Required by Mimir >= 3.2.5 unless explicit SNS credentials are disabled by the operator.
+- `profile` (String) Named AWS profile used to authenticate. On Mimir >= 3.2.5 it does not replace access_key and secret_key unless explicit SNS credentials are disabled by the operator.
 - `region` (String) The AWS region. If blank, the region from the default credentials chain is used.
-- `role_arn` (String) AWS Role ARN, an alternative to using AWS API keys.
-- `secret_key` (String, Sensitive)
+- `role_arn` (String) AWS Role ARN to assume. On Mimir >= 3.2.5 it does not replace access_key and secret_key unless explicit SNS credentials are disabled by the operator.
+- `secret_key` (String, Sensitive) The AWS API secret key. Required by Mimir >= 3.2.5 unless explicit SNS credentials are disabled by the operator.
 
 
 
