@@ -158,23 +158,23 @@ func TestAccResourceRuleGroupAlerting_Basic(t *testing.T) {
 			{
 				Config: testAccResourceRuleGroupAlerting_interval,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_interval", "alert_1_interval", client),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "name", "alert_1_interval"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "namespace", "namespace_1"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "rule.0.alert", "test1_info"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "rule.0.expr", "test1_metric"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "interval", "6h"),
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1", "alert_1_interval", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "name", "alert_1_interval"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.alert", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "interval", "6h"),
 				),
 			},
 			{
 				Config: testAccResourceRuleGroupAlerting_interval_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1_interval", "alert_1_interval", client),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "name", "alert_1_interval"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "namespace", "namespace_1"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "rule.0.alert", "test1_info"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "rule.0.expr", "test1_metric"),
-					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1_interval", "interval", "10m"),
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_alerting.alert_1", "alert_1_interval", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "name", "alert_1_interval"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.alert", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_alerting.alert_1", "interval", "10m"),
 				),
 			},
 		},
@@ -371,8 +371,13 @@ const testAccResourceRuleGroupAlerting_basic_update = `
     }
 `
 
+// The interval steps reuse the basic steps' resource address on purpose: the name
+// change is then a ForceNew replacement, which Terraform runs as delete then
+// create. Two addresses make it a parallel delete and create, and Mimir's
+// filesystem rule store can remove the emptied tenant directory while the create
+// lists it ("readdirent /ruler/rules/<tenant>: no such file or directory").
 const testAccResourceRuleGroupAlerting_interval = `
-    resource "mimir_rule_group_alerting" "alert_1_interval" {
+    resource "mimir_rule_group_alerting" "alert_1" {
             name = "alert_1_interval"
             namespace = "namespace_1"
             interval = "6h"
@@ -384,7 +389,7 @@ const testAccResourceRuleGroupAlerting_interval = `
 `
 
 const testAccResourceRuleGroupAlerting_interval_update = `
-    resource "mimir_rule_group_alerting" "alert_1_interval" {
+    resource "mimir_rule_group_alerting" "alert_1" {
             name = "alert_1_interval"
             namespace = "namespace_1"
             interval = "10m"

@@ -115,23 +115,23 @@ func TestAccResourceRuleGroupRecording_Basic(t *testing.T) {
 			{
 				Config: testAccResourceRuleGroupRecording_interval,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_interval", "record_1_interval", client),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "name", "record_1_interval"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "namespace", "namespace_1"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.record", "test1_info"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.expr", "test1_metric"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "interval", "6h"),
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1", "record_1_interval", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "name", "record_1_interval"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "interval", "6h"),
 				),
 			},
 			{
 				Config: testAccResourceRuleGroupRecording_interval_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1_interval", "record_1_interval", client),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "name", "record_1_interval"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "namespace", "namespace_1"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.record", "test1_info"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "rule.0.expr", "test1_metric"),
-					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1_interval", "interval", "10m"),
+					testAccCheckMimirRuleGroupExists("mimir_rule_group_recording.record_1", "record_1_interval", client),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "name", "record_1_interval"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "namespace", "namespace_1"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.0.record", "test1_info"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "rule.0.expr", "test1_metric"),
+					resource.TestCheckResourceAttr("mimir_rule_group_recording.record_1", "interval", "10m"),
 				),
 			},
 		},
@@ -361,8 +361,13 @@ const testAccResourceRuleGroupRecording_federated_rule_group_rule_change = `
 	}
 `
 
+// The interval steps reuse the basic steps' resource address on purpose: the name
+// change is then a ForceNew replacement, which Terraform runs as delete then
+// create. Two addresses make it a parallel delete and create, and Mimir's
+// filesystem rule store can remove the emptied tenant directory while the create
+// lists it ("readdirent /ruler/rules/<tenant>: no such file or directory").
 const testAccResourceRuleGroupRecording_interval = `
-    resource "mimir_rule_group_recording" "record_1_interval" {
+    resource "mimir_rule_group_recording" "record_1" {
             name = "record_1_interval"
             namespace = "namespace_1"
             interval = "6h"
@@ -374,7 +379,7 @@ const testAccResourceRuleGroupRecording_interval = `
 `
 
 const testAccResourceRuleGroupRecording_interval_update = `
-    resource "mimir_rule_group_recording" "record_1_interval" {
+    resource "mimir_rule_group_recording" "record_1" {
             name = "record_1_interval"
             namespace = "namespace_1"
             interval = "10m"
