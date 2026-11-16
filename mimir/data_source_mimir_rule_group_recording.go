@@ -53,6 +53,16 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 				Deprecated:  "With Mimir >= 2.13, replaced by query_offset. This attribute will be removed when it is no longer supported in Mimir.",
 				Computed:    true,
 			},
+			alignEvaluationTimeOnIntervalKey: {
+				Type:        schema.TypeBool,
+				Description: alignEvaluationTimeOnIntervalDescr,
+				Computed:    true,
+			},
+			ruleGroupLimitKey: {
+				Type:        schema.TypeInt,
+				Description: ruleGroupLimitDescr,
+				Computed:    true,
+			},
 			labelsKey: {
 				Type:        schema.TypeMap,
 				Computed:    true,
@@ -138,6 +148,12 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 	}
 	if err := d.Set(labelsKey, data.Labels); err != nil {
 		return diag.Errorf("error setting item: %v", err)
+	}
+	if err := d.Set(alignEvaluationTimeOnIntervalKey, data.AlignEvaluationTimeOnInterval); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(ruleGroupLimitKey, data.Limit); err != nil {
+		return diag.FromErr(err)
 	}
 	if err := d.Set("source_tenants", data.SourceTenants); err != nil {
 		return diag.FromErr(err)

@@ -7,14 +7,14 @@ import "testing"
 // group labels, so a group using them could not be read back in full.
 func TestRuleGroupDataSourcesExposeGroupFields(t *testing.T) {
 	alerting := dataSourcemimirRuleGroupAlerting().Schema
-	for _, attr := range []string{intervalKey, labelsKey, sourceTenantsKey} {
+	for _, attr := range []string{intervalKey, labelsKey, sourceTenantsKey, queryOffsetKey, alignEvaluationTimeOnIntervalKey, ruleGroupLimitKey} {
 		if _, declared := alerting[attr]; !declared {
 			t.Errorf("alerting data source does not expose %q", attr)
 		}
 	}
 
 	recording := dataSourcemimirRuleGroupRecording().Schema
-	for _, attr := range []string{intervalKey, labelsKey, queryOffsetKey, sourceTenantsKey} {
+	for _, attr := range []string{intervalKey, labelsKey, queryOffsetKey, sourceTenantsKey, alignEvaluationTimeOnIntervalKey, ruleGroupLimitKey} {
 		if _, declared := recording[attr]; !declared {
 			t.Errorf("recording data source does not expose %q", attr)
 		}

@@ -689,6 +689,13 @@ func weChatConfigFields() map[string]*schema.Schema {
 
 func webhookConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"payload": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Description:      "A custom request body, as a YAML or JSON document whose string values may use Alertmanager templates. Replaces the default webhook JSON payload." + mimirMin32Descr,
+			ValidateFunc:     validateYAMLDocument,
+			DiffSuppressFunc: suppressEquivalentYAML,
+		},
 		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -1015,6 +1022,12 @@ func opsgenieConfigFields() map[string]*schema.Schema {
 
 func slackConfigFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"update_message": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Update the existing Slack message instead of posting a new one when the alert group changes. Needs a bot token: api_url must be https://slack.com/api/chat.postMessage." + mimirMin32Descr,
+		},
 		sendResolvedKey: {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -1738,8 +1751,15 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 				Schema: map[string]*schema.Schema{
 					"name": {
 						Type:        schema.TypeString,
-						Description: "The time after which an alert is declared resolved if it has not been updated.",
+						Description: "The receiver name.",
 						Required:    true,
+					},
+					labelsKey: {
+						Type:         schema.TypeMap,
+						Description:  "Labels attached to the receiver, for querying and filtering. A name label, if set, must equal the receiver name." + mimirMin32Descr,
+						Elem:         &schema.Schema{Type: schema.TypeString},
+						Optional:     true,
+						ValidateFunc: validateLabels,
 					},
 					"pagerduty_configs": {
 						Type:     schema.TypeList,
@@ -2219,7 +2239,13 @@ func dataSourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 				Schema: map[string]*schema.Schema{
 					"name": {
 						Type:        schema.TypeString,
-						Description: "The time after which an alert is declared resolved if it has not been updated.",
+						Description: "The receiver name.",
+						Computed:    true,
+					},
+					labelsKey: {
+						Type:        schema.TypeMap,
+						Description: "Labels attached to the receiver, for querying and filtering. A name label, if set, must equal the receiver name." + mimirMin32Descr,
+						Elem:        &schema.Schema{Type: schema.TypeString},
 						Computed:    true,
 					},
 					"pagerduty_configs": {

@@ -39,9 +39,11 @@ resource "mimir_rule_group_recording" "test" {
 
 ### Optional
 
+- `align_evaluation_time_on_interval` (Boolean) Whether to align the group's evaluation timestamps on multiples of its interval.
 - `evaluation_delay` (String, Deprecated) **Deprecated** The duration by which to delay the execution of the recording rule.
 - `interval` (String) Recording Rule group interval
 - `labels` (Map of String) Group-level labels added to all rules in the group. Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops them).
+- `limit` (Number) Maximum number of alerts or series a rule in the group may produce; 0 means no limit. Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops it).
 - `namespace` (String) Recording Rule group namespace
 - `org_id` (String) The Organization ID. If not set, the Org ID defined in the provider block will be used.
 - `query_offset` (String) The duration by which to delay the execution of the recording rule.

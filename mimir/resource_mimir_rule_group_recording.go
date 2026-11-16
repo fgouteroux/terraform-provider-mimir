@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"gopkg.in/yaml.v3"
 )
 
@@ -67,6 +68,17 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				ConflictsWith: []string{"query_offset"},
 				ValidateFunc:  validateDuration,
 				StateFunc:     formatDuration,
+			},
+			alignEvaluationTimeOnIntervalKey: {
+				Type:        schema.TypeBool,
+				Description: alignEvaluationTimeOnIntervalDescr,
+				Optional:    true,
+			},
+			ruleGroupLimitKey: {
+				Type:         schema.TypeInt,
+				Description:  ruleGroupLimitDescr,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(0),
 			},
 			sourceTenantsKey: {
 				Type:        schema.TypeList,
@@ -144,21 +156,18 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	}
 
 	rules := &recordingRuleGroup{
-		Name:            name,
-		Interval:        d.Get(intervalKey).(string),
-		EvaluationDelay: d.Get("evaluation_delay").(string),
-		QueryOffset:     d.Get("query_offset").(string),
-		SourceTenants:   expandStringArray(d.Get("source_tenants").([]interface{})),
-		Rules:           expandRecordingRules(d.Get("rule").([]interface{})),
+		Name:                          name,
+		Interval:                      d.Get(intervalKey).(string),
+		EvaluationDelay:               d.Get("evaluation_delay").(string),
+		QueryOffset:                   d.Get("query_offset").(string),
+		SourceTenants:                 expandStringArray(d.Get("source_tenants").([]interface{})),
+		Rules:                         expandRecordingRules(d.Get("rule").([]interface{})),
+		AlignEvaluationTimeOnInterval: d.Get(alignEvaluationTimeOnIntervalKey).(bool),
+		Limit:                         d.Get(ruleGroupLimitKey).(int),
 	}
 	if v, ok := d.GetOk(labelsKey); ok {
 		rules.Labels = expandStringMap(v.(map[string]interface{}))
 	}
-	// if ed, ok := d.GetOk("evaluation_delay"); ok {
-	// 	rules.EvaluationDelay = ed.(string)
-	// } else {
-	// 	rules.QueryOffset = d.Get("query_offset").(string)
-	// }
 	data, _ := yaml.Marshal(rules)
 	headers := map[string]string{contentTypeHeader: contentTypeYAML}
 	if orgID != "" {
@@ -262,21 +271,31 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set(alignEvaluationTimeOnIntervalKey, data.AlignEvaluationTimeOnInterval)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set(ruleGroupLimitKey, data.Limit)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	return diags
 }
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", intervalKey, "query_offset", "evaluation_delay", "source_tenants", labelsKey) {
+	if d.HasChanges("rule", intervalKey, "query_offset", "evaluation_delay", "source_tenants", labelsKey, alignEvaluationTimeOnIntervalKey, ruleGroupLimitKey) {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get(namespaceKey).(string)
 		orgID := d.Get(orgIDKey).(string)
 
 		rules := &recordingRuleGroup{
-			Name:          name,
-			Interval:      d.Get(intervalKey).(string),
-			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
-			Rules:         expandRecordingRules(d.Get("rule").([]interface{})),
+			Name:                          name,
+			Interval:                      d.Get(intervalKey).(string),
+			SourceTenants:                 expandStringArray(d.Get("source_tenants").([]interface{})),
+			Rules:                         expandRecordingRules(d.Get("rule").([]interface{})),
+			AlignEvaluationTimeOnInterval: d.Get(alignEvaluationTimeOnIntervalKey).(bool),
+			Limit:                         d.Get(ruleGroupLimitKey).(int),
 		}
 		if ed, ok := d.GetOk("evaluation_delay"); ok {
 			rules.EvaluationDelay = ed.(string)
@@ -426,11 +445,13 @@ type recordingRule struct {
 }
 
 type recordingRuleGroup struct {
-	Name            string            `yaml:"name"`
-	Interval        string            `yaml:"interval,omitempty"`
-	QueryOffset     string            `yaml:"query_offset,omitempty"`
-	EvaluationDelay string            `yaml:"evaluation_delay,omitempty"`
-	Rules           []recordingRule   `yaml:"rules"`
-	SourceTenants   []string          `yaml:"source_tenants,omitempty"`
-	Labels          map[string]string `yaml:"labels,omitempty"`
+	Name                          string            `yaml:"name"`
+	Interval                      string            `yaml:"interval,omitempty"`
+	QueryOffset                   string            `yaml:"query_offset,omitempty"`
+	EvaluationDelay               string            `yaml:"evaluation_delay,omitempty"`
+	Rules                         []recordingRule   `yaml:"rules"`
+	SourceTenants                 []string          `yaml:"source_tenants,omitempty"`
+	Labels                        map[string]string `yaml:"labels,omitempty"`
+	AlignEvaluationTimeOnInterval bool              `yaml:"align_evaluation_time_on_interval,omitempty"`
+	Limit                         int               `yaml:"limit,omitempty"`
 }

@@ -91,6 +91,7 @@ type inhibitRule struct {
 
 type receiver struct {
 	Name             string             `yaml:"name" json:"name"`
+	Labels           map[string]string  `yaml:"labels,omitempty" json:"labels,omitempty"`
 	OpsgenieConfigs  []*opsgenieConfig  `yaml:"opsgenie_configs,omitempty" json:"opsgenie_configs,omitempty"`
 	PagerdutyConfigs []*pagerdutyConfig `yaml:"pagerduty_configs,omitempty" json:"pagerduty_configs,omitempty"`
 	SlackConfigs     []*slackConfig     `yaml:"slack_configs,omitempty" json:"slack_configs,omitempty"`
@@ -113,6 +114,7 @@ type webhookConfig struct {
 	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
 	MaxAlerts     int32             `yaml:"max_alerts,omitempty" json:"max_alerts,omitempty"`
 	Timeout       time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	Payload       interface{}       `yaml:"payload,omitempty" json:"payload,omitempty"`
 }
 
 type webexConfig struct {
@@ -213,6 +215,7 @@ type slackConfig struct {
 	LinkNames     bool              `yaml:"link_names,omitempty" json:"link_names,omitempty"`
 	MrkdwnIn      []string          `yaml:"mrkdwn_in,omitempty" json:"mrkdwn_in,omitempty"`
 	Actions       []slackAction     `yaml:"actions,omitempty" json:"actions,omitempty"`
+	UpdateMessage bool              `yaml:"update_message,omitempty" json:"update_message,omitempty"`
 }
 
 type msteamsConfig struct {

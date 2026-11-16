@@ -48,6 +48,21 @@ func dataSourcemimirRuleGroupAlerting() *schema.Resource {
 				Description: "Group-level labels applied to all rules in the group.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			queryOffsetKey: {
+				Type:        schema.TypeString,
+				Description: queryOffsetDescr,
+				Computed:    true,
+			},
+			alignEvaluationTimeOnIntervalKey: {
+				Type:        schema.TypeBool,
+				Description: alignEvaluationTimeOnIntervalDescr,
+				Computed:    true,
+			},
+			ruleGroupLimitKey: {
+				Type:        schema.TypeInt,
+				Description: ruleGroupLimitDescr,
+				Computed:    true,
+			},
 			sourceTenantsKey: {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -139,6 +154,15 @@ func dataSourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.Resourc
 	}
 	if err := d.Set(labelsKey, data.Labels); err != nil {
 		return diag.Errorf("error setting item: %v", err)
+	}
+	if err := d.Set(queryOffsetKey, data.QueryOffset); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(alignEvaluationTimeOnIntervalKey, data.AlignEvaluationTimeOnInterval); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(ruleGroupLimitKey, data.Limit); err != nil {
+		return diag.FromErr(err)
 	}
 	if err := d.Set("source_tenants", data.SourceTenants); err != nil {
 		return diag.FromErr(err)

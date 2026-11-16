@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"gopkg.in/yaml.v3"
 )
 
@@ -50,6 +51,24 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validateDuration,
 				StateFunc:    formatDuration,
+			},
+			queryOffsetKey: {
+				Type:         schema.TypeString,
+				Description:  queryOffsetDescr,
+				Optional:     true,
+				ValidateFunc: validateDuration,
+				StateFunc:    formatDuration,
+			},
+			alignEvaluationTimeOnIntervalKey: {
+				Type:        schema.TypeBool,
+				Description: alignEvaluationTimeOnIntervalDescr,
+				Optional:    true,
+			},
+			ruleGroupLimitKey: {
+				Type:         schema.TypeInt,
+				Description:  ruleGroupLimitDescr,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(0),
 			},
 			sourceTenantsKey: {
 				Type:        schema.TypeList,
@@ -148,10 +167,13 @@ func resourcemimirRuleGroupAlertingCreate(ctx context.Context, d *schema.Resourc
 	}
 
 	rules := &alertingRuleGroup{
-		Name:          name,
-		Interval:      d.Get(intervalKey).(string),
-		SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
-		Rules:         expandAlertingRules(d.Get("rule").([]interface{})),
+		Name:                          name,
+		Interval:                      d.Get(intervalKey).(string),
+		SourceTenants:                 expandStringArray(d.Get("source_tenants").([]interface{})),
+		Rules:                         expandAlertingRules(d.Get("rule").([]interface{})),
+		QueryOffset:                   d.Get(queryOffsetKey).(string),
+		AlignEvaluationTimeOnInterval: d.Get(alignEvaluationTimeOnIntervalKey).(bool),
+		Limit:                         d.Get(ruleGroupLimitKey).(int),
 	}
 	if v, ok := d.GetOk(labelsKey); ok {
 		rules.Labels = expandStringMap(v.(map[string]interface{}))
@@ -248,22 +270,37 @@ func resourcemimirRuleGroupAlertingRead(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	err = d.Set(queryOffsetKey, data.QueryOffset)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set(alignEvaluationTimeOnIntervalKey, data.AlignEvaluationTimeOnInterval)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set(ruleGroupLimitKey, data.Limit)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }
 
 func resourcemimirRuleGroupAlertingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", intervalKey, "source_tenants", labelsKey) {
+	if d.HasChanges("rule", intervalKey, "source_tenants", labelsKey, queryOffsetKey, alignEvaluationTimeOnIntervalKey, ruleGroupLimitKey) {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get(namespaceKey).(string)
 		orgID := d.Get(orgIDKey).(string)
 
 		rules := &alertingRuleGroup{
-			Name:          name,
-			Interval:      d.Get(intervalKey).(string),
-			SourceTenants: expandStringArray(d.Get("source_tenants").([]interface{})),
-			Rules:         expandAlertingRules(d.Get("rule").([]interface{})),
+			Name:                          name,
+			Interval:                      d.Get(intervalKey).(string),
+			SourceTenants:                 expandStringArray(d.Get("source_tenants").([]interface{})),
+			Rules:                         expandAlertingRules(d.Get("rule").([]interface{})),
+			QueryOffset:                   d.Get(queryOffsetKey).(string),
+			AlignEvaluationTimeOnInterval: d.Get(alignEvaluationTimeOnIntervalKey).(bool),
+			Limit:                         d.Get(ruleGroupLimitKey).(int),
 		}
 		if v, ok := d.GetOk(labelsKey); ok {
 			rules.Labels = expandStringMap(v.(map[string]interface{}))
@@ -439,9 +476,12 @@ type alertingRule struct {
 }
 
 type alertingRuleGroup struct {
-	Name          string            `yaml:"name"`
-	Interval      string            `yaml:"interval,omitempty"`
-	Rules         []alertingRule    `yaml:"rules"`
-	SourceTenants []string          `yaml:"source_tenants,omitempty"`
-	Labels        map[string]string `yaml:"labels,omitempty"`
+	Name                          string            `yaml:"name"`
+	Interval                      string            `yaml:"interval,omitempty"`
+	Rules                         []alertingRule    `yaml:"rules"`
+	SourceTenants                 []string          `yaml:"source_tenants,omitempty"`
+	Labels                        map[string]string `yaml:"labels,omitempty"`
+	QueryOffset                   string            `yaml:"query_offset,omitempty"`
+	AlignEvaluationTimeOnInterval bool              `yaml:"align_evaluation_time_on_interval,omitempty"`
+	Limit                         int               `yaml:"limit,omitempty"`
 }

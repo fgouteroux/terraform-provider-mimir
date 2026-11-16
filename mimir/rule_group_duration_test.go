@@ -8,8 +8,15 @@ import "testing"
 // permanent diff — the defect that broke CI for the pushover ttl attribute.
 func TestRuleGroupDurationsNormalizeState(t *testing.T) {
 	alerting := resourcemimirRuleGroupAlerting().Schema
-	if alerting[intervalKey].StateFunc == nil {
-		t.Error("alerting rule group interval has no StateFunc: formatDuration")
+	for _, attr := range []string{intervalKey, queryOffsetKey} {
+		entry, declared := alerting[attr]
+		if !declared {
+			t.Errorf("alerting rule group has no %q attribute", attr)
+			continue
+		}
+		if entry.StateFunc == nil {
+			t.Errorf("alerting rule group %q has no StateFunc: formatDuration", attr)
+		}
 	}
 
 	recording := resourcemimirRuleGroupRecording().Schema

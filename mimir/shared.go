@@ -2,7 +2,9 @@ package mimir
 
 import (
 	"fmt"
+	"log"
 	"net/url"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -10,8 +12,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/promql/parser"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -343,4 +347,64 @@ func validateTime(v interface{}, k string) (ws []string, errors []error) {
 		errors = append(errors, fmt.Errorf("\"%s\": timestamp %s out of range", k, in))
 	}
 	return
+}
+
+// validateYAMLDocument checks that a string attribute holds a YAML (or JSON)
+// document, so a malformed webhook payload fails at plan time.
+func validateYAMLDocument(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	if value == "" {
+		return
+	}
+	var doc interface{}
+	if err := yaml.Unmarshal([]byte(value), &doc); err != nil {
+		errors = append(errors, fmt.Errorf("%q: invalid YAML or JSON document: %v", k, err))
+	}
+	return
+}
+
+// expandYAMLDocument decodes a YAML/JSON attribute into the structure the
+// Alertmanager configuration embeds. validateYAMLDocument has already rejected
+// malformed input at plan time, so a decode error here is only logged.
+func expandYAMLDocument(value string) interface{} {
+	if value == "" {
+		return nil
+	}
+	var doc interface{}
+	if err := yaml.Unmarshal([]byte(value), &doc); err != nil {
+		log.Printf("[WARN] cannot decode YAML document, sending it unset: %v", err)
+		return nil
+	}
+	return doc
+}
+
+// flattenYAMLDocument renders an embedded structure back to the YAML string
+// kept in state. suppressEquivalentYAML hides the formatting difference with
+// the configured value (JSON, key order, indentation).
+func flattenYAMLDocument(doc interface{}) string {
+	if doc == nil {
+		return ""
+	}
+	out, err := yaml.Marshal(doc)
+	if err != nil {
+		log.Printf("[WARN] cannot encode YAML document: %v", err)
+		return ""
+	}
+	return string(out)
+}
+
+// suppressEquivalentYAML reports whether two YAML/JSON documents decode to the
+// same value, so reformatting alone never shows as a diff.
+func suppressEquivalentYAML(_, oldValue, newValue string, _ *schema.ResourceData) bool {
+	if oldValue == newValue {
+		return true
+	}
+	var oldDoc, newDoc interface{}
+	if err := yaml.Unmarshal([]byte(oldValue), &oldDoc); err != nil {
+		return false
+	}
+	if err := yaml.Unmarshal([]byte(newValue), &newDoc); err != nil {
+		return false
+	}
+	return reflect.DeepEqual(oldDoc, newDoc)
 }

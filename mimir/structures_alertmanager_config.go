@@ -331,6 +331,11 @@ func expandReceiverConfig(v []interface{}) []*receiver {
 		if raw, ok := data["name"]; ok {
 			cfg.Name = raw.(string)
 		}
+		if raw, ok := data[labelsKey]; ok {
+			if labels := expandStringMap(raw.(map[string]interface{})); len(labels) > 0 {
+				cfg.Labels = labels
+			}
+		}
 		if raw, ok := data["pagerduty_configs"]; ok {
 			cfg.PagerdutyConfigs = expandPagerdutyConfig(raw.([]interface{}))
 		}
@@ -388,6 +393,7 @@ func flattenReceiverConfig(v []*receiver) []interface{} {
 	for _, v := range v {
 		cfg := make(map[string]interface{})
 		cfg["name"] = v.Name
+		cfg[labelsKey] = v.Labels
 		cfg["pagerduty_configs"] = flattenPagerdutyConfig(v.PagerdutyConfigs)
 		cfg["email_configs"] = flattenEmailConfig(v.EmailConfigs)
 		cfg["wechat_configs"] = flattenWeChatConfig(v.WeChatConfigs)
@@ -799,6 +805,9 @@ func expandWebhookConfig(v []interface{}) []*webhookConfig {
 			timeout, _ := model.ParseDuration(raw.(string))
 			cfg.Timeout = time.Duration(timeout)
 		}
+		if raw, ok := data["payload"]; ok {
+			cfg.Payload = expandYAMLDocument(raw.(string))
+		}
 		webhookConf = append(webhookConf, cfg)
 	}
 	return webhookConf
@@ -820,6 +829,7 @@ func flattenWebhookConfig(v []*webhookConfig) []interface{} {
 		cfg["url"] = v.URL
 		cfg["max_alerts"] = v.MaxAlerts
 		cfg[timeoutKey] = flattenDuration(v.Timeout)
+		cfg["payload"] = flattenYAMLDocument(v.Payload)
 		webhookConf = append(webhookConf, cfg)
 	}
 	return webhookConf
@@ -1254,6 +1264,9 @@ func expandSlackConfig(v []interface{}) []*slackConfig {
 		cfg := &slackConfig{}
 		data := v.(map[string]interface{})
 
+		if raw, ok := data["update_message"]; ok {
+			cfg.UpdateMessage = raw.(bool)
+		}
 		if raw, ok := data["send_resolved"]; ok {
 			cfg.VSendResolved = new(bool)
 			*cfg.VSendResolved = raw.(bool)
@@ -1350,6 +1363,7 @@ func flattenSlackConfig(v []*slackConfig) []interface{} {
 	for _, v := range v {
 		cfg := make(map[string]interface{})
 		cfg["send_resolved"] = v.VSendResolved
+		cfg["update_message"] = v.UpdateMessage
 		cfg["fields"] = flattenSlackConfigFields(v.Fields)
 		cfg["actions"] = flattenSlackConfigActions(v.Actions)
 		if v.HTTPConfig != nil {
