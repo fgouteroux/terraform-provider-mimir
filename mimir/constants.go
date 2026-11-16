@@ -10,11 +10,14 @@ const (
 	contentTypeHeader = "Content-Type"
 	contentTypeYAML   = "application/yaml"
 
-	receiverKey        = "receiver"
-	sendResolvedKey    = "send_resolved"
-	sendResolvedDescr  = "Whether to notify about resolved alerts."
-	titleKey           = "title"
-	httpConfigKey      = "http_config"
+	receiverKey       = "receiver"
+	sendResolvedKey   = "send_resolved"
+	sendResolvedDescr = "Whether to notify about resolved alerts."
+	titleKey          = "title"
+	httpConfigKey     = "http_config"
+
+	oauth2GrantTypeJWTBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer" //nolint:gosec // OAuth 2.0 grant type URN, not a credential
+
 	httpConfigDescr    = "The HTTP client's configuration."
 	apiURLKey          = "api_url"
 	messageKey         = "message"

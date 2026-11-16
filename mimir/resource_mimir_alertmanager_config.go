@@ -56,7 +56,7 @@ func resourcemimirAlertmanagerConfigCreate(ctx context.Context, d *schema.Resour
 		}
 	}
 
-	_, err := alertmanagerConfigCreateUpdate(client, d, apiAlertsPath)
+	err := alertmanagerConfigCreateUpdate(client, d, apiAlertsPath)
 	baseMsg := "Cannot create alertmanager config"
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
@@ -155,7 +155,7 @@ func resourcemimirAlertmanagerConfigRead(ctx context.Context, d *schema.Resource
 
 func resourcemimirAlertmanagerConfigUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
-	_, err := alertmanagerConfigCreateUpdate(client, d, apiAlertsPath)
+	err := alertmanagerConfigCreateUpdate(client, d, apiAlertsPath)
 	baseMsg := "Cannot update alertmanager config"
 	err = handleHTTPError(err, baseMsg)
 	if err != nil {
@@ -209,7 +209,7 @@ func alertmanagerConfigRead(meta interface{}, orgID string) (string, error) {
 	return resp, handleHTTPError(err, baseMsg)
 }
 
-func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, path string) (string, error) {
+func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, path string) error {
 	headers := map[string]string{"Content-Type": contentTypeYAML}
 	orgID := d.Get("org_id").(string)
 	if orgID != "" {
@@ -224,18 +224,23 @@ func alertmanagerConfigCreateUpdate(client *apiClient, d *schema.ResourceData, p
 		Route:         expandRouteConfig(d.Get("route").([]interface{})),
 		Templates:     expandStringArray(d.Get("templates").([]interface{})),
 	}
-	alertmanagerConfBytes, _ := yaml.Marshal(&alertmanagerConf)
+	alertmanagerConfBytes, err := yaml.Marshal(&alertmanagerConf)
+	if err != nil {
+		return fmt.Errorf("unable to encode the alertmanager configuration: %w", err)
+	}
 
 	alertmanagerUserConf := &alertmanagerUserConfig{
 		TemplateFiles:      expandStringMap(d.Get("templates_files").(map[string]interface{})),
 		AlertmanagerConfig: string(alertmanagerConfBytes),
 	}
 
-	dataBytes, _ := yaml.Marshal(&alertmanagerUserConf)
+	dataBytes, err := yaml.Marshal(&alertmanagerUserConf)
+	if err != nil {
+		return fmt.Errorf("unable to encode the alertmanager user configuration: %w", err)
+	}
 
-	resp, err := client.sendRequest("alertmanager", "POST", path, string(dataBytes), headers)
-
-	return resp, err
+	_, err = client.sendRequest("alertmanager", "POST", path, string(dataBytes), headers)
+	return err
 }
 
 func alertmanagerEmptyConfigCheck(d *schema.ResourceData, data string) (diag.Diagnostics, bool) {

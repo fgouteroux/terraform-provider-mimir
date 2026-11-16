@@ -244,6 +244,17 @@ type httpClientConfig struct {
 	TLSConfig       *tlsConfig     `yaml:"tls_config,omitempty"`
 	FollowRedirects *bool          `yaml:"follow_redirects,omitempty"`
 	EnableHTTP2     *bool          `yaml:"enable_http2,omitempty"`
+
+	NoProxy              string              `yaml:"no_proxy,omitempty"`
+	ProxyFromEnvironment bool                `yaml:"proxy_from_environment,omitempty"`
+	ProxyConnectHeader   map[string][]string `yaml:"proxy_connect_header,omitempty"`
+	HTTPHeaders          map[string]*header  `yaml:"http_headers,omitempty"`
+}
+
+// header is one entry of http_headers. Mimir rejects the files form.
+type header struct {
+	Values  []string `yaml:"values,omitempty"`
+	Secrets []string `yaml:"secrets,omitempty"`
 }
 
 type tlsConfig struct {
@@ -269,6 +280,14 @@ type oauth2 struct {
 	Scopes         []string          `yaml:"scopes,omitempty"`
 	TokenURL       string            `yaml:"token_url,omitempty"`
 	EndpointParams map[string]string `yaml:"endpoint_params,omitempty"`
+
+	GrantType              string                 `yaml:"grant_type,omitempty"`
+	ClientCertificateKeyID string                 `yaml:"client_certificate_key_id,omitempty"`
+	ClientCertificateKey   string                 `yaml:"client_certificate_key,omitempty"`
+	SignatureAlgorithm     string                 `yaml:"signature_algorithm,omitempty"`
+	Iss                    string                 `yaml:"iss,omitempty"`
+	Audience               string                 `yaml:"audience,omitempty"`
+	Claims                 map[string]interface{} `yaml:"claims,omitempty"`
 
 	TLSConfig *tlsConfig `yaml:"tls_config,omitempty"`
 }

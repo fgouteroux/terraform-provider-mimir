@@ -213,6 +213,67 @@ func httpConfigFields() map[string]*schema.Schema {
 			Default:     true,
 			Description: "Whether to enable HTTP2.",
 		},
+		"no_proxy": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Comma-separated list of IP addresses, CIDR notations and domain names that bypass proxy_url. Requires proxy_url.",
+		},
+		"proxy_from_environment": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Use the proxy URL indicated by the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables of the Mimir Alertmanager. Conflicts with proxy_url and no_proxy.",
+		},
+		"proxy_connect_header": {
+			Type:        schema.TypeSet,
+			Optional:    true,
+			Description: "Headers to send to the proxy during CONNECT requests. Requires proxy_url or proxy_from_environment.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:         schema.TypeString,
+						Required:     true,
+						Description:  "The header name.",
+						ValidateFunc: validation.StringIsNotEmpty,
+					},
+					"values": {
+						Type:        schema.TypeList,
+						Required:    true,
+						Sensitive:   true,
+						Description: "The header values.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
+				},
+			},
+		},
+		"http_headers": {
+			Type:        schema.TypeSet,
+			Optional:    true,
+			Description: "Custom HTTP headers to send with each request. Headers set by Alertmanager itself, such as Authorization or Content-Type, are not allowed.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:         schema.TypeString,
+						Required:     true,
+						Description:  "The header name.",
+						ValidateFunc: validateHTTPHeaderName,
+					},
+					"values": {
+						Type:        schema.TypeList,
+						Optional:    true,
+						Description: "The header values.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
+					"secrets": {
+						Type:        schema.TypeList,
+						Optional:    true,
+						Sensitive:   true,
+						Description: "The header values, hidden from logs and plan output.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
+				},
+			},
+		},
 		"tls_config": {
 			Type:        schema.TypeList,
 			Optional:    true,
@@ -302,6 +363,45 @@ func httpConfigFields() map[string]*schema.Schema {
 						Type:        schema.TypeList,
 						Optional:    true,
 						Description: "Scopes for the token request.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+					},
+					"grant_type": {
+						Type:         schema.TypeString,
+						Optional:     true,
+						Description:  "The OAuth 2.0 grant type: `client_credentials` (the default) or `" + oauth2GrantTypeJWTBearer + "` (RFC 7523).",
+						ValidateFunc: validation.StringInSlice([]string{"client_credentials", oauth2GrantTypeJWTBearer}, false),
+					},
+					"client_certificate_key_id": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "The key ID (kid) put in the JWT header. Only used with the jwt-bearer grant type.",
+					},
+					"client_certificate_key": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Sensitive:   true,
+						Description: "The PEM private key used to sign the JWT. Only used with the jwt-bearer grant type.",
+					},
+					"signature_algorithm": {
+						Type:         schema.TypeString,
+						Optional:     true,
+						Description:  "The RSA algorithm used to sign the JWT: RS256 (the default), RS384 or RS512. Only used with the jwt-bearer grant type.",
+						ValidateFunc: validation.StringInSlice([]string{"RS256", "RS384", "RS512"}, false),
+					},
+					"iss": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "The JWT issuer. Defaults to client_id. Only used with the jwt-bearer grant type.",
+					},
+					"audience": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "The JWT audience. Defaults to token_url. Only used with the jwt-bearer grant type.",
+					},
+					"claims": {
+						Type:        schema.TypeMap,
+						Optional:    true,
+						Description: "Extra claims added to the JWT. Only used with the jwt-bearer grant type.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 					},
 				},
