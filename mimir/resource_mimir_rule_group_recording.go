@@ -22,6 +22,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: customizeDiffMimirRules(recordingRuleAttributes),
 		Schema: map[string]*schema.Schema{
 			orgIDKey: {
 				Type:         schema.TypeString,

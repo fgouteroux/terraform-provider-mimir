@@ -1,9 +1,12 @@
 package mimir
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -13,7 +16,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/prometheus/alertmanager/matcher/compat"
 	"github.com/prometheus/common/model"
+	"github.com/prometheus/common/promslog"
+	"github.com/prometheus/prometheus/model/rulefmt"
 	"github.com/prometheus/prometheus/promql/parser"
 	"gopkg.in/yaml.v3"
 )
@@ -212,9 +218,46 @@ func validateOrgID(v interface{}, k string) (ws []string, errors []error) {
 	if !validOrgID(value) {
 		errors = append(errors, fmt.Errorf(
 			"\"%s\": Invalid Org ID %q: must not be \".\"/\"..\" and must contain no control characters or '/'", k, value))
+		return
+	}
+	if value == "" {
+		return
+	}
+	for _, tenantID := range strings.Split(value, "|") {
+		if err := mimirTenantIDError(tenantID); err != nil {
+			errors = append(errors, fmt.Errorf("\"%s\": Invalid Org ID %q: %v", k, value, err))
+		}
 	}
 
 	return
+}
+
+// maxTenantIDLength and tenantIDSpecialChars mirror dskit's tenant.ValidTenantID,
+// which Mimir applies to every X-Scope-OrgID (each "|"-separated tenant of a
+// federated request).
+const (
+	maxTenantIDLength    = 150
+	tenantIDSpecialChars = "!-_.*'()"
+)
+
+func mimirTenantIDError(tenantID string) error {
+	if tenantID == "" {
+		return fmt.Errorf("tenant ID must not be empty")
+	}
+	for i := 0; i < len(tenantID); i++ {
+		c := tenantID[i]
+		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || strings.IndexByte(tenantIDSpecialChars, c) >= 0 {
+			continue
+		}
+		return fmt.Errorf("tenant ID %q contains unsupported character %q at position %d: only letters, digits and %s are allowed", tenantID, c, i, tenantIDSpecialChars)
+	}
+	if len(tenantID) > maxTenantIDLength {
+		return fmt.Errorf("tenant ID %q is too long: max %d characters", tenantID, maxTenantIDLength)
+	}
+	if tenantID == "." || tenantID == ".." {
+		return fmt.Errorf("tenant ID must not be '.' or '..'")
+	}
+	return nil
 }
 
 func validatePromQLExpr(v interface{}, k string) (ws []string, errors []error) {
@@ -407,4 +450,131 @@ func suppressEquivalentYAML(_, oldValue, newValue string, _ *schema.ResourceData
 		return false
 	}
 	return reflect.DeepEqual(oldDoc, newDoc)
+}
+
+// mimirRuleErrors runs the rule checks Mimir's ruler applies on upload
+// (rulefmt.Rule.Validate with Mimir's parser options and the default legacy
+// name validation scheme): PromQL parsing, record/alert exclusivity, fields a
+// recording rule may not carry, label and annotation names, and the parsing of
+// alert label and annotation templates. Durations are validated by the caller.
+func mimirRuleErrors(rule rulefmt.Rule) []error {
+	var errs []error
+	for _, we := range rule.Validate(rulefmt.RuleNode{}, model.LegacyValidation, parser.NewParser(promQLParserOptions)) {
+		errs = append(errs, we.Unwrap())
+	}
+	return errs
+}
+
+// Rule block attributes of each single-group resource, as read by
+// customizeDiffMimirRules. Reading an attribute a schema does not declare
+// panics, so each resource passes its own list.
+var (
+	alertingRuleAttributes  = []string{"alert", "expr", "for", "keep_firing_for", labelsKey, "annotations"}
+	recordingRuleAttributes = []string{"record", "expr", labelsKey}
+)
+
+// customizeDiffMimirRules runs mimirRuleErrors on every rule block of a
+// single-group resource, so what the per-attribute validators cannot see (alert
+// templates in labels and annotations, the reserved __name__ label) fails at
+// plan instead of at apply. A rule holding a value not known until apply is
+// skipped; its per-attribute validators still run.
+func customizeDiffMimirRules(attributes []string) schema.CustomizeDiffFunc {
+	declared := map[string]bool{}
+	for _, attr := range attributes {
+		declared[attr] = true
+	}
+	return func(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+		var errs []error
+		for i := 0; i < diff.Get("rule.#").(int); i++ {
+			if err := validateRuleBlock(diff, i, attributes, declared); err != nil {
+				errs = append(errs, err)
+			}
+		}
+		return errors.Join(errs...)
+	}
+}
+
+func validateRuleBlock(diff *schema.ResourceDiff, i int, attributes []string, declared map[string]bool) error {
+	prefix := fmt.Sprintf("rule.%d.", i)
+	for _, attr := range attributes {
+		if !diff.NewValueKnown(prefix + attr) {
+			return nil
+		}
+	}
+
+	get := func(attr string) (interface{}, bool) {
+		if !declared[attr] {
+			return nil, false
+		}
+		return diff.GetOk(prefix + attr)
+	}
+
+	rule := rulefmt.Rule{Expr: diff.Get(prefix + "expr").(string)}
+	name := ""
+	if v, ok := get("alert"); ok {
+		rule.Alert = v.(string)
+		name = rule.Alert
+	}
+	if v, ok := get("record"); ok {
+		rule.Record = v.(string)
+		name = rule.Record
+	}
+	for attr, target := range map[string]*model.Duration{"for": &rule.For, "keep_firing_for": &rule.KeepFiringFor} {
+		v, ok := get(attr)
+		if !ok {
+			continue
+		}
+		d, err := model.ParseDuration(v.(string))
+		if err != nil {
+			// Already reported by the attribute's own ValidateFunc.
+			continue
+		}
+		*target = d
+	}
+	if v, ok := get(labelsKey); ok {
+		rule.Labels = expandStringMap(v.(map[string]interface{}))
+	}
+	if v, ok := get("annotations"); ok {
+		rule.Annotations = expandStringMap(v.(map[string]interface{}))
+	}
+
+	var errs []error
+	for _, err := range mimirRuleErrors(rule) {
+		errs = append(errs, fmt.Errorf("rule %d (%s): %w", i, name, err))
+	}
+	return errors.Join(errs...)
+}
+
+// alertmanagerMatchersParser parses matchers the way Mimir does by default:
+// UTF-8 strict mode is off, so Alertmanager runs in fallback mode and accepts
+// a matcher that either the UTF-8 or the classic parser accepts.
+var alertmanagerMatchersParser = compat.FallbackMatchersParser(promslog.NewNopLogger())
+
+// validateAlertmanagerMatchers rejects a matchers entry Mimir would refuse.
+func validateAlertmanagerMatchers(v interface{}, k string) (ws []string, errs []error) {
+	value := v.(string)
+	if _, err := alertmanagerMatchersParser(value, "config"); err != nil {
+		errs = append(errs, fmt.Errorf("%q: invalid matcher %q: %v", k, value, err))
+	}
+	return
+}
+
+// validateTemplateName mirrors Mimir's validateTemplateFilename: a template
+// name must be a bare file name, since Mimir writes templates into a per-tenant
+// directory and refuses anything that could point outside it.
+func validateTemplateName(v interface{}, k string) (ws []string, errs []error) {
+	name := v.(string)
+	if filepath.Base(name) != name || filepath.Dir(filepath.Clean(name)) != "." {
+		errs = append(errs, fmt.Errorf("%q: invalid template name %q: the template name cannot contain any path", k, name))
+	}
+	return
+}
+
+// validateTemplateFiles applies validateTemplateName to every templates_files key.
+func validateTemplateFiles(v interface{}, k string) (ws []string, errs []error) {
+	for name := range v.(map[string]interface{}) {
+		_, nameErrs := validateTemplateName(name, k)
+		errs = append(errs, nameErrs...)
+	}
+	return
 }

@@ -173,6 +173,7 @@ func Provider(version string) func() *schema.Provider {
 				"mimir_rule_group_alerting":      dataSourcemimirRuleGroupAlerting(),
 				"mimir_rule_group_recording":     dataSourcemimirRuleGroupRecording(),
 				"mimir_distributor_tenant_stats": dataSourcemimirDistributorTenantStats(),
+				"mimir_tenant_limits":            dataSourcemimirTenantLimits(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"mimir_alertmanager_config":  resourcemimirAlertmanagerConfig(),

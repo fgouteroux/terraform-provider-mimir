@@ -34,7 +34,7 @@ func childRouteSchema(level int) map[string]*schema.Schema {
 			Type:        schema.TypeList,
 			Optional:    true,
 			Description: "A list of matchers that an alert has to fulfill to match the node.",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+			Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validateAlertmanagerMatchers},
 		},
 		"group_wait": {
 			Type:         schema.TypeString,
@@ -1608,13 +1608,13 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 						Type:        schema.TypeList,
 						Optional:    true,
 						Description: "A list of matchers for which one or more alerts have to exist for the inhibition to take effect.",
-						Elem:        &schema.Schema{Type: schema.TypeString},
+						Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validateAlertmanagerMatchers},
 					},
 					"target_matchers": {
 						Type:        schema.TypeList,
 						Optional:    true,
 						Description: "A list of matchers that have to be fulfilled by the target alerts to be muted.",
-						Elem:        &schema.Schema{Type: schema.TypeString},
+						Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validateAlertmanagerMatchers},
 					},
 					"equal": {
 						Type:        schema.TypeList,
@@ -1915,13 +1915,14 @@ func resourceMimirAlertmanagerConfigSchemaV1() map[string]*schema.Schema {
 			Type:        schema.TypeList,
 			Optional:    true,
 			Description: "A list of template names to use.",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+			Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validateTemplateName},
 		},
 		"templates_files": {
-			Type:        schema.TypeMap,
-			Optional:    true,
-			Description: "A map of key values string, where the key is the template name and the value the content of the template.",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+			Type:         schema.TypeMap,
+			Optional:     true,
+			Description:  "A map of key values string, where the key is the template name and the value the content of the template.",
+			Elem:         &schema.Schema{Type: schema.TypeString},
+			ValidateFunc: validateTemplateFiles,
 		},
 	}
 }
