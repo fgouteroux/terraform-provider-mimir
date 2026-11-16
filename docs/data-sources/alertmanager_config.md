@@ -165,6 +165,7 @@ Read-Only:
 
 - `discord_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--discord_configs))
 - `email_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--email_configs))
+- `labels` (Map of String)
 - `msteams_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteams_configs))
 - `msteamsv2_configs` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--msteamsv2_configs))
 - `name` (String)
@@ -799,6 +800,7 @@ Read-Only:
 - `timeout` (String)
 - `title` (String)
 - `title_link` (String)
+- `update_message` (Boolean)
 - `username` (String)
 
 <a id="nestedobjatt--receiver--slack_configs--actions"></a>
@@ -1258,6 +1260,7 @@ Read-Only:
 
 - `http_config` (List of Object) (see [below for nested schema](#nestedobjatt--receiver--webhook_configs--http_config))
 - `max_alerts` (Number)
+- `payload` (String)
 - `send_resolved` (Boolean)
 - `timeout` (String)
 - `url` (String)

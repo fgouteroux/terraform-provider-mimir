@@ -81,12 +81,13 @@ resource "mimir_alertmanager_config" "mytenant" {
 
 Required:
 
-- `name` (String) The time after which an alert is declared resolved if it has not been updated.
+- `name` (String) The receiver name.
 
 Optional:
 
 - `discord_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--discord_configs))
 - `email_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--email_configs))
+- `labels` (Map of String) Labels attached to the receiver, for querying and filtering. A name label, if set, must equal the receiver name. Requires Mimir >= 3.2.0.
 - `msteams_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--msteams_configs))
 - `msteamsv2_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--msteamsv2_configs))
 - `opsgenie_configs` (Block List) (see [below for nested schema](#nestedblock--receiver--opsgenie_configs))
@@ -720,6 +721,7 @@ Optional:
 - `timeout` (String) The maximum time allowed to invoke Slack. When left unset, the notification timeout applies. Requires Mimir >= 3.1.0.
 - `title` (String)
 - `title_link` (String)
+- `update_message` (Boolean) Update the existing Slack message instead of posting a new one when the alert group changes. Needs a bot token: api_url must be https://slack.com/api/chat.postMessage. Requires Mimir >= 3.2.0.
 - `username` (String)
 
 <a id="nestedblock--receiver--slack_configs--actions"></a>
@@ -1179,6 +1181,7 @@ Optional:
 
 - `http_config` (Block List, Max: 1) The HTTP client's configuration. (see [below for nested schema](#nestedblock--receiver--webhook_configs--http_config))
 - `max_alerts` (Number) The maximum number of alerts to include in a single webhook message. Alerts above this threshold are truncated. When leaving this at its default value of 0, all alerts are included.
+- `payload` (String) A custom request body, as a YAML or JSON document whose string values may use Alertmanager templates. Replaces the default webhook JSON payload. Requires Mimir >= 3.2.0.
 - `send_resolved` (Boolean) Whether to notify about resolved alerts.
 - `timeout` (String) The maximum time allowed to invoke the webhook. When left unset, the notification timeout applies.
 - `url` (String) The endpoint to send HTTP POST requests to.

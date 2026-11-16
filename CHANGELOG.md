@@ -8,6 +8,16 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Added
+
+- `mimir_rule_group_alerting` gains `query_offset`, and both single-group resources and their
+  data sources gain `align_evaluation_time_on_interval` and `limit` (persisted by Mimir >= 3.0).
+  These resources rewrite the whole group on update, so a value set outside Terraform used to be
+  silently removed.
+- `mimir_alertmanager_config` gains `receiver.labels`, `webhook_configs.payload` and
+  `slack_configs.update_message`, all requiring Mimir >= 3.2. `payload` takes a YAML or JSON
+  document; formatting differences do not show as a diff.
+
 ### Fixed
 
 - PromQL expressions are parsed with the same options as Mimir, so experimental functions and

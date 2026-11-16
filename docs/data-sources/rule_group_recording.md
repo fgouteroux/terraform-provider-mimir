@@ -33,10 +33,12 @@ data "mimir_rule_group_recording" "record" {
 
 ### Read-Only
 
+- `align_evaluation_time_on_interval` (Boolean) Whether to align the group's evaluation timestamps on multiples of its interval.
 - `evaluation_delay` (String, Deprecated) **Deprecated** The duration by which to delay the execution of the recording rule.
 - `id` (String) The ID of this resource.
 - `interval` (String) Recording Rule group interval
 - `labels` (Map of String) Group-level labels applied to all rules in the group.
+- `limit` (Number) Maximum number of alerts or series a rule in the group may produce; 0 means no limit. Requires Mimir >= 3.0.0 to be persisted (older Mimir accepts but drops it).
 - `query_offset` (String) The duration by which to delay the execution of the recording rule.
 - `rule` (List of Object) (see [below for nested schema](#nestedatt--rule))
 - `source_tenants` (List of String) Allows aggregating data from multiple tenants while evaluating a rule group.
