@@ -122,7 +122,10 @@ func TestAccResourceAlertmanagerConfig_HTTPConfigFields(t *testing.T) {
 				Config: `
     resource "mimir_alertmanager_config" "mytenant" {
       route {
-        receiver = "webhook"
+        group_wait      = "30s"
+        group_interval  = "5m"
+        repeat_interval = "1h"
+        receiver        = "webhook"
       }
       receiver {
         name = "webhook"
@@ -146,8 +149,11 @@ func TestAccResourceAlertmanagerConfig_HTTPConfigFields(t *testing.T) {
 const testAccResourceAlertmanagerConfigHTTPConfigFields = `
     resource "mimir_alertmanager_config" "mytenant" {
       route {
-        group_by = ["..."]
-        receiver = "webhook"
+        group_by        = ["..."]
+        group_wait      = "30s"
+        group_interval  = "5m"
+        repeat_interval = "1h"
+        receiver        = "webhook"
       }
       receiver {
         name = "webhook"
