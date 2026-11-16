@@ -19,6 +19,11 @@ var (
 	metricNameRegexp = regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
 	validTime        = "^((([01][0-9])|(2[0-3])):[0-5][0-9])$|(^24:00$)"
 	validTimeRE      = regexp.MustCompile(validTime)
+
+	promQLParserOptions = parser.Options{
+		EnableExperimentalFunctions: true,
+		EnableBinopFillModifiers:    true,
+	}
 )
 
 // hasControlChar reports whether s contains any Unicode control character (category Cc:
@@ -211,7 +216,7 @@ func validateOrgID(v interface{}, k string) (ws []string, errors []error) {
 func validatePromQLExpr(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
-	if _, err := parser.NewParser(parser.Options{}).ParseExpr(value); err != nil {
+	if _, err := parser.NewParser(promQLParserOptions).ParseExpr(value); err != nil {
 		errors = append(errors, fmt.Errorf(
 			"\"%s\": Invalid PromQL expression %q: %v", k, value, err))
 	}
@@ -286,7 +291,7 @@ func flattenDuration(d time.Duration) string {
 
 func formatPromQLExpr(v interface{}) string {
 	if enablePromQLExprFormat {
-		value, _ := parser.NewParser(parser.Options{}).ParseExpr(v.(string))
+		value, _ := parser.NewParser(promQLParserOptions).ParseExpr(v.(string))
 		// remove spaces causing decoding issues with multiline yaml marshal/unmarshall
 		return strings.TrimLeft(parser.Prettify(value), " ")
 	}
