@@ -47,7 +47,7 @@ func dataSourcemimirRuleGroupRecording() *schema.Resource {
 				Description: "The duration by which to delay the execution of the recording rule.",
 				Computed:    true,
 			},
-			"evaluation_delay": {
+			evaluationDelayKey: {
 				Type:        schema.TypeString,
 				Description: "**Deprecated** The duration by which to delay the execution of the recording rule.",
 				Deprecated:  "With Mimir >= 2.13, replaced by query_offset. This attribute will be removed when it is no longer supported in Mimir.",
@@ -143,7 +143,7 @@ func dataSourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resour
 	if err := d.Set("query_offset", data.QueryOffset); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("evaluation_delay", data.EvaluationDelay); err != nil {
+	if err := d.Set(evaluationDelayKey, data.EvaluationDelay); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set(labelsKey, data.Labels); err != nil {

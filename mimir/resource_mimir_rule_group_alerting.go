@@ -22,6 +22,7 @@ func resourcemimirRuleGroupAlerting() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: customizeDiffMimirRules(alertingRuleAttributes),
 		Schema: map[string]*schema.Schema{
 			orgIDKey: {
 				Type:         schema.TypeString,

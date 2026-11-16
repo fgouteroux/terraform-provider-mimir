@@ -33,7 +33,7 @@ jobs:
     - name: Run linters
       uses: golangci/golangci-lint-action@v9
       with:
-        version: v2.12.1
+        version: v2.15.0
         args: --timeout 10m
 
     # tfplugindocs reads the provider schema through the Terraform CLI. Without
@@ -91,14 +91,18 @@ jobs:
     - name: Setup Grafana Mimir from ${{ matrix.mimir-version }}
       run: |
         docker pull grafana/mimir:${{ matrix.mimir-version }}
+        # The runtime config file enables /api/v1/user_limits, which Mimir only
+        # serves when -runtime-config.file is set (mimir_tenant_limits tests).
         docker run \
           -d \
           -p 8080:8080 \
           --name mimir \
+          -v "${{ github.workspace }}/.github/mimir/runtime.yaml:/etc/mimir/runtime.yaml:ro" \
           grafana/mimir:${{ matrix.mimir-version }} \
           -target=alertmanager,ruler \
           -tenant-federation.enabled=true \
-          -ruler.tenant-federation.enabled=true
+          -ruler.tenant-federation.enabled=true \
+          -runtime-config.file=/etc/mimir/runtime.yaml
 
     - name: Run acceptance test
       run: MIMIR_VERSION=${{ matrix.mimir-version }} make testacc

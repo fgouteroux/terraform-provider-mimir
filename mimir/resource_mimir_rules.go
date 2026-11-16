@@ -3,6 +3,7 @@ package mimir
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/prometheus/common/model"
+	"github.com/prometheus/prometheus/model/rulefmt"
 	"gopkg.in/yaml.v3"
 )
 
@@ -219,6 +221,13 @@ func resourceMimirRules() *schema.Resource {
 			if err != nil || len(ruleGroups.Groups) == 0 {
 				return nil
 			}
+			// content is checked by its ValidateFunc; content_file is only read
+			// here, so check it now rather than at apply.
+			if diff.Get("content_file").(string) != "" {
+				if err := validateRuleGroupsContent(ruleGroups); err != nil {
+					return fmt.Errorf("content_file validation failed: %w", err)
+				}
+			}
 
 			// Determine which groups will be managed
 			allGroupNames := make([]string, len(ruleGroups.Groups))
@@ -325,6 +334,12 @@ func validateYAMLContent(val interface{}, key string) (warns []string, errs []er
 		errs = append(errs, fmt.Errorf("%q validation failed: %v", key, err))
 	}
 
+	for _, group := range ruleGroups.Groups {
+		if group.PartialResponse != nil {
+			warns = append(warns, fmt.Sprintf("%q: group %q sets partial_response_strategy, a Thanos field that Mimir ignores", key, group.Name))
+		}
+	}
+
 	return
 }
 
@@ -350,10 +365,38 @@ func validateRuleGroupsContent(ruleGroups RuleGroups) error {
 		}
 		groupNames[group.Name] = true
 
-		// Validate interval if specified
-		if group.Interval != "" {
-			if _, err := model.ParseDuration(group.Interval); err != nil {
-				return fmt.Errorf("group %d (%s): invalid interval '%s': %v", i, group.Name, group.Interval, err)
+		// Validate group durations if specified
+		durations := map[string]model.Duration{}
+		for _, f := range []struct{ name, value string }{
+			{"interval", group.Interval},
+			{queryOffsetKey, group.QueryOffset},
+			{evaluationDelayKey, group.EvaluationDelay},
+		} {
+			if f.value == "" {
+				continue
+			}
+			d, err := model.ParseDuration(f.value)
+			if err != nil {
+				return fmt.Errorf("group %d (%s): invalid %s '%s': %v", i, group.Name, f.name, f.value, err)
+			}
+			durations[f.name] = d
+		}
+
+		// Mimir rejects a group whose query_offset and deprecated
+		// evaluation_delay are both set to different values.
+		if group.QueryOffset != "" && group.EvaluationDelay != "" {
+			if durations[queryOffsetKey] != durations[evaluationDelayKey] {
+				return fmt.Errorf("group %d (%s): query_offset and the deprecated evaluation_delay are set to different values; remove evaluation_delay", i, group.Name)
+			}
+		}
+
+		if group.Limit < 0 {
+			return fmt.Errorf("group %d (%s): limit must not be negative", i, group.Name)
+		}
+
+		for name := range group.Labels {
+			if !labelNameRegexp.MatchString(name) {
+				return fmt.Errorf("group %d (%s): invalid group label name %q. Must match the regex %s", i, group.Name, name, labelNameRegexp)
 			}
 		}
 
@@ -411,13 +454,44 @@ func validateRule(rule Rule, groupIndex, ruleIndex int, groupName string) error 
 			return fmt.Errorf("group %d (%s), rule %d: invalid record name '%s'. Must match the regex %s", groupIndex, groupName, ruleIndex, rule.Record, metricNameRegexp)
 		}
 
-		// Recording rules shouldn't have 'for' or 'annotations'
+		// Recording rules shouldn't have 'for', 'keep_firing_for' or 'annotations'
 		if rule.For != "" {
 			return fmt.Errorf("group %d (%s), rule %d: recording rules cannot have 'for' field", groupIndex, groupName, ruleIndex)
+		}
+		if rule.KeepFiringFor != "" {
+			return fmt.Errorf("group %d (%s), rule %d: recording rules cannot have 'keep_firing_for' field", groupIndex, groupName, ruleIndex)
 		}
 		if len(rule.Annotations) > 0 {
 			return fmt.Errorf("group %d (%s), rule %d: recording rules cannot have annotations", groupIndex, groupName, ruleIndex)
 		}
+	}
+
+	var forDuration, keepFiringFor model.Duration
+	if rule.For != "" {
+		var err error
+		if forDuration, err = model.ParseDuration(rule.For); err != nil {
+			return fmt.Errorf("group %d (%s), rule %d: invalid 'for' duration '%s': %v", groupIndex, groupName, ruleIndex, rule.For, err)
+		}
+	}
+	if rule.KeepFiringFor != "" {
+		var err error
+		if keepFiringFor, err = model.ParseDuration(rule.KeepFiringFor); err != nil {
+			return fmt.Errorf("group %d (%s), rule %d: invalid 'keep_firing_for' duration '%s': %v", groupIndex, groupName, ruleIndex, rule.KeepFiringFor, err)
+		}
+	}
+
+	// The checks Mimir's ruler runs on upload: PromQL parsing, label and
+	// annotation names, and alert template parsing.
+	if errs := mimirRuleErrors(rulefmt.Rule{
+		Record:        rule.Record,
+		Alert:         rule.Alert,
+		Expr:          rule.Expr,
+		For:           forDuration,
+		KeepFiringFor: keepFiringFor,
+		Labels:        rule.Labels,
+		Annotations:   rule.Annotations,
+	}); len(errs) > 0 {
+		return fmt.Errorf("group %d (%s), rule %d: %w", groupIndex, groupName, ruleIndex, errors.Join(errs...))
 	}
 
 	return nil

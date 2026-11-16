@@ -10,6 +10,10 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
 
 ### Added
 
+- `mimir_tenant_limits` data source, reading the tenant's effective limits from Mimir's
+  `/api/v1/user_limits` endpoint, which Mimir only serves when it runs with
+  `-runtime-config.file`. The `alertmanager_*` limits require Mimir >= 3.2.
+
 - `mimir_rule_group_alerting` gains `query_offset`, and both single-group resources and their
   data sources gain `align_evaluation_time_on_interval` and `limit` (persisted by Mimir >= 3.0).
   These resources rewrite the whole group on update, so a value set outside Terraform used to be
@@ -18,6 +22,26 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
   `slack_configs.update_message`, all requiring Mimir >= 3.2. `payload` takes a YAML or JSON
   document; formatting differences do not show as a diff.
 
+### Changed
+
+- Configuration errors that Mimir rejects on upload now fail at plan instead of apply:
+  - `mimir_rules` runs Mimir's rule checks (PromQL parsing, label and annotation names, alert
+    template parsing, `keep_firing_for` durations and its absence on recording rules), validates
+    `query_offset`, `evaluation_delay`, `limit` and group labels, rejects `query_offset` and
+    `evaluation_delay` set to different values, and now also validates `content_file`.
+  - `mimir_rule_group_alerting` and `mimir_rule_group_recording` run the same rule checks,
+    which catches broken alert templates and the reserved `__name__` label.
+  - `mimir_alertmanager_config` validates route and inhibit rule matchers, and rejects template
+    names that contain a path.
+  - `org_id` follows Mimir's tenant ID rules: letters, digits and `!-_.*'()`, at most 150
+    characters per `|`-separated tenant.
+- `mimir_rules` warns that `partial_response_strategy` is a Thanos field Mimir ignores.
+- Since Mimir 3.2.5, SNS receivers need `sigv4.access_key` and `sigv4.secret_key` unless the
+  operator disables `-alertmanager.require-explicit-sns-credentials`. The `sigv4` attribute
+  descriptions now say so; the provider does not enforce it, as the flag can be turned off.
+- Acceptance tests run against Mimir 2.17.12, 3.1.10 and 3.2.5.
+- Built with Go 1.26.
+
 ### Fixed
 
 - PromQL expressions are parsed with the same options as Mimir, so experimental functions and
@@ -25,19 +49,11 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
 - PromQL validation uses Prometheus v0.314.0, which matches the function set of Mimir 3.2:
   `max_of`, `min_of`, `start`, `end`, `range`, `step` and `start_timestamp` are now accepted.
 - A 404 from Mimir's router (wrong URI, missing `/prometheus` prefix) or an HTML 404 page from
-  a reverse proxy in front of Mimir is now reported as an error. It used to read as "object deleted", so the resource was silently dropped from state
-  and recreated on the next apply.
+  a reverse proxy in front of Mimir is now reported as an error. It used to read as "object deleted",
+  so the resource was silently dropped from state and recreated on the next apply.
 - `mimir_distributor_tenant_stats` calls `/distributor/all_user_stats` when only `uri` is set,
   and returns an error instead of an empty result when the endpoint is not found.
 - The custom headers example used `header` instead of `headers`.
-
-### Changed
-
-- Since Mimir 3.2.5, SNS receivers need `sigv4.access_key` and `sigv4.secret_key` unless the
-  operator disables `-alertmanager.require-explicit-sns-credentials`. The `sigv4` attribute
-  descriptions now say so; the provider does not enforce it, as the flag can be turned off.
-- Acceptance tests run against Mimir 2.17.12, 3.1.10 and 3.2.5.
-- Built with Go 1.26.
 
 ## [1.1.0] - 2026-08-11
 

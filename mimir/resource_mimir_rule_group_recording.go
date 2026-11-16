@@ -22,6 +22,7 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: customizeDiffMimirRules(recordingRuleAttributes),
 		Schema: map[string]*schema.Schema{
 			orgIDKey: {
 				Type:         schema.TypeString,
@@ -56,11 +57,11 @@ func resourcemimirRuleGroupRecording() *schema.Resource {
 				Type:          schema.TypeString,
 				Description:   "The duration by which to delay the execution of the recording rule.",
 				Optional:      true,
-				ConflictsWith: []string{"evaluation_delay"},
+				ConflictsWith: []string{evaluationDelayKey},
 				ValidateFunc:  validateDuration,
 				StateFunc:     formatDuration,
 			},
-			"evaluation_delay": {
+			evaluationDelayKey: {
 				Type:          schema.TypeString,
 				Description:   "**Deprecated** The duration by which to delay the execution of the recording rule.",
 				Optional:      true,
@@ -158,7 +159,7 @@ func resourcemimirRuleGroupRecordingCreate(ctx context.Context, d *schema.Resour
 	rules := &recordingRuleGroup{
 		Name:                          name,
 		Interval:                      d.Get(intervalKey).(string),
-		EvaluationDelay:               d.Get("evaluation_delay").(string),
+		EvaluationDelay:               d.Get(evaluationDelayKey).(string),
 		QueryOffset:                   d.Get("query_offset").(string),
 		SourceTenants:                 expandStringArray(d.Get("source_tenants").([]interface{})),
 		Rules:                         expandRecordingRules(d.Get("rule").([]interface{})),
@@ -252,8 +253,8 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if _, ok := d.GetOk("evaluation_delay"); ok {
-		err = d.Set("evaluation_delay", data.EvaluationDelay)
+	if _, ok := d.GetOk(evaluationDelayKey); ok {
+		err = d.Set(evaluationDelayKey, data.EvaluationDelay)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -283,7 +284,7 @@ func resourcemimirRuleGroupRecordingRead(ctx context.Context, d *schema.Resource
 }
 
 func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("rule", intervalKey, "query_offset", "evaluation_delay", "source_tenants", labelsKey, alignEvaluationTimeOnIntervalKey, ruleGroupLimitKey) {
+	if d.HasChanges("rule", intervalKey, "query_offset", evaluationDelayKey, "source_tenants", labelsKey, alignEvaluationTimeOnIntervalKey, ruleGroupLimitKey) {
 		client := meta.(*apiClient)
 		name := d.Get("name").(string)
 		namespace := d.Get(namespaceKey).(string)
@@ -297,7 +298,7 @@ func resourcemimirRuleGroupRecordingUpdate(ctx context.Context, d *schema.Resour
 			AlignEvaluationTimeOnInterval: d.Get(alignEvaluationTimeOnIntervalKey).(bool),
 			Limit:                         d.Get(ruleGroupLimitKey).(int),
 		}
-		if ed, ok := d.GetOk("evaluation_delay"); ok {
+		if ed, ok := d.GetOk(evaluationDelayKey); ok {
 			rules.EvaluationDelay = ed.(string)
 		} else {
 			rules.QueryOffset = d.Get("query_offset").(string)

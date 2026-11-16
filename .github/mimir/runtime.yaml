@@ -1,0 +1,5 @@
+# Runtime configuration for the acceptance tests' Mimir. mimir_tenant_limits
+# tests read these overrides back through /api/v1/user_limits.
+overrides:
+  mytenant:
+    ingestion_rate: 12345
