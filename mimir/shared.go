@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	amcommoncfg "github.com/prometheus/alertmanager/config/common"
 	"github.com/prometheus/alertmanager/matcher/compat"
 	commoncfg "github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
@@ -315,7 +317,11 @@ func validateDuration(v interface{}, k string) (ws []string, errors []error) {
 }
 
 func formatDuration(v interface{}) string {
-	value, _ := model.ParseDuration(v.(string))
+	value, err := model.ParseDuration(v.(string))
+	if err != nil {
+		// Unset ("") or rejected by validateDuration: keep the value as is.
+		return v.(string)
+	}
 	str := value.String()
 	if str == "0s" {
 		return ""
@@ -340,7 +346,11 @@ func flattenDuration(d time.Duration) string {
 
 func formatPromQLExpr(v interface{}) string {
 	if enablePromQLExprFormat {
-		value, _ := parser.NewParser(promQLParserOptions).ParseExpr(v.(string))
+		value, err := parser.NewParser(promQLParserOptions).ParseExpr(v.(string))
+		if err != nil {
+			// Rejected by validatePromQLExpr: keep the expression as written.
+			return v.(string)
+		}
 		// remove spaces causing decoding issues with multiline yaml marshal/unmarshall
 		return strings.TrimLeft(parser.Prettify(value), " ")
 	}
@@ -348,20 +358,25 @@ func formatPromQLExpr(v interface{}) string {
 }
 
 // Converts a string of the form "HH:MM" into the number of minutes elapsed in the day.
-func parseTime(in string) (mins int) {
+func parseTime(in string) (int, error) {
 	// start_time and end_time are both Optional and validateTime returns early
 	// for "", so an unset half of a times block reaches this function as an
 	// empty string. Indexing [1] unconditionally then panics the provider.
 	timestampComponents := strings.Split(in, ":")
 	if len(timestampComponents) != 2 {
-		return 0
+		return 0, nil
 	}
-	timeStampHours, _ := strconv.Atoi(timestampComponents[0])
-	timeStampMinutes, _ := strconv.Atoi(timestampComponents[1])
+	hours, err := strconv.Atoi(timestampComponents[0])
+	if err != nil {
+		return 0, fmt.Errorf("invalid time %q: %w", in, err)
+	}
+	minutes, err := strconv.Atoi(timestampComponents[1])
+	if err != nil {
+		return 0, fmt.Errorf("invalid time %q: %w", in, err)
+	}
 
 	// Timestamps are stored as minutes elapsed in the day, so multiply hours by 60.
-	mins = timeStampHours*60 + timeStampMinutes
-	return mins
+	return hours*60 + minutes, nil
 }
 
 func validateTime(v interface{}, k string) (ws []string, errors []error) {
@@ -591,6 +606,46 @@ func validateHTTPHeaderName(v interface{}, k string) (ws []string, errs []error)
 	}
 	if _, reserved := commoncfg.ReservedHeaders[name]; reserved {
 		errs = append(errs, fmt.Errorf("%q: setting header %q is not allowed", k, name))
+	}
+	return
+}
+
+// validateAlertmanagerURL applies Alertmanager's URL rules: an absolute http or
+// https URL with a host. An empty value means unset.
+func validateAlertmanagerURL(v interface{}, k string) (ws []string, errs []error) {
+	value := v.(string)
+	if value == "" {
+		return
+	}
+	if _, err := amcommoncfg.ParseURL(value); err != nil {
+		errs = append(errs, fmt.Errorf("%q: invalid URL %q: %v", k, value, err))
+	}
+	return
+}
+
+// validateHostPort applies Alertmanager's host:port rules, where the port is
+// mandatory. An empty value means unset.
+func validateHostPort(v interface{}, k string) (ws []string, errs []error) {
+	value := v.(string)
+	if value == "" {
+		return
+	}
+	_, port, err := net.SplitHostPort(value)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("%q: invalid address %q, expected host:port: %v", k, value, err))
+		return
+	}
+	if port == "" {
+		errs = append(errs, fmt.Errorf("%q: address %q: port cannot be empty", k, value))
+	}
+	return
+}
+
+// validateLocation checks the value against the IANA time zone database.
+func validateLocation(v interface{}, k string) (ws []string, errs []error) {
+	value := v.(string)
+	if _, err := time.LoadLocation(value); err != nil {
+		errs = append(errs, fmt.Errorf("%q: unknown location %q: %v", k, value, err))
 	}
 	return
 }

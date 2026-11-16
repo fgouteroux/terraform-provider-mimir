@@ -55,7 +55,10 @@ func TestAlertmanagerMimir32FieldsRoundTrip(t *testing.T) {
 		}},
 	}}
 
-	receivers := expandReceiverConfig(in)
+	receivers, err := expandReceiverConfig(in)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if got := receivers[0].Labels["team"]; got != "infra" {
 		t.Errorf("labels not expanded: %v", receivers[0].Labels)
 	}
@@ -72,11 +75,14 @@ func TestAlertmanagerMimir32FieldsRoundTrip(t *testing.T) {
 		t.Error("update_message not flattened")
 	}
 
-	unset := expandReceiverConfig([]interface{}{map[string]interface{}{
+	unset, err := expandReceiverConfig([]interface{}{map[string]interface{}{
 		"name":            "plain",
 		labelsKey:         map[string]interface{}{},
 		"webhook_configs": []interface{}{map[string]interface{}{"url": "http://example.com", "payload": ""}},
 	}})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if unset[0].Labels != nil || unset[0].WebhookConfigs[0].Payload != nil {
 		t.Errorf("unset fields must stay nil, got labels=%v payload=%v", unset[0].Labels, unset[0].WebhookConfigs[0].Payload)
 	}

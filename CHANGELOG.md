@@ -59,6 +59,12 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
 - `mimir_distributor_tenant_stats` calls `/distributor/all_user_stats` when only `uri` is set,
   and returns an error instead of an empty result when the endpoint is not found.
 - The custom headers example used `header` instead of `headers`.
+- `mimir_alertmanager_config` no longer drops values it cannot parse. A `smtp_smarthost` or
+  `smarthost` without a port used to be sent empty, an invalid `location` fell back to UTC, and
+  a malformed global URL could crash the provider. These values are now checked at plan time
+  with Alertmanager's rules (absolute http(s) URL, `host:port`, IANA time zone).
+- Errors from encoding rule groups and the Alertmanager configuration, and from writing state,
+  are reported instead of ignored.
 
 ## [1.1.0] - 2026-08-11
 
