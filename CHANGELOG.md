@@ -6,14 +6,29 @@ GoReleaser already produces a per-release list of commit subjects. This file exi
 what that list cannot convey: behaviour that changes under an unchanged configuration,
 and the reason a fix matters. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.2.0] - 2026-11-17
+
+Aligns the provider with Mimir 3.2, moves most of the errors Mimir reports on upload to plan
+time, and adds the `mimir_tenant_limits` data source.
+
+### Upgrade notes
+
+No attribute changes its default, and a configuration Mimir accepts keeps planning cleanly.
+A few configurations that used to apply now fail at plan, because the provider silently
+dropped or replaced the value instead of reporting it:
+
+- `smtp_smarthost` or `smarthost` without a port, which was sent empty;
+- a time interval `location` that is not an IANA time zone, which fell back to UTC;
+- an `org_id`, on the provider or in `MIMIR_ORG_ID`, that Mimir would refuse as a tenant ID.
+
+A wrong `uri` or `ruler_uri` (for example a missing `/prometheus` prefix) now fails instead of
+dropping resources from state.
 
 ### Added
 
 - `mimir_tenant_limits` data source, reading the tenant's effective limits from Mimir's
   `/api/v1/user_limits` endpoint, which Mimir only serves when it runs with
   `-runtime-config.file`. The `alertmanager_*` limits require Mimir >= 3.2.
-
 - `mimir_rule_group_alerting` gains `query_offset`, and both single-group resources and their
   data sources gain `align_evaluation_time_on_interval` and `limit` (persisted by Mimir >= 3.0).
   These resources rewrite the whole group on update, so a value set outside Terraform used to be
@@ -66,6 +81,13 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
   with Alertmanager's rules (absolute http(s) URL, `host:port`, IANA time zone).
 - Errors from encoding rule groups and the Alertmanager configuration, and from writing state,
   are reported instead of ignored.
+
+### Security
+
+- Dependencies bumped to fix vulnerabilities reachable from the provider: `google.golang.org/grpc`
+  v1.83.2 (GO-2026-6443, GO-2026-6348), `golang.org/x/net` v0.60.0 (HTTP/2 fixes),
+  `go.opentelemetry.io/otel` v1.45.0 (GO-2026-6505) and `github.com/klauspost/compress` v1.20.2
+  (GO-2026-6865).
 
 ## [1.1.0] - 2026-08-11
 
