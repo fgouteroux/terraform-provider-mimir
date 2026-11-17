@@ -39,7 +39,8 @@ and the reason a fix matters. Entries follow [Keep a Changelog](https://keepacha
   - `mimir_alertmanager_config` validates route and inhibit rule matchers, and rejects template
     names that contain a path.
   - `org_id` follows Mimir's tenant ID rules: letters, digits and `!-_.*'()`, at most 150
-    characters per `|`-separated tenant.
+    characters per `|`-separated tenant. This applies to the provider's `org_id` and
+    `MIMIR_ORG_ID` too, which used to be sent unchecked.
 - `mimir_rules` warns that `partial_response_strategy` is a Thanos field Mimir ignores.
 - Since Mimir 3.2.5, SNS receivers need `sigv4.access_key` and `sigv4.secret_key` unless the
   operator disables `-alertmanager.require-explicit-sns-credentials`. The `sigv4` attribute

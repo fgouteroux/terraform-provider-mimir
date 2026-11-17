@@ -52,10 +52,11 @@ func Provider(version string) func() *schema.Provider {
 					Description: "mimir distributor base url",
 				},
 				"org_id": {
-					Type:        schema.TypeString,
-					Required:    true,
-					DefaultFunc: schema.EnvDefaultFunc("MIMIR_ORG_ID", nil),
-					Description: "The default organization id to operate on within mimir. For resources that have an org_id attribute, the resource-level attribute has priority. May alternatively be set via the MIMIR_ORG_ID environment variable.",
+					Type:         schema.TypeString,
+					Required:     true,
+					DefaultFunc:  schema.EnvDefaultFunc("MIMIR_ORG_ID", nil),
+					ValidateFunc: validateOrgID,
+					Description:  "The default organization id to operate on within mimir. For resources that have an org_id attribute, the resource-level attribute has priority. May alternatively be set via the MIMIR_ORG_ID environment variable.",
 				},
 				"token": {
 					Type:        schema.TypeString,
